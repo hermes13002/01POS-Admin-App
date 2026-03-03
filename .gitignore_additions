@@ -1,0 +1,9 @@
+# Generated Riverpod files
+*.g.dart
+*.freezed.dart
+
+# Build runner cache
+.dart_tool/build/
+
+# Generated files marker
+*.generated.dart
