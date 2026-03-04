@@ -55,11 +55,11 @@ class CustomSearchBar extends StatelessWidget {
           fillColor: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.3),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide.none,
+            borderSide: BorderSide(color: Theme.of(context).colorScheme.primary.withOpacity(0.15),),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide.none,
+            borderSide: BorderSide(color: Theme.of(context).colorScheme.primary.withOpacity(0.15),),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),

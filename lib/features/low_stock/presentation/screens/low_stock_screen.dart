@@ -5,21 +5,21 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:onepos_admin_app/core/theme/app_theme.dart';
 import 'package:onepos_admin_app/core/utils/amount_formatter.dart';
 import 'package:onepos_admin_app/features/products/data/models/product_model.dart';
-import 'package:onepos_admin_app/features/products/presentation/providers/products_provider.dart';
+import 'package:onepos_admin_app/features/low_stock/presentation/providers/low_stock_provider.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_app_bar2.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_search_bar.dart';
 import 'package:onepos_admin_app/shared/widgets/loading_widget.dart';
 
-/// products screen with expandable product tiles
-class ProductsScreen extends HookConsumerWidget {
-  const ProductsScreen({super.key});
+/// low stock screen with expandable product tiles
+class LowStockScreen extends HookConsumerWidget {
+  const LowStockScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final searchController = useTextEditingController();
     final searchQuery = useState('');
     final expandedProductId = useState<String?>(null);
-    final productsAsync = ref.watch(productsProvider);
+    final productsAsync = ref.watch(lowStockProductsProvider);
 
     // listen for search changes
     useEffect(() {
@@ -34,16 +34,8 @@ class ProductsScreen extends HookConsumerWidget {
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
       appBar: CustomAppBar2(
-        title: 'Products',
+        title: 'Low Stock',
         backgroundColor: AppTheme.backgroundColor,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.more_horiz, color: Colors.black),
-            onPressed: () {
-              // TODO: menu options
-            },
-          ),
-        ],
       ),
       body: Column(
         children: [
@@ -69,7 +61,7 @@ class ProductsScreen extends HookConsumerWidget {
                 if (filtered.isEmpty) {
                   return Center(
                     child: Text(
-                      'No products found',
+                      'No low stock products found',
                       style: GoogleFonts.poppins(
                         fontSize: 14,
                         color: AppTheme.textSecondary,
@@ -91,7 +83,7 @@ class ProductsScreen extends HookConsumerWidget {
                     final isExpanded =
                         expandedProductId.value == product.id;
 
-                    return _ProductTile(
+                    return _LowStockTile(
                       product: product,
                       isExpanded: isExpanded,
                       onToggle: () {
@@ -99,10 +91,7 @@ class ProductsScreen extends HookConsumerWidget {
                             isExpanded ? null : product.id;
                       },
                       onEdit: () {
-                        // TODO: navigate to edit screen
-                      },
-                      onDelete: () {
-                        _showDeleteDialog(context, ref, product);
+                        // TODO: navigate to edit product screen
                       },
                     );
                   },
@@ -114,7 +103,7 @@ class ProductsScreen extends HookConsumerWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      'Failed to load products',
+                      'Failed to load low stock products',
                       style: GoogleFonts.poppins(
                         fontSize: 16,
                         color: AppTheme.textSecondary,
@@ -122,7 +111,8 @@ class ProductsScreen extends HookConsumerWidget {
                     ),
                     const SizedBox(height: AppTheme.spacingMedium),
                     ElevatedButton(
-                      onPressed: () => ref.invalidate(productsProvider),
+                      onPressed: () =>
+                          ref.invalidate(lowStockProductsProvider),
                       child: const Text('Retry'),
                     ),
                   ],
@@ -133,77 +123,31 @@ class ProductsScreen extends HookConsumerWidget {
         ],
       ),
 
-      // floating action button with expandable speed dial
-      floatingActionButton: _AddProductFab(
-        onAddProduct: () {
+      // simple black circular fab
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
           Navigator.pushNamed(context, '/add-product');
         },
-        onAddCategory: () {
-          Navigator.pushNamed(context, '/add-category');
-        },
-        onAddSubCategory: () {
-          Navigator.pushNamed(context, '/add-sub-category');
-        },
-      ),
-    );
-  }
-
-  void _showDeleteDialog(
-      BuildContext context, WidgetRef ref, ProductModel product) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
-        ),
-        title: Text(
-          'Delete Product',
-          style: GoogleFonts.poppins(
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        content: Text(
-          'Are you sure you want to delete "${product.name}"?',
-          style: GoogleFonts.poppins(fontSize: 14),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              'Cancel',
-              style: GoogleFonts.poppins(color: AppTheme.textSecondary),
-            ),
-          ),
-          TextButton(
-            onPressed: () {
-              ref.read(productsProvider.notifier).deleteProduct(product.id);
-              Navigator.pop(context);
-            },
-            child: Text(
-              'Delete',
-              style: GoogleFonts.poppins(color: AppTheme.errorColor),
-            ),
-          ),
-        ],
+        backgroundColor: Colors.black,
+        shape: const CircleBorder(),
+        child: const Icon(Icons.add, color: Colors.white, size: 28),
       ),
     );
   }
 }
 
-/// expandable product tile
-class _ProductTile extends StatelessWidget {
+/// expandable low stock product tile
+class _LowStockTile extends StatelessWidget {
   final ProductModel product;
   final bool isExpanded;
   final VoidCallback onToggle;
   final VoidCallback onEdit;
-  final VoidCallback onDelete;
 
-  const _ProductTile({
+  const _LowStockTile({
     required this.product,
     required this.isExpanded,
     required this.onToggle,
     required this.onEdit,
-    required this.onDelete,
   });
 
   @override
@@ -318,7 +262,7 @@ class _ProductTile extends StatelessWidget {
               ),
             ),
 
-            // divider before actions
+            // divider before action
             Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: AppTheme.spacingMedium,
@@ -327,7 +271,7 @@ class _ProductTile extends StatelessWidget {
               child: Divider(color: AppTheme.grey200, height: 1),
             ),
 
-            // action buttons
+            // edit button (single centered button, no delete)
             Padding(
               padding: const EdgeInsets.fromLTRB(
                 AppTheme.spacingMedium,
@@ -335,63 +279,31 @@ class _ProductTile extends StatelessWidget {
                 AppTheme.spacingMedium,
                 AppTheme.spacingMedium,
               ),
-              child: Row(
-                children: [
-                  // edit button
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: onEdit,
-                      icon: Icon(
-                        Icons.edit_outlined,
-                        size: 18,
-                        color: AppTheme.textSecondary,
-                      ),
-                      label: Text(
-                        'Edit',
-                        style: GoogleFonts.poppins(
-                          fontSize: 14,
-                          color: AppTheme.textSecondary,
-                        ),
-                      ),
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        side: const BorderSide(color: AppTheme.grey300),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(
-                              AppTheme.borderRadiusMedium),
-                        ),
-                      ),
+              child: SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: onEdit,
+                  icon: Icon(
+                    Icons.edit_outlined,
+                    size: 18,
+                    color: AppTheme.textSecondary,
+                  ),
+                  label: Text(
+                    'Edit',
+                    style: GoogleFonts.poppins(
+                      fontSize: 14,
+                      color: AppTheme.textSecondary,
                     ),
                   ),
-                  const SizedBox(width: AppTheme.spacingMedium),
-
-                  // delete button
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: onDelete,
-                      icon: const Icon(
-                        Icons.delete_outline,
-                        size: 18,
-                        color: AppTheme.errorColor,
-                      ),
-                      label: Text(
-                        'Delete',
-                        style: GoogleFonts.poppins(
-                          fontSize: 14,
-                          color: AppTheme.errorColor,
-                        ),
-                      ),
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        side: const BorderSide(color: Color(0xFFFFCDD2)),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(
-                              AppTheme.borderRadiusMedium),
-                        ),
-                      ),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    side: const BorderSide(color: AppTheme.grey300),
+                    shape: RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.circular(AppTheme.borderRadiusMedium),
                     ),
                   ),
-                ],
+                ),
               ),
             ),
           ],
@@ -429,143 +341,6 @@ class _DetailRow extends StatelessWidget {
             fontSize: 14,
             fontWeight: FontWeight.w500,
             color: AppTheme.textPrimary,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-/// floating action button with expandable options
-class _AddProductFab extends HookWidget {
-  final VoidCallback onAddProduct;
-  final VoidCallback onAddCategory;
-  final VoidCallback onAddSubCategory;
-
-  const _AddProductFab({
-    required this.onAddProduct,
-    required this.onAddCategory,
-    required this.onAddSubCategory,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final isExpanded = useState(false);
-
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        // expanded options
-        if (isExpanded.value) ...[
-          // add product option
-          _FabOption(
-            label: 'Add Product',
-            color: const Color(0xFF4CAF50),
-            icon: Icons.add_box_outlined,
-            onTap: () {
-              isExpanded.value = false;
-              onAddProduct();
-            },
-          ),
-          const SizedBox(height: AppTheme.spacingSmall + 4),
-
-          // add sub-category option
-          _FabOption(
-            label: 'Add Sub-category',
-            color: const Color(0xFFC2185B),
-            icon: Icons.description_outlined,
-            onTap: () {
-              isExpanded.value = false;
-              onAddSubCategory();
-            },
-          ),
-          const SizedBox(height: AppTheme.spacingSmall + 4),
-
-          // add category option
-          _FabOption(
-            label: 'Add Category',
-            color: const Color(0xFF1E88E5),
-            icon: Icons.description_outlined,
-            onTap: () {
-              isExpanded.value = false;
-              onAddCategory();
-            },
-          ),
-          const SizedBox(height: AppTheme.spacingSmall + 4),
-        ],
-
-        // main fab
-        FloatingActionButton(
-          onPressed: () => isExpanded.value = !isExpanded.value,
-          backgroundColor: Colors.black,
-          shape: const CircleBorder(),
-          child: AnimatedRotation(
-            turns: isExpanded.value ? 0.125 : 0,
-            duration: const Duration(milliseconds: 200),
-            child: const Icon(Icons.add, color: Colors.white, size: 28),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-/// individual fab option button
-class _FabOption extends StatelessWidget {
-  final String label;
-  final Color color;
-  final IconData icon;
-  final VoidCallback onTap;
-
-  const _FabOption({
-    required this.label,
-    required this.color,
-    required this.icon,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        // label
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(AppTheme.borderRadiusSmall),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.08),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Text(
-            label,
-            style: GoogleFonts.poppins(
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
-              color: AppTheme.textPrimary,
-            ),
-          ),
-        ),
-        const SizedBox(width: AppTheme.spacingSmall + 4),
-
-        // icon button
-        SizedBox(
-          width: 48,
-          height: 48,
-          child: FloatingActionButton(
-            heroTag: label,
-            onPressed: onTap,
-            backgroundColor: color,
-            elevation: 2,
-            shape: const CircleBorder(),
-            child: Icon(icon, color: Colors.white, size: 22),
           ),
         ),
       ],

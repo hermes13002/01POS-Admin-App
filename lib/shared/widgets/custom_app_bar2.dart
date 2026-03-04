@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// Custom app bar with back button and title (matches Figma design)
 class CustomAppBar2 extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   final VoidCallback? onBackPressed;

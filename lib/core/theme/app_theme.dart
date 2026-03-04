@@ -13,6 +13,7 @@ class AppTheme {
   static const Color errorColor = Color(0xFFD32F2F);
   static const Color successColor = Color(0xFF4CAF50);
   static const Color white = Colors.white;
+  static const Color blue = Color.fromRGBO(83, 157, 243, 1);
   
   // grey shades
   static const Color grey50 = Color(0xFFFAFAFA);

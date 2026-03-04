@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:onepos_admin_app/core/routes/app_routes.dart';
 import 'package:onepos_admin_app/core/storage/shared_prefs_service.dart';
 import 'package:onepos_admin_app/core/theme/app_theme.dart';
-import 'package:onepos_admin_app/features/products/presentation/screens/add_product_screen.dart';
-import 'package:onepos_admin_app/features/products/presentation/screens/products_screen.dart';
-import 'package:onepos_admin_app/features/reports/presentation/screens/reports_screen.dart';
 import 'package:onepos_admin_app/presentation/screens/main_navigation_screen.dart';
 
 void main() async {
@@ -30,11 +28,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       home: const MainNavigationScreen(),
-      routes: {
-        '/reports': (context) => const ReportsScreen(),
-        '/products': (context) => const ProductsScreen(),
-        '/add-product': (context) => const AddProductScreen(),
-      },
+      routes: AppRoutes.routes,
     );
   }
 }

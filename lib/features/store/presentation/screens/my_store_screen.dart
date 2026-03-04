@@ -3,23 +3,21 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:onepos_admin_app/core/theme/app_theme.dart';
-import 'package:onepos_admin_app/core/utils/amount_formatter.dart';
-import 'package:onepos_admin_app/features/products/data/models/product_model.dart';
-import 'package:onepos_admin_app/features/products/presentation/providers/products_provider.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_app_bar2.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_search_bar.dart';
-import 'package:onepos_admin_app/shared/widgets/loading_widget.dart';
+import '../../../products/data/models/product_model.dart';
+import '../providers/store_provider.dart';
 
-/// products screen with expandable product tiles
-class ProductsScreen extends HookConsumerWidget {
-  const ProductsScreen({super.key});
+/// my store screen - manage store categories
+class MyStoreScreen extends HookConsumerWidget {
+  const MyStoreScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final searchController = useTextEditingController();
     final searchQuery = useState('');
-    final expandedProductId = useState<String?>(null);
-    final productsAsync = ref.watch(productsProvider);
+    final expandedIndex = useState<int?>(0);
+    final categoriesAsync = ref.watch(storeCategoriesProvider);
 
     // listen for search changes
     useEffect(() {
@@ -34,13 +32,13 @@ class ProductsScreen extends HookConsumerWidget {
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
       appBar: CustomAppBar2(
-        title: 'Products',
+        title: 'My Store',
         backgroundColor: AppTheme.backgroundColor,
         actions: [
           IconButton(
             icon: const Icon(Icons.more_horiz, color: Colors.black),
             onPressed: () {
-              // TODO: menu options
+              // TODO: implement more options menu
             },
           ),
         ],
@@ -54,14 +52,15 @@ class ProductsScreen extends HookConsumerWidget {
             onClear: () => searchQuery.value = '',
           ),
 
-          // products list
+          // categories list
           Expanded(
-            child: productsAsync.when(
-              data: (products) {
+            child: categoriesAsync.when(
+              data: (categories) {
+                // filter by search
                 final filtered = searchQuery.value.isEmpty
-                    ? products
-                    : products
-                        .where((p) => p.name
+                    ? categories
+                    : categories
+                        .where((c) => c.name
                             .toLowerCase()
                             .contains(searchQuery.value.toLowerCase()))
                         .toList();
@@ -69,7 +68,7 @@ class ProductsScreen extends HookConsumerWidget {
                 if (filtered.isEmpty) {
                   return Center(
                     child: Text(
-                      'No products found',
+                      'No categories found',
                       style: GoogleFonts.poppins(
                         fontSize: 14,
                         color: AppTheme.textSecondary,
@@ -87,34 +86,35 @@ class ProductsScreen extends HookConsumerWidget {
                   separatorBuilder: (_, __) =>
                       const SizedBox(height: AppTheme.spacingSmall),
                   itemBuilder: (context, index) {
-                    final product = filtered[index];
-                    final isExpanded =
-                        expandedProductId.value == product.id;
+                    final category = filtered[index];
+                    final isExpanded = expandedIndex.value == index;
 
-                    return _ProductTile(
-                      product: product,
+                    return _CategoryCard(
+                      category: category,
                       isExpanded: isExpanded,
                       onToggle: () {
-                        expandedProductId.value =
-                            isExpanded ? null : product.id;
+                        expandedIndex.value = isExpanded ? null : index;
+                      },
+                      onView: () {
+                        // TODO: navigate to category detail
                       },
                       onEdit: () {
-                        // TODO: navigate to edit screen
+                        _showEditCategoryDialog(context, ref, category);
                       },
                       onDelete: () {
-                        _showDeleteDialog(context, ref, product);
+                        _showDeleteConfirmation(context, ref, category);
                       },
                     );
                   },
                 );
               },
-              loading: () => const Center(child: LoadingWidget()),
-              error: (error, stack) => Center(
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (error, _) => Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      'Failed to load products',
+                      'Failed to load categories',
                       style: GoogleFonts.poppins(
                         fontSize: 16,
                         color: AppTheme.textSecondary,
@@ -122,7 +122,7 @@ class ProductsScreen extends HookConsumerWidget {
                     ),
                     const SizedBox(height: AppTheme.spacingMedium),
                     ElevatedButton(
-                      onPressed: () => ref.invalidate(productsProvider),
+                      onPressed: () => ref.invalidate(storeCategoriesProvider),
                       child: const Text('Retry'),
                     ),
                   ],
@@ -133,11 +133,8 @@ class ProductsScreen extends HookConsumerWidget {
         ],
       ),
 
-      // floating action button with expandable speed dial
-      floatingActionButton: _AddProductFab(
-        onAddProduct: () {
-          Navigator.pushNamed(context, '/add-product');
-        },
+      // fab with speed dial (same pattern as products screen)
+      floatingActionButton: _AddCategoryFab(
         onAddCategory: () {
           Navigator.pushNamed(context, '/add-category');
         },
@@ -148,8 +145,11 @@ class ProductsScreen extends HookConsumerWidget {
     );
   }
 
-  void _showDeleteDialog(
-      BuildContext context, WidgetRef ref, ProductModel product) {
+  /// show dialog to edit a category name
+  void _showEditCategoryDialog(
+      BuildContext context, WidgetRef ref, ProductCategory category) {
+    final nameController = TextEditingController(text: category.name);
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -157,13 +157,64 @@ class ProductsScreen extends HookConsumerWidget {
           borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
         ),
         title: Text(
-          'Delete Product',
-          style: GoogleFonts.poppins(
-            fontWeight: FontWeight.w600,
+          'Edit Category',
+          style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+        ),
+        content: TextField(
+          controller: nameController,
+          decoration: InputDecoration(
+            hintText: 'Category name',
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
+            ),
           ),
         ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              'Cancel',
+              style: GoogleFonts.poppins(color: AppTheme.textSecondary),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              if (nameController.text.trim().isNotEmpty) {
+                ref.read(storeCategoriesProvider.notifier).updateCategory(
+                      ProductCategory(
+                        id: category.id,
+                        name: nameController.text.trim(),
+                        subCategories: category.subCategories,
+                      ),
+                    );
+                Navigator.pop(context);
+              }
+            },
+            child: Text(
+              'Save',
+              style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// show delete confirmation dialog
+  void _showDeleteConfirmation(
+      BuildContext context, WidgetRef ref, ProductCategory category) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
+        ),
+        title: Text(
+          'Delete Category',
+          style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+        ),
         content: Text(
-          'Are you sure you want to delete "${product.name}"?',
+          'Are you sure you want to delete "${category.name}"?',
           style: GoogleFonts.poppins(fontSize: 14),
         ),
         actions: [
@@ -176,7 +227,9 @@ class ProductsScreen extends HookConsumerWidget {
           ),
           TextButton(
             onPressed: () {
-              ref.read(productsProvider.notifier).deleteProduct(product.id);
+              ref
+                  .read(storeCategoriesProvider.notifier)
+                  .deleteCategory(category.id);
               Navigator.pop(context);
             },
             child: Text(
@@ -190,18 +243,20 @@ class ProductsScreen extends HookConsumerWidget {
   }
 }
 
-/// expandable product tile
-class _ProductTile extends StatelessWidget {
-  final ProductModel product;
+/// expandable category card widget
+class _CategoryCard extends StatelessWidget {
+  final ProductCategory category;
   final bool isExpanded;
   final VoidCallback onToggle;
+  final VoidCallback onView;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
 
-  const _ProductTile({
-    required this.product,
+  const _CategoryCard({
+    required this.category,
     required this.isExpanded,
     required this.onToggle,
+    required this.onView,
     required this.onEdit,
     required this.onDelete,
   });
@@ -216,7 +271,7 @@ class _ProductTile extends StatelessWidget {
       ),
       child: Column(
         children: [
-          // header row (always visible)
+          // category header
           InkWell(
             onTap: onToggle,
             borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
@@ -224,41 +279,9 @@ class _ProductTile extends StatelessWidget {
               padding: const EdgeInsets.all(AppTheme.spacingMedium),
               child: Row(
                 children: [
-                  // product image placeholder
-                  Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: AppTheme.grey800,
-                      borderRadius:
-                          BorderRadius.circular(AppTheme.borderRadiusSmall),
-                    ),
-                    child: product.imageUrl != null
-                        ? ClipRRect(
-                            borderRadius: BorderRadius.circular(
-                                AppTheme.borderRadiusSmall),
-                            child: Image.network(
-                              product.imageUrl!,
-                              fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) => const Icon(
-                                Icons.image_outlined,
-                                color: Colors.white,
-                                size: 20,
-                              ),
-                            ),
-                          )
-                        : const Icon(
-                            Icons.image_outlined,
-                            color: Colors.white,
-                            size: 20,
-                          ),
-                  ),
-                  const SizedBox(width: AppTheme.spacingSmall + 4),
-
-                  // product name
                   Expanded(
                     child: Text(
-                      product.name,
+                      category.name,
                       style: GoogleFonts.poppins(
                         fontSize: 15,
                         fontWeight: FontWeight.w500,
@@ -266,20 +289,6 @@ class _ProductTile extends StatelessWidget {
                       ),
                     ),
                   ),
-
-                  // price
-                  Text(
-                    AmountFormatter.formatCurrency(product.price,
-                        showDecimals: false),
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                      color: AppTheme.textPrimary,
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-
-                  // expand/collapse icon
                   Icon(
                     isExpanded
                         ? Icons.keyboard_arrow_up
@@ -295,8 +304,8 @@ class _ProductTile extends StatelessWidget {
           // expanded content
           if (isExpanded) ...[
             Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: AppTheme.spacingMedium),
+              padding: const EdgeInsets.symmetric(
+                  horizontal: AppTheme.spacingMedium),
               child: Divider(color: AppTheme.grey200, height: 1),
             ),
             Padding(
@@ -307,13 +316,23 @@ class _ProductTile extends StatelessWidget {
                 0,
               ),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // category row
-                  _DetailRow(label: 'Category:', value: product.category),
-                  const SizedBox(height: AppTheme.spacingSmall),
-
-                  // stock row
-                  _DetailRow(label: 'Stock:', value: '${product.stock}'),
+                  // sub-category labels
+                  if (category.subCategories.isNotEmpty)
+                    Wrap(
+                      spacing: 16,
+                      runSpacing: 8,
+                      children: category.subCategories.map((sub) {
+                        return Text(
+                          sub,
+                          style: GoogleFonts.poppins(
+                            fontSize: 13,
+                            color: AppTheme.textSecondary,
+                          ),
+                        );
+                      }).toList(),
+                    ),
                 ],
               ),
             ),
@@ -327,7 +346,7 @@ class _ProductTile extends StatelessWidget {
               child: Divider(color: AppTheme.grey200, height: 1),
             ),
 
-            // action buttons
+            // action buttons row
             Padding(
               padding: const EdgeInsets.fromLTRB(
                 AppTheme.spacingMedium,
@@ -337,17 +356,17 @@ class _ProductTile extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  // edit button
+                  // view button
                   Expanded(
                     child: OutlinedButton.icon(
-                      onPressed: onEdit,
+                      onPressed: onView,
                       icon: Icon(
-                        Icons.edit_outlined,
+                        Icons.visibility_outlined,
                         size: 18,
                         color: AppTheme.textSecondary,
                       ),
                       label: Text(
-                        'Edit',
+                        'View',
                         style: GoogleFonts.poppins(
                           fontSize: 14,
                           color: AppTheme.textSecondary,
@@ -363,7 +382,35 @@ class _ProductTile extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(width: AppTheme.spacingMedium),
+                  const SizedBox(width: AppTheme.spacingSmall),
+
+                  // edit button
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: onEdit,
+                      icon: const Icon(
+                        Icons.edit_outlined,
+                        size: 18,
+                        color: Color(0xFF4CAF50),
+                      ),
+                      label: Text(
+                        'Edit',
+                        style: GoogleFonts.poppins(
+                          fontSize: 14,
+                          color: const Color(0xFF4CAF50),
+                        ),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        side: const BorderSide(color: Color(0xFFC8E6C9)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(
+                              AppTheme.borderRadiusMedium),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: AppTheme.spacingSmall),
 
                   // delete button
                   Expanded(
@@ -401,49 +448,12 @@ class _ProductTile extends StatelessWidget {
   }
 }
 
-/// detail row with label and value
-class _DetailRow extends StatelessWidget {
-  final String label;
-  final String value;
-
-  const _DetailRow({
-    required this.label,
-    required this.value,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          label,
-          style: GoogleFonts.poppins(
-            fontSize: 14,
-            color: AppTheme.textSecondary,
-          ),
-        ),
-        Text(
-          value,
-          style: GoogleFonts.poppins(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-            color: AppTheme.textPrimary,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-/// floating action button with expandable options
-class _AddProductFab extends HookWidget {
-  final VoidCallback onAddProduct;
+/// fab with speed dial for adding category/sub-category
+class _AddCategoryFab extends HookWidget {
   final VoidCallback onAddCategory;
   final VoidCallback onAddSubCategory;
 
-  const _AddProductFab({
-    required this.onAddProduct,
+  const _AddCategoryFab({
     required this.onAddCategory,
     required this.onAddSubCategory,
   });
@@ -458,18 +468,6 @@ class _AddProductFab extends HookWidget {
       children: [
         // expanded options
         if (isExpanded.value) ...[
-          // add product option
-          _FabOption(
-            label: 'Add Product',
-            color: const Color(0xFF4CAF50),
-            icon: Icons.add_box_outlined,
-            onTap: () {
-              isExpanded.value = false;
-              onAddProduct();
-            },
-          ),
-          const SizedBox(height: AppTheme.spacingSmall + 4),
-
           // add sub-category option
           _FabOption(
             label: 'Add Sub-category',
