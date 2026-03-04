@@ -3,21 +3,22 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:onepos_admin_app/core/theme/app_theme.dart';
+import 'package:onepos_admin_app/features/customers/data/models/customer_model.dart';
+import 'package:onepos_admin_app/features/customers/presentation/providers/customers_provider.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_app_bar2.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_search_bar.dart';
-import '../../../products/data/models/product_model.dart';
-import '../providers/store_provider.dart';
+import 'package:onepos_admin_app/shared/widgets/loading_widget.dart';
 
-/// my store screen - manage store categories
-class MyStoreScreen extends HookConsumerWidget {
-  const MyStoreScreen({super.key});
+/// customers screen with expandable customer tiles
+class CustomersScreen extends HookConsumerWidget {
+  const CustomersScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final searchController = useTextEditingController();
     final searchQuery = useState('');
-    final expandedIndex = useState<int?>(0);
-    final categoriesAsync = ref.watch(storeCategoriesProvider);
+    final expandedCustomerId = useState<String?>(null);
+    final customersAsync = ref.watch(customersProvider);
 
     // listen for search changes
     useEffect(() {
@@ -32,7 +33,7 @@ class MyStoreScreen extends HookConsumerWidget {
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
       appBar: CustomAppBar2(
-        title: 'My Store',
+        title: 'Customers',
         backgroundColor: AppTheme.backgroundColor,
         actions: [
           IconButton(
@@ -52,23 +53,24 @@ class MyStoreScreen extends HookConsumerWidget {
             onClear: () => searchQuery.value = '',
           ),
 
-          // categories list
+          // customers list
           Expanded(
-            child: categoriesAsync.when(
-              data: (categories) {
-                // filter by search
+            child: customersAsync.when(
+              data: (customers) {
                 final filtered = searchQuery.value.isEmpty
-                    ? categories
-                    : categories
-                        .where((c) => c.name
-                            .toLowerCase()
-                            .contains(searchQuery.value.toLowerCase()))
+                    ? customers
+                    : customers
+                        .where((c) =>
+                            c.name.toLowerCase().contains(
+                                searchQuery.value.toLowerCase()) ||
+                            c.email.toLowerCase().contains(
+                                searchQuery.value.toLowerCase()))
                         .toList();
 
                 if (filtered.isEmpty) {
                   return Center(
                     child: Text(
-                      'No categories found',
+                      'No customers found',
                       style: GoogleFonts.poppins(
                         fontSize: 14,
                         color: AppTheme.textSecondary,
@@ -86,35 +88,37 @@ class MyStoreScreen extends HookConsumerWidget {
                   separatorBuilder: (_, __) =>
                       const SizedBox(height: AppTheme.spacingSmall),
                   itemBuilder: (context, index) {
-                    final category = filtered[index];
-                    final isExpanded = expandedIndex.value == index;
+                    final customer = filtered[index];
+                    final isExpanded =
+                        expandedCustomerId.value == customer.id;
 
-                    return _CategoryCard(
-                      category: category,
+                    return _CustomerTile(
+                      customer: customer,
                       isExpanded: isExpanded,
                       onToggle: () {
-                        expandedIndex.value = isExpanded ? null : index;
+                        expandedCustomerId.value =
+                            isExpanded ? null : customer.id;
                       },
                       onView: () {
-                        // TODO: navigate to category detail
+                        // TODO: navigate to customer detail
                       },
                       onEdit: () {
-                        _showEditCategoryDialog(context, ref, category);
+                        // TODO: navigate to edit customer
                       },
                       onDelete: () {
-                        _showDeleteConfirmation(context, ref, category);
+                        _showDeleteConfirmation(context, ref, customer);
                       },
                     );
                   },
                 );
               },
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (error, _) => Center(
+              loading: () => const Center(child: LoadingWidget()),
+              error: (error, stack) => Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      'Failed to load categories',
+                      'Failed to load customers',
                       style: GoogleFonts.poppins(
                         fontSize: 16,
                         color: AppTheme.textSecondary,
@@ -122,7 +126,7 @@ class MyStoreScreen extends HookConsumerWidget {
                     ),
                     const SizedBox(height: AppTheme.spacingMedium),
                     ElevatedButton(
-                      onPressed: () => ref.invalidate(storeCategoriesProvider),
+                      onPressed: () => ref.invalidate(customersProvider),
                       child: const Text('Retry'),
                     ),
                   ],
@@ -133,76 +137,18 @@ class MyStoreScreen extends HookConsumerWidget {
         ],
       ),
 
-      // fab with speed dial (same pattern as products screen)
-      floatingActionButton: _AddCategoryFab(
-        onAddCategory: () {
-          Navigator.pushNamed(context, '/add-category');
+      // fab with add customer option
+      floatingActionButton: _AddCustomerFab(
+        onAddCustomer: () {
+          Navigator.pushNamed(context, '/add-customer');
         },
-        onAddSubCategory: () {
-          Navigator.pushNamed(context, '/add-sub-category');
-        },
-      ),
-    );
-  }
-
-  /// show dialog to edit a category name
-  void _showEditCategoryDialog(
-      BuildContext context, WidgetRef ref, ProductCategory category) {
-    final nameController = TextEditingController(text: category.name);
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
-        ),
-        title: Text(
-          'Edit Category',
-          style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
-        ),
-        content: TextField(
-          controller: nameController,
-          decoration: InputDecoration(
-            hintText: 'Category name',
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
-            ),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              'Cancel',
-              style: GoogleFonts.poppins(color: AppTheme.textSecondary),
-            ),
-          ),
-          TextButton(
-            onPressed: () {
-              if (nameController.text.trim().isNotEmpty) {
-                ref.read(storeCategoriesProvider.notifier).updateCategory(
-                      ProductCategory(
-                        id: category.id,
-                        name: nameController.text.trim(),
-                        subCategories: category.subCategories,
-                      ),
-                    );
-                Navigator.pop(context);
-              }
-            },
-            child: Text(
-              'Save',
-              style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
-            ),
-          ),
-        ],
       ),
     );
   }
 
   /// show delete confirmation dialog
   void _showDeleteConfirmation(
-      BuildContext context, WidgetRef ref, ProductCategory category) {
+      BuildContext context, WidgetRef ref, CustomerModel customer) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -210,11 +156,11 @@ class MyStoreScreen extends HookConsumerWidget {
           borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
         ),
         title: Text(
-          'Delete Category',
+          'Delete Customer',
           style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
         ),
         content: Text(
-          'Are you sure you want to delete "${category.name}"?',
+          'Are you sure you want to delete "${customer.name}"?',
           style: GoogleFonts.poppins(fontSize: 14),
         ),
         actions: [
@@ -228,8 +174,8 @@ class MyStoreScreen extends HookConsumerWidget {
           TextButton(
             onPressed: () {
               ref
-                  .read(storeCategoriesProvider.notifier)
-                  .deleteCategory(category.id);
+                  .read(customersProvider.notifier)
+                  .deleteCustomer(customer.id);
               Navigator.pop(context);
             },
             child: Text(
@@ -243,17 +189,17 @@ class MyStoreScreen extends HookConsumerWidget {
   }
 }
 
-/// expandable category card widget
-class _CategoryCard extends StatelessWidget {
-  final ProductCategory category;
+/// expandable customer tile
+class _CustomerTile extends StatelessWidget {
+  final CustomerModel customer;
   final bool isExpanded;
   final VoidCallback onToggle;
   final VoidCallback onView;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
 
-  const _CategoryCard({
-    required this.category,
+  const _CustomerTile({
+    required this.customer,
     required this.isExpanded,
     required this.onToggle,
     required this.onView,
@@ -271,7 +217,7 @@ class _CategoryCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          // category header
+          // header row (always visible)
           InkWell(
             onTap: onToggle,
             borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
@@ -279,16 +225,32 @@ class _CategoryCard extends StatelessWidget {
               padding: const EdgeInsets.all(AppTheme.spacingMedium),
               child: Row(
                 children: [
+                  // customer info
                   Expanded(
-                    child: Text(
-                      category.name,
-                      style: GoogleFonts.poppins(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w500,
-                        color: AppTheme.textPrimary,
-                      ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          customer.name,
+                          style: GoogleFonts.poppins(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                            color: AppTheme.textPrimary,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          customer.email,
+                          style: GoogleFonts.poppins(
+                            fontSize: 13,
+                            color: AppTheme.textSecondary,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
+
+                  // expand/collapse icon
                   Icon(
                     isExpanded
                         ? Icons.keyboard_arrow_up
@@ -301,48 +263,11 @@ class _CategoryCard extends StatelessWidget {
             ),
           ),
 
-          // expanded content
+          // expanded content - action buttons
           if (isExpanded) ...[
             Padding(
               padding: const EdgeInsets.symmetric(
                   horizontal: AppTheme.spacingMedium),
-              child: Divider(color: AppTheme.grey200, height: 1),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                AppTheme.spacingMedium,
-                AppTheme.spacingSmall + 4,
-                AppTheme.spacingMedium,
-                0,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // sub-category labels
-                  if (category.subCategories.isNotEmpty)
-                    Wrap(
-                      spacing: 16,
-                      runSpacing: 8,
-                      children: category.subCategories.map((sub) {
-                        return Text(
-                          sub,
-                          style: GoogleFonts.poppins(
-                            fontSize: 13,
-                            color: AppTheme.textSecondary,
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                ],
-              ),
-            ),
-
-            // divider before actions
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppTheme.spacingMedium,
-                vertical: AppTheme.spacingSmall + 4,
-              ),
               child: Divider(color: AppTheme.grey200, height: 1),
             ),
 
@@ -350,7 +275,7 @@ class _CategoryCard extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.fromLTRB(
                 AppTheme.spacingMedium,
-                0,
+                AppTheme.spacingSmall + 4,
                 AppTheme.spacingMedium,
                 AppTheme.spacingMedium,
               ),
@@ -448,14 +373,12 @@ class _CategoryCard extends StatelessWidget {
   }
 }
 
-/// fab with speed dial for adding category/sub-category
-class _AddCategoryFab extends HookWidget {
-  final VoidCallback onAddCategory;
-  final VoidCallback onAddSubCategory;
+/// fab with add customer option
+class _AddCustomerFab extends HookWidget {
+  final VoidCallback onAddCustomer;
 
-  const _AddCategoryFab({
-    required this.onAddCategory,
-    required this.onAddSubCategory,
+  const _AddCustomerFab({
+    required this.onAddCustomer,
   });
 
   @override
@@ -466,28 +389,15 @@ class _AddCategoryFab extends HookWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        // expanded options
+        // expanded option
         if (isExpanded.value) ...[
-          // add sub-category option
           _FabOption(
-            label: 'Add Sub-category',
-            color: const Color(0xFFC2185B),
-            icon: Icons.description_outlined,
-            onTap: () {
-              isExpanded.value = false;
-              onAddSubCategory();
-            },
-          ),
-          const SizedBox(height: AppTheme.spacingSmall + 4),
-
-          // add category option
-          _FabOption(
-            label: 'Add Category',
+            label: 'Add Customer',
             color: const Color(0xFF1E88E5),
-            icon: Icons.description_outlined,
+            icon: Icons.person_add_outlined,
             onTap: () {
               isExpanded.value = false;
-              onAddCategory();
+              onAddCustomer();
             },
           ),
           const SizedBox(height: AppTheme.spacingSmall + 4),

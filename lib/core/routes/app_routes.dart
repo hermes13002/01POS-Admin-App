@@ -7,6 +7,8 @@ import 'package:onepos_admin_app/features/reports/presentation/screens/reports_s
 import 'package:onepos_admin_app/features/store/presentation/screens/add_category_screen.dart';
 import 'package:onepos_admin_app/features/store/presentation/screens/add_sub_category_screen.dart';
 import 'package:onepos_admin_app/features/store/presentation/screens/my_store_screen.dart';
+import 'package:onepos_admin_app/features/customers/presentation/screens/customers_screen.dart';
+import 'package:onepos_admin_app/features/customers/presentation/screens/add_customer_screen.dart';
 
 /// centralized route configuration
 class AppRoutes {
@@ -22,6 +24,8 @@ class AppRoutes {
   static const String addSubCategory = '/add-sub-category';
   static const String lowStock = '/low-stock';
   static const String sales = '/sales';
+  static const String customers = '/customers';
+  static const String addCustomer = '/add-customer';
 
   // route map
   static Map<String, WidgetBuilder> get routes => {
@@ -33,5 +37,7 @@ class AppRoutes {
         addSubCategory: (context) => const AddSubCategoryScreen(),
         lowStock: (context) => const LowStockScreen(),
         sales: (context) => const SalesScreen(),
+        customers: (context) => const CustomersScreen(),
+        addCustomer: (context) => const AddCustomerScreen(),
       };
 }
