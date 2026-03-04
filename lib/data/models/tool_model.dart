@@ -123,6 +123,12 @@ class AppTools {
       iconPath: 'assets/icons/online_store.png',
       route: '/online-store',
     ),
+    ToolModel(
+      id: 'new_product',
+      name: 'New Product',
+      iconPath: 'assets/icons/new_product.png',
+      route: '/add-product',
+    ),
   ];
 
   /// Default quick actions (first 6 tools)

@@ -135,6 +135,9 @@ class ProductsScreen extends HookConsumerWidget {
 
       // floating action button with expandable speed dial
       floatingActionButton: _AddProductFab(
+        onAddProduct: () {
+          Navigator.pushNamed(context, '/add-product');
+        },
         onAddCategory: () {
           // TODO: add category flow
         },
@@ -435,10 +438,12 @@ class _DetailRow extends StatelessWidget {
 
 /// floating action button with expandable options
 class _AddProductFab extends HookWidget {
+  final VoidCallback onAddProduct;
   final VoidCallback onAddCategory;
   final VoidCallback onAddSubCategory;
 
   const _AddProductFab({
+    required this.onAddProduct,
     required this.onAddCategory,
     required this.onAddSubCategory,
   });
@@ -453,6 +458,18 @@ class _AddProductFab extends HookWidget {
       children: [
         // expanded options
         if (isExpanded.value) ...[
+          // add product option
+          _FabOption(
+            label: 'Add Product',
+            color: const Color(0xFF4CAF50),
+            icon: Icons.add_box_outlined,
+            onTap: () {
+              isExpanded.value = false;
+              onAddProduct();
+            },
+          ),
+          const SizedBox(height: AppTheme.spacingSmall + 4),
+
           // add sub-category option
           _FabOption(
             label: 'Add Sub-category',
