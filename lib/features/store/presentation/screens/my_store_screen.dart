@@ -60,10 +60,12 @@ class MyStoreScreen extends HookConsumerWidget {
                 final filtered = searchQuery.value.isEmpty
                     ? categories
                     : categories
-                        .where((c) => c.name
-                            .toLowerCase()
-                            .contains(searchQuery.value.toLowerCase()))
-                        .toList();
+                          .where(
+                            (c) => c.name.toLowerCase().contains(
+                              searchQuery.value.toLowerCase(),
+                            ),
+                          )
+                          .toList();
 
                 if (filtered.isEmpty) {
                   return Center(
@@ -147,7 +149,10 @@ class MyStoreScreen extends HookConsumerWidget {
 
   /// show dialog to edit a category name
   void _showEditCategoryDialog(
-      BuildContext context, WidgetRef ref, ProductCategory category) {
+    BuildContext context,
+    WidgetRef ref,
+    ProductCategory category,
+  ) {
     final nameController = TextEditingController(text: category.name);
 
     showDialog(
@@ -180,7 +185,9 @@ class MyStoreScreen extends HookConsumerWidget {
           TextButton(
             onPressed: () {
               if (nameController.text.trim().isNotEmpty) {
-                ref.read(storeCategoriesProvider.notifier).updateCategory(
+                ref
+                    .read(storeCategoriesProvider.notifier)
+                    .updateCategory(
                       ProductCategory(
                         id: category.id,
                         name: nameController.text.trim(),
@@ -202,7 +209,10 @@ class MyStoreScreen extends HookConsumerWidget {
 
   /// show delete confirmation dialog
   void _showDeleteConfirmation(
-      BuildContext context, WidgetRef ref, ProductCategory category) {
+    BuildContext context,
+    WidgetRef ref,
+    ProductCategory category,
+  ) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -305,7 +315,8 @@ class _CategoryCard extends StatelessWidget {
           if (isExpanded) ...[
             Padding(
               padding: const EdgeInsets.symmetric(
-                  horizontal: AppTheme.spacingMedium),
+                horizontal: AppTheme.spacingMedium,
+              ),
               child: Divider(color: AppTheme.grey200, height: 1),
             ),
             Padding(
@@ -377,7 +388,8 @@ class _CategoryCard extends StatelessWidget {
                         side: const BorderSide(color: AppTheme.grey300),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(
-                              AppTheme.borderRadiusMedium),
+                            AppTheme.borderRadiusMedium,
+                          ),
                         ),
                       ),
                     ),
@@ -405,7 +417,8 @@ class _CategoryCard extends StatelessWidget {
                         side: const BorderSide(color: AppTheme.blue),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(
-                              AppTheme.borderRadiusMedium),
+                            AppTheme.borderRadiusMedium,
+                          ),
                         ),
                       ),
                     ),
@@ -433,7 +446,8 @@ class _CategoryCard extends StatelessWidget {
                         side: const BorderSide(color: Color(0xFFFFCDD2)),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(
-                              AppTheme.borderRadiusMedium),
+                            AppTheme.borderRadiusMedium,
+                          ),
                         ),
                       ),
                     ),
@@ -468,6 +482,18 @@ class _AddCategoryFab extends HookWidget {
       children: [
         // expanded options
         if (isExpanded.value) ...[
+          // add sub-category option
+          _FabOption(
+            label: 'Generate Store',
+            color: const Color(0xFF4CAF50), // green
+            icon: Icons.store_mall_directory_outlined,
+            onTap: () {
+              isExpanded.value = false;
+              // TODO: implement generate store
+            },
+          ),
+          const SizedBox(height: AppTheme.spacingSmall + 4),
+
           // add sub-category option
           _FabOption(
             label: 'Add Sub-category',

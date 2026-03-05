@@ -32,24 +32,28 @@ class QuickActionCard extends StatelessWidget {
           children: [
             // circular icon container
             Container(
-              width: 52,
-              height: 52,
+              width: 46,
+              height: 46,
               decoration: BoxDecoration(color: color, shape: BoxShape.circle),
               child: Center(
-                child: Icon(tool.icon, size: 26, color: Colors.black54),
+                child: Icon(tool.icon, size: 24, color: Colors.black54),
               ),
             ),
-            const SizedBox(height: 10),
-            Text(
-              tool.name,
-              style: GoogleFonts.poppins(
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-                color: AppTheme.textPrimary.withValues(alpha: 0.65),
+            const SizedBox(height: 6),
+            Expanded(
+              child: Center(
+                child: Text(
+                  tool.name,
+                  style: GoogleFonts.poppins(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: AppTheme.textPrimary.withValues(alpha: 0.65),
+                  ),
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
-              textAlign: TextAlign.center,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
             ),
           ],
         ),

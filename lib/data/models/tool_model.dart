@@ -153,6 +153,6 @@ class AppTools {
     ),
   ];
 
-  /// Default quick actions (first 6 tools)
-  static List<ToolModel> get defaultQuickActions => allTools.take(6).toList();
+  /// Default quick actions (first 8 tools)
+  static List<ToolModel> get defaultQuickActions => allTools.take(8).toList();
 }

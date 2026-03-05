@@ -22,10 +22,12 @@ class QuickActions extends _$QuickActions {
 
     if (savedIds != null && savedIds.isNotEmpty) {
       final tools = savedIds
-          .map((id) => AppTools.allTools.firstWhere(
-                (tool) => tool.id == id,
-                orElse: () => AppTools.allTools.first,
-              ))
+          .map(
+            (id) => AppTools.allTools.firstWhere(
+              (tool) => tool.id == id,
+              orElse: () => AppTools.allTools.first,
+            ),
+          )
           .toList();
 
       state = tools;
@@ -55,6 +57,16 @@ class QuickActions extends _$QuickActions {
   Future<void> removeTool(String toolId) async {
     final updatedTools = state.where((tool) => tool.id != toolId).toList();
     await updateQuickActions(updatedTools);
+  }
+
+  /// Replace tool in quick actions
+  Future<void> replaceTool(String oldToolId, ToolModel newTool) async {
+    final index = state.indexWhere((t) => t.id == oldToolId);
+    if (index != -1 && !state.any((t) => t.id == newTool.id)) {
+      final updatedTools = List<ToolModel>.from(state);
+      updatedTools[index] = newTool;
+      await updateQuickActions(updatedTools);
+    }
   }
 
   /// Reset to default quick actions

@@ -74,6 +74,14 @@ class AppTheme {
         surface: surfaceColor,
         error: errorColor,
       ),
+
+      textSelectionTheme: TextSelectionThemeData(
+        selectionColor: primaryColor.withOpacity(0.3),
+        cursorColor: primaryColor,
+        selectionHandleColor: primaryColor,
+      ),
+      
+      primaryTextTheme: _poppinsTextTheme,
       
       // text theme
       textTheme: _poppinsTextTheme.copyWith(
