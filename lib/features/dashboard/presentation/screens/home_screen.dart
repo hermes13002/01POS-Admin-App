@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:onepos_admin_app/core/routes/app_routes.dart';
 import 'package:onepos_admin_app/core/theme/app_theme.dart';
 import 'package:onepos_admin_app/data/models/tool_model.dart';
 import 'package:onepos_admin_app/features/dashboard/presentation/screens/_quick_action_card.dart';
@@ -26,7 +27,7 @@ class HomeScreen extends HookConsumerWidget {
     ];
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppTheme.backgroundColor,
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
@@ -98,13 +99,17 @@ class HomeScreen extends HookConsumerWidget {
                       ],
                     ),
                     const SizedBox(width: 4),
-                    CircleAvatar(
-                      radius: 16,
-                      backgroundColor: AppTheme.grey300,
-                      child: const Icon(
-                        Icons.person,
-                        color: Colors.black,
-                        size: 18,
+                    GestureDetector(
+                      onTap: () =>
+                          Navigator.pushNamed(context, AppRoutes.onlineStore),
+                      child: CircleAvatar(
+                        radius: 16,
+                        backgroundColor: AppTheme.grey300,
+                        child: const Icon(
+                          Icons.person,
+                          color: Colors.black,
+                          size: 18,
+                        ),
                       ),
                     ),
                   ],
@@ -473,19 +478,10 @@ class EditQuickActionsSheet extends HookConsumerWidget {
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Center(
-                              child: Image.asset(
-                                tool.iconPath,
-                                width: 32,
-                                height: 32,
+                              child: Icon(
+                                tool.icon,
+                                size: 32,
                                 color: isSelected ? Colors.white : Colors.black,
-                                errorBuilder: (context, error, stackTrace) =>
-                                    Icon(
-                                      Icons.apps,
-                                      size: 32,
-                                      color: isSelected
-                                          ? Colors.white
-                                          : Colors.black,
-                                    ),
                               ),
                             ),
                           ),

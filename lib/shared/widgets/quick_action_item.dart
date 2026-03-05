@@ -39,20 +39,11 @@ class QuickActionItem extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Center(
-                child: Image.asset(
-                  tool.iconPath,
-                  width: 28,
-                  height: 28,
-                  errorBuilder: (context, error, stackTrace) => const Icon(
-                    Icons.apps,
-                    size: 28,
-                    color: Colors.black,
-                  ),
-                ),
+                child: Icon(tool.icon, size: 28, color: Colors.black),
               ),
             ),
             const SizedBox(height: AppTheme.spacingSmall),
-            
+
             // label
             Text(
               tool.name,

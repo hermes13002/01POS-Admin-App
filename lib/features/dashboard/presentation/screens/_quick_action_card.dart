@@ -36,16 +36,7 @@ class QuickActionCard extends StatelessWidget {
               height: 52,
               decoration: BoxDecoration(color: color, shape: BoxShape.circle),
               child: Center(
-                child: Image.asset(
-                  tool.iconPath,
-                  width: 26,
-                  height: 26,
-                  errorBuilder: (context, error, stackTrace) => Icon(
-                    Icons.home_outlined,
-                    size: 26,
-                    color: Colors.black54,
-                  ),
-                ),
+                child: Icon(tool.icon, size: 26, color: Colors.black54),
               ),
             ),
             const SizedBox(height: 10),

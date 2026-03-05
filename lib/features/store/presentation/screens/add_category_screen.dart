@@ -5,6 +5,7 @@ import 'package:onepos_admin_app/core/theme/app_theme.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_app_bar2.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_button.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_text_field.dart';
+import 'package:onepos_admin_app/core/utils/validators.dart';
 import '../../../products/data/models/product_model.dart';
 import '../providers/store_provider.dart';
 
@@ -35,12 +36,8 @@ class AddCategoryScreen extends HookConsumerWidget {
               CustomTextField(
                 controller: nameController,
                 hint: 'Category name',
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Please enter a category name';
-                  }
-                  return null;
-                },
+                validator: (val) =>
+                    Validators.validateRequired(val, 'Category name'),
               ),
               const SizedBox(height: AppTheme.spacingMedium),
 
@@ -64,8 +61,7 @@ class AddCategoryScreen extends HookConsumerWidget {
                         .read(storeCategoriesProvider.notifier)
                         .addCategory(
                           ProductCategory(
-                            id: DateTime.now()
-                                .millisecondsSinceEpoch
+                            id: DateTime.now().millisecondsSinceEpoch
                                 .toString(),
                             name: nameController.text.trim(),
                             subCategories: const [],

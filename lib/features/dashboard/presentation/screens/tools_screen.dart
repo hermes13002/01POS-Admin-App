@@ -17,8 +17,11 @@ class ToolsScreen extends HookConsumerWidget {
         return AppTools.allTools;
       }
       return AppTools.allTools
-          .where((tool) =>
-              tool.name.toLowerCase().contains(searchQuery.value.toLowerCase()))
+          .where(
+            (tool) => tool.name.toLowerCase().contains(
+              searchQuery.value.toLowerCase(),
+            ),
+          )
           .toList();
     }, [searchQuery.value]);
 
@@ -60,16 +63,25 @@ class ToolsScreen extends HookConsumerWidget {
                     vertical: AppTheme.spacingSmall,
                   ),
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
+                    borderRadius: BorderRadius.circular(
+                      AppTheme.borderRadiusMedium,
+                    ),
                     borderSide: const BorderSide(color: AppTheme.grey300),
                   ),
                   enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
+                    borderRadius: BorderRadius.circular(
+                      AppTheme.borderRadiusMedium,
+                    ),
                     borderSide: const BorderSide(color: AppTheme.grey300),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
-                    borderSide: const BorderSide(color: AppTheme.primaryColor, width: 1.5),
+                    borderRadius: BorderRadius.circular(
+                      AppTheme.borderRadiusMedium,
+                    ),
+                    borderSide: const BorderSide(
+                      color: AppTheme.primaryColor,
+                      width: 1.5,
+                    ),
                   ),
                 ),
               ),
@@ -94,12 +106,13 @@ class ToolsScreen extends HookConsumerWidget {
                         ),
                       )
                     : GridView.builder(
-                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 3,
-                          crossAxisSpacing: AppTheme.spacingMedium,
-                          mainAxisSpacing: AppTheme.spacingMedium,
-                          childAspectRatio: 0.9,
-                        ),
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 3,
+                              crossAxisSpacing: AppTheme.spacingMedium,
+                              mainAxisSpacing: AppTheme.spacingMedium,
+                              childAspectRatio: 0.9,
+                            ),
                         itemCount: filteredTools.length,
                         itemBuilder: (context, index) {
                           final tool = filteredTools[index];
@@ -138,16 +151,10 @@ class ToolsScreen extends HookConsumerWidget {
                 shape: BoxShape.circle,
               ),
               child: Center(
-                child: Image.asset(
-                  tool.iconPath,
-                  width: 32,
-                  height: 32,
-                  color: const Color.fromRGBO(83, 157, 243, 0.15),
-                  errorBuilder: (context, error, stackTrace) => const Icon(
-                    Icons.home_outlined,
-                    size: 32,
-                    color: Color(0xFF2196F3),
-                  ),
+                child: Icon(
+                  tool.icon,
+                  size: 32,
+                  color: const Color(0xFF2196F3),
                 ),
               ),
             ),

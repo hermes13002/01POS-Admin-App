@@ -7,6 +7,7 @@ import 'package:onepos_admin_app/shared/widgets/app_dropdown.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_app_bar2.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_button.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_text_field.dart';
+import 'package:onepos_admin_app/core/utils/validators.dart';
 import '../../../products/data/models/product_model.dart';
 import '../providers/store_provider.dart';
 
@@ -40,24 +41,23 @@ class AddSubCategoryScreen extends HookConsumerWidget {
                   hint: 'Select a category',
                   value: selectedCategory.value?.id,
                   items: categories
-                      .map((c) => DropdownMenuItem(
-                            value: c.id,
-                            child: Text(
-                              c.name,
-                              style: GoogleFonts.poppins(fontSize: 14),
-                            ),
-                          ))
+                      .map(
+                        (c) => DropdownMenuItem(
+                          value: c.id,
+                          child: Text(
+                            c.name,
+                            style: GoogleFonts.poppins(fontSize: 14),
+                          ),
+                        ),
+                      )
                       .toList(),
                   onChanged: (id) {
-                    selectedCategory.value =
-                        categories.firstWhere((c) => c.id == id);
+                    selectedCategory.value = categories.firstWhere(
+                      (c) => c.id == id,
+                    );
                   },
-                  validator: (value) {
-                    if (value == null) {
-                      return 'Please select a category';
-                    }
-                    return null;
-                  },
+                  validator: (val) =>
+                      Validators.validateRequired(val, 'Category'),
                 ),
                 loading: () => const LinearProgressIndicator(),
                 error: (_, __) => Text(
@@ -74,12 +74,8 @@ class AddSubCategoryScreen extends HookConsumerWidget {
               CustomTextField(
                 controller: nameController,
                 hint: 'Sub-category name',
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Please enter a sub-category name';
-                  }
-                  return null;
-                },
+                validator: (val) =>
+                    Validators.validateRequired(val, 'Sub-category name'),
               ),
 
               const Spacer(),

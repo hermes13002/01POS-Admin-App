@@ -11,6 +11,7 @@ import 'package:onepos_admin_app/shared/widgets/app_dropdown.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_app_bar2.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_button.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_text_field.dart';
+import 'package:onepos_admin_app/core/utils/validators.dart';
 
 /// screen for adding a new product (single scrollable form)
 class AddProductScreen extends HookConsumerWidget {
@@ -86,12 +87,8 @@ class AddProductScreen extends HookConsumerWidget {
                 label: 'Product name *',
                 hint: 'Enter product name',
                 controller: nameController,
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Product name is required';
-                  }
-                  return null;
-                },
+                validator: (val) =>
+                    Validators.validateRequired(val, 'Product name'),
               ),
               const SizedBox(height: AppTheme.spacingMedium),
 
@@ -102,18 +99,16 @@ class AddProductScreen extends HookConsumerWidget {
                   hint: 'Select category',
                   value: selectedCategory.value,
                   items: categories
-                      .map((c) => DropdownMenuItem(
-                            value: c.name,
-                            child: Text(c.name),
-                          ))
+                      .map(
+                        (c) => DropdownMenuItem(
+                          value: c.name,
+                          child: Text(c.name),
+                        ),
+                      )
                       .toList(),
                   onChanged: (value) => selectedCategory.value = value,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Category is required';
-                    }
-                    return null;
-                  },
+                  validator: (val) =>
+                      Validators.validateRequired(val, 'Category'),
                 ),
                 loading: () => const LinearProgressIndicator(),
                 error: (_, __) => const Text('Failed to load categories'),
@@ -127,10 +122,7 @@ class AddProductScreen extends HookConsumerWidget {
                 value: selectedSubCategory.value,
                 enabled: subCategories.isNotEmpty,
                 items: subCategories
-                    .map((s) => DropdownMenuItem(
-                          value: s,
-                          child: Text(s),
-                        ))
+                    .map((s) => DropdownMenuItem(value: s, child: Text(s)))
                     .toList(),
                 onChanged: (value) => selectedSubCategory.value = value,
               ),
@@ -142,15 +134,7 @@ class AddProductScreen extends HookConsumerWidget {
                 hint: 'Enter quantity',
                 controller: quantityController,
                 keyboardType: TextInputType.number,
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Quantity is required';
-                  }
-                  if (int.tryParse(value) == null) {
-                    return 'Enter a valid number';
-                  }
-                  return null;
-                },
+                validator: (val) => Validators.validateNumber(val, 'Quantity'),
               ),
               const SizedBox(height: AppTheme.spacingMedium),
 
@@ -159,17 +143,11 @@ class AddProductScreen extends HookConsumerWidget {
                 label: 'Price *',
                 hint: 'Enter price',
                 controller: priceController,
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Price is required';
-                  }
-                  if (double.tryParse(value) == null) {
-                    return 'Enter a valid price';
-                  }
-                  return null;
-                },
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                validator: (val) =>
+                    Validators.validatePositiveNumber(val, 'Price'),
               ),
               const SizedBox(height: AppTheme.spacingLarge),
 
@@ -189,8 +167,9 @@ class AddProductScreen extends HookConsumerWidget {
               ImageUploadBox(
                 imagePath: productImage.value,
                 onTap: () async {
-                  final path =
-                      await AppImagePicker.showPickerBottomSheet(context);
+                  final path = await AppImagePicker.showPickerBottomSheet(
+                    context,
+                  );
                   if (path != null) {
                     productImage.value = path;
                   }
@@ -302,9 +281,7 @@ class AddProductScreen extends HookConsumerWidget {
                         : null,
                   );
 
-                  await ref
-                      .read(productsProvider.notifier)
-                      .addProduct(product);
+                  await ref.read(productsProvider.notifier).addProduct(product);
 
                   isLoading.value = false;
 
@@ -340,8 +317,6 @@ class _SectionLabel extends StatelessWidget {
     );
   }
 }
-
-
 
 /// date picker field with calendar icon
 class _DatePickerField extends StatelessWidget {

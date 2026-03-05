@@ -10,6 +10,7 @@ class CustomButtonWithIcon extends StatelessWidget {
   final Color? backgroundColor;
   final Color? textColor;
   final Color? iconColor;
+  final Color? borderColor;
   final double? width;
   final double height;
   final EdgeInsetsGeometry? padding;
@@ -27,6 +28,7 @@ class CustomButtonWithIcon extends StatelessWidget {
     this.backgroundColor,
     this.textColor,
     this.iconColor,
+    this.borderColor,
     this.width,
     this.height = 48,
     this.padding,
@@ -51,6 +53,7 @@ class CustomButtonWithIcon extends StatelessWidget {
           shape: RoundedRectangleBorder(
             borderRadius: borderRadius ?? BorderRadius.circular(8),
           ),
+          side: BorderSide(color: borderColor ?? theme.colorScheme.primary),
         ),
         child: _buildContent(effectiveTextColor, effectiveIconColor),
       );

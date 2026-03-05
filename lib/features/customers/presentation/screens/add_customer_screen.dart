@@ -5,6 +5,7 @@ import 'package:onepos_admin_app/core/theme/app_theme.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_app_bar2.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_button.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_text_field.dart';
+import 'package:onepos_admin_app/core/utils/validators.dart';
 import '../../data/models/customer_model.dart';
 import '../providers/customers_provider.dart';
 
@@ -36,12 +37,8 @@ class AddCustomerScreen extends HookConsumerWidget {
               CustomTextField(
                 controller: nameController,
                 hint: 'Customer name',
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Please enter a customer name';
-                  }
-                  return null;
-                },
+                validator: (val) =>
+                    Validators.validateRequired(val, 'Customer name'),
               ),
               const SizedBox(height: AppTheme.spacingMedium),
 
@@ -50,12 +47,7 @@ class AddCustomerScreen extends HookConsumerWidget {
                 controller: emailController,
                 hint: 'Email address',
                 keyboardType: TextInputType.emailAddress,
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Please enter an email address';
-                  }
-                  return null;
-                },
+                validator: Validators.validateEmail,
               ),
               const SizedBox(height: AppTheme.spacingMedium),
 
@@ -79,8 +71,7 @@ class AddCustomerScreen extends HookConsumerWidget {
                         .read(customersProvider.notifier)
                         .addCustomer(
                           CustomerModel(
-                            id: DateTime.now()
-                                .millisecondsSinceEpoch
+                            id: DateTime.now().millisecondsSinceEpoch
                                 .toString(),
                             name: nameController.text.trim(),
                             email: emailController.text.trim(),

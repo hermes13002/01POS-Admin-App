@@ -9,6 +9,23 @@ import 'package:onepos_admin_app/features/store/presentation/screens/add_sub_cat
 import 'package:onepos_admin_app/features/store/presentation/screens/my_store_screen.dart';
 import 'package:onepos_admin_app/features/customers/presentation/screens/customers_screen.dart';
 import 'package:onepos_admin_app/features/customers/presentation/screens/add_customer_screen.dart';
+import 'package:onepos_admin_app/features/expenses/presentation/screens/expenses_screen.dart';
+import 'package:onepos_admin_app/features/expenses/presentation/screens/add_expense_screen.dart';
+import 'package:onepos_admin_app/features/bill/presentation/screens/bills_screen.dart';
+import 'package:onepos_admin_app/features/bill/presentation/screens/add_bill_screen.dart';
+import 'package:onepos_admin_app/features/discount/presentation/screens/discount_screen.dart';
+import 'package:onepos_admin_app/features/discount/presentation/screens/add_discount_screen.dart';
+import 'package:onepos_admin_app/features/users/presentation/screens/users_screen.dart';
+import 'package:onepos_admin_app/features/users/presentation/screens/add_user_screen.dart';
+import 'package:onepos_admin_app/features/payment_method/presentation/screens/payment_method_screen.dart';
+import 'package:onepos_admin_app/features/payment_method/presentation/screens/add_payment_method_screen.dart';
+import 'package:onepos_admin_app/features/payment_method/presentation/screens/connect_bank_account_screen.dart';
+import 'package:onepos_admin_app/features/online_store/presentation/screens/store_profile_screen.dart';
+import 'package:onepos_admin_app/features/online_store/presentation/screens/edit_store_name_screen.dart';
+import 'package:onepos_admin_app/features/online_store/presentation/screens/edit_email_address_screen.dart';
+import 'package:onepos_admin_app/features/online_store/presentation/screens/edit_phone_number_screen.dart';
+import 'package:onepos_admin_app/features/online_store/presentation/screens/edit_address_screen.dart';
+import 'package:onepos_admin_app/features/online_store/presentation/screens/login_settings_screen.dart';
 
 /// centralized route configuration
 class AppRoutes {
@@ -26,18 +43,52 @@ class AppRoutes {
   static const String sales = '/sales';
   static const String customers = '/customers';
   static const String addCustomer = '/add-customer';
+  static const String expenses = '/expenses';
+  static const String addExpense = '/add-expense';
+  static const String bills = '/bill';
+  static const String addBill = '/add-bill';
+  static const String discount = '/discount';
+  static const String addDiscount = '/add-discount';
+  static const String users = '/users';
+  static const String addUser = '/add-user';
+  static const String paymentMethod = '/payment-method';
+  static const String addPaymentMethod = '/add-payment-method';
+  static const String connectBankAccount = '/connect-bank-account';
+  static const String onlineStore = '/online-store';
+  static const String editStoreName = '/edit-store-name';
+  static const String editEmailAddress = '/edit-email-address';
+  static const String editPhoneNumber = '/edit-phone-number';
+  static const String editAddress = '/edit-address';
+  static const String loginSettings = '/login-settings';
 
   // route map
   static Map<String, WidgetBuilder> get routes => {
-        reports: (context) => const ReportsScreen(),
-        products: (context) => const ProductsScreen(),
-        addProduct: (context) => const AddProductScreen(),
-        myStore: (context) => const MyStoreScreen(),
-        addCategory: (context) => const AddCategoryScreen(),
-        addSubCategory: (context) => const AddSubCategoryScreen(),
-        lowStock: (context) => const LowStockScreen(),
-        sales: (context) => const SalesScreen(),
-        customers: (context) => const CustomersScreen(),
-        addCustomer: (context) => const AddCustomerScreen(),
-      };
+    reports: (context) => const ReportsScreen(),
+    products: (context) => const ProductsScreen(),
+    addProduct: (context) => const AddProductScreen(),
+    myStore: (context) => const MyStoreScreen(),
+    addCategory: (context) => const AddCategoryScreen(),
+    addSubCategory: (context) => const AddSubCategoryScreen(),
+    lowStock: (context) => const LowStockScreen(),
+    sales: (context) => const SalesScreen(),
+    customers: (context) => const CustomersScreen(),
+    addCustomer: (context) => const AddCustomerScreen(),
+    expenses: (context) => const ExpensesScreen(),
+    addExpense: (context) => const AddExpenseScreen(),
+    bills: (context) => const BillsScreen(),
+    addBill: (context) => const AddBillScreen(),
+    discount: (context) => const DiscountScreen(),
+    addDiscount: (context) => const AddDiscountScreen(),
+    users: (context) => const UsersScreen(),
+    addUser: (context) => const AddUserScreen(),
+    paymentMethod: (context) => const PaymentMethodScreen(),
+    addPaymentMethod: (context) => const AddPaymentMethodScreen(),
+    connectBankAccount: (context) => const ConnectBankAccountScreen(),
+    onlineStore: (context) => const StoreProfileScreen(),
+    editStoreName: (context) => const EditStoreNameScreen(),
+    editEmailAddress: (context) => const EditEmailAddressScreen(),
+    editPhoneNumber: (context) => const EditPhoneNumberScreen(),
+    editAddress: (context) => const EditAddressScreen(),
+    loginSettings: (context) => const LoginSettingsScreen(),
+  };
 }
