@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:onepos_admin_app/features/auth/presentation/screens/login_screen.dart';
 import 'package:onepos_admin_app/features/low_stock/presentation/screens/low_stock_screen.dart';
 import 'package:onepos_admin_app/features/products/presentation/screens/add_product_screen.dart';
 import 'package:onepos_admin_app/features/sales/presentation/screens/sales_screen.dart';
@@ -33,6 +34,7 @@ class AppRoutes {
   AppRoutes._();
 
   // route names
+  static const String login = '/login';
   static const String reports = '/reports';
   static const String products = '/products';
   static const String addProduct = '/add-product';
@@ -63,6 +65,7 @@ class AppRoutes {
 
   // route map
   static Map<String, WidgetBuilder> get routes => {
+    login: (context) => const LoginScreen(),
     reports: (context) => const ReportsScreen(),
     products: (context) => const ProductsScreen(),
     addProduct: (context) => const AddProductScreen(),

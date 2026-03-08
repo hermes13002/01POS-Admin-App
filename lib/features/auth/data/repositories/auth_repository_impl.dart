@@ -1,0 +1,47 @@
+import 'package:dartz/dartz.dart';
+import 'package:onepos_admin_app/core/errors/exceptions.dart';
+import 'package:onepos_admin_app/core/errors/failures.dart';
+import '../../data/datasources/auth_remote_datasource.dart';
+import '../../data/models/login_response_model.dart';
+import '../../domain/repositories/auth_repository.dart';
+
+class AuthRepositoryImpl implements AuthRepository {
+  final AuthRemoteDatasource _datasource;
+
+  AuthRepositoryImpl(this._datasource);
+
+  @override
+  Future<Either<Failure, LoginResponseModel>> loginWithEmail(
+    String email,
+    String password,
+  ) async {
+    try {
+      final result = await _datasource.loginWithEmail(email, password);
+      return Right(result);
+    } on AuthenticationException catch (e) {
+      return Left(AuthenticationFailure(message: e.message));
+    } on NetworkException catch (e) {
+      return Left(NetworkFailure(message: e.message));
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message, statusCode: e.statusCode));
+    } catch (e) {
+      return Left(UnknownFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, LoginResponseModel>> loginWithPin(String pin) async {
+    try {
+      final result = await _datasource.loginWithPin(pin);
+      return Right(result);
+    } on AuthenticationException catch (e) {
+      return Left(AuthenticationFailure(message: e.message));
+    } on NetworkException catch (e) {
+      return Left(NetworkFailure(message: e.message));
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message, statusCode: e.statusCode));
+    } catch (e) {
+      return Left(UnknownFailure(message: e.toString()));
+    }
+  }
+}
