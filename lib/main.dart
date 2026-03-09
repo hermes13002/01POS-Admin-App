@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:onepos_admin_app/core/routes/app_routes.dart';
 import 'package:onepos_admin_app/core/storage/secure_storage_service.dart';
 import 'package:onepos_admin_app/core/constants/app_constants.dart';
 import 'package:onepos_admin_app/core/storage/shared_prefs_service.dart';
 import 'package:onepos_admin_app/core/theme/app_theme.dart';
+import 'package:onepos_admin_app/core/network/connectivity_provider.dart';
 import 'package:onepos_admin_app/features/auth/presentation/screens/login_screen.dart';
 import 'package:onepos_admin_app/presentation/screens/main_navigation_screen.dart';
 
@@ -34,6 +36,95 @@ class MyApp extends StatelessWidget {
       theme: AppTheme.lightTheme,
       home: isLoggedIn ? const MainNavigationScreen() : const LoginScreen(),
       routes: AppRoutes.routes,
+      // wrap every screen with the connectivity banner
+      builder: (context, child) => ConnectivityBanner(child: child!),
+    );
+  }
+}
+
+/// app-wide offline/online banner — sits above every screen
+class ConnectivityBanner extends ConsumerStatefulWidget {
+  const ConnectivityBanner({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  ConsumerState<ConnectivityBanner> createState() => _ConnectivityBannerState();
+}
+
+class _ConnectivityBannerState extends ConsumerState<ConnectivityBanner> {
+  bool? _previousStatus;
+
+  @override
+  Widget build(BuildContext context) {
+    final connectivityAsync = ref.watch(connectivityProvider);
+
+    return connectivityAsync.when(
+      data: (isOnline) {
+        final showRestored = _previousStatus == false && isOnline;
+        _previousStatus = isOnline;
+
+        return Column(
+          children: [
+            if (!isOnline)
+              _StatusBanner(
+                message: 'No internet connection',
+                color: AppTheme.errorColor,
+                icon: Icons.wifi_off_rounded,
+              )
+            else if (showRestored)
+              _StatusBanner(
+                message: 'Back online',
+                color: AppTheme.successColor,
+                icon: Icons.wifi_rounded,
+              ),
+            Expanded(child: widget.child),
+          ],
+        );
+      },
+      loading: () => widget.child,
+      error: (_, __) => widget.child,
+    );
+  }
+}
+
+class _StatusBanner extends StatelessWidget {
+  const _StatusBanner({
+    required this.message,
+    required this.color,
+    required this.icon,
+  });
+
+  final String message;
+  final Color color;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: color,
+      child: SafeArea(
+        bottom: false,
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, color: Colors.white, size: 16),
+              const SizedBox(width: 8),
+              Text(
+                message,
+                style: GoogleFonts.poppins(
+                  color: Colors.white,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

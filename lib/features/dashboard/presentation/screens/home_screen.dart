@@ -1,13 +1,23 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:onepos_admin_app/core/routes/app_routes.dart';
 import 'package:onepos_admin_app/core/theme/app_theme.dart';
 import 'package:onepos_admin_app/data/models/tool_model.dart';
 import 'package:onepos_admin_app/features/dashboard/presentation/screens/_quick_action_card.dart';
 import 'package:onepos_admin_app/presentation/providers/quick_actions_provider.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
+
+const List<String> _backgroundImages = [
+  'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80',
+  'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80',
+  'https://images.unsplash.com/photo-1469474968028-56623f02e42e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80',
+  'https://images.unsplash.com/photo-1472214103451-9374bd1c798e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80',
+  'https://images.unsplash.com/photo-1501594907352-04cda38ebc29?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80',
+];
 
 /// home screen
 class HomeScreen extends HookConsumerWidget {
@@ -17,6 +27,15 @@ class HomeScreen extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final quickActions = ref.watch(quickActionsProvider);
     final selectedPeriod = useState<String>('This week');
+    final bgIndex = useState(0);
+
+    // cycle background images every 5 seconds
+    useEffect(() {
+      final timer = Timer.periodic(const Duration(seconds: 5), (_) {
+        bgIndex.value = (bgIndex.value + 1) % _backgroundImages.length;
+      });
+      return timer.cancel;
+    }, []);
 
     final pastelColors = [
       const Color(0xFFDDE3FF), // soft blue-purple
@@ -124,15 +143,22 @@ class HomeScreen extends HookConsumerWidget {
                   borderRadius: BorderRadius.circular(18),
                   child: Stack(
                     children: [
-                      // background image
-                      SizedBox(
-                        height: 260,
-                        width: double.infinity,
-                        child: Image.asset(
-                          'assets/images/home-image.png',
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) =>
-                              Container(color: const Color(0xFF2D5A27)),
+                      // animated background image
+                      AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 800),
+                        child: SizedBox(
+                          key: ValueKey(bgIndex.value),
+                          height: 260,
+                          width: double.infinity,
+                          child: CachedNetworkImage(
+                            imageUrl: _backgroundImages[bgIndex.value],
+                            fit: BoxFit.cover,
+                            placeholder: (_, __) =>
+                                Container(color: const Color(0xFF2D5A27)),
+                            errorWidget: (_, __, ___) =>
+                                Container(color: const Color(0xFF2D5A27)),
+                            fadeInDuration: Duration.zero,
+                          ),
                         ),
                       ),
                       // dark overlay
