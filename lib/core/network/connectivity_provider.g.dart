@@ -6,7 +6,7 @@ part of 'connectivity_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$connectivityHash() => r'8f304621cb34bdba3844b925f449746921ebe11c';
+String _$connectivityHash() => r'6c004e62df31c35f59b7119b4d54a8d6b7427ecc';
 
 /// watches connectivity and emits true = online, false = offline
 ///
@@ -25,7 +25,7 @@ final connectivityProvider = AutoDisposeStreamProvider<bool>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef ConnectivityRef = AutoDisposeStreamProviderRef<bool>;
-String _$isConnectedHash() => r'5d37fee067301289c50b08d35ce7533e39a127c1';
+String _$isConnectedHash() => r'9e1fefdbc2ce7d2d8e1e664d476d48722a577735';
 
 /// one-shot check — used before making a request
 ///

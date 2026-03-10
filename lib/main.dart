@@ -7,6 +7,7 @@ import 'package:onepos_admin_app/core/constants/app_constants.dart';
 import 'package:onepos_admin_app/core/storage/shared_prefs_service.dart';
 import 'package:onepos_admin_app/core/theme/app_theme.dart';
 import 'package:onepos_admin_app/core/network/connectivity_provider.dart';
+import 'package:onepos_admin_app/core/utils/session_manager.dart';
 import 'package:onepos_admin_app/features/auth/presentation/screens/login_screen.dart';
 import 'package:onepos_admin_app/presentation/screens/main_navigation_screen.dart';
 
@@ -31,6 +32,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: SessionManager.navigatorKey,
       title: 'OnePOS Admin',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,

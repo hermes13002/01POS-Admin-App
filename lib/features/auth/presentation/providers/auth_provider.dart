@@ -49,8 +49,11 @@ class Auth extends _$Auth {
   }
 
   Future<void> logout() async {
-    await SecureStorageService().delete(AppConstants.keyAccessToken);
-    await SecureStorageService().delete(AppConstants.keyUserId);
+    // call logout api — ignore errors so we always clear local tokens
+    try {
+      await _repo.logout();
+    } catch (_) {}
+    await SecureStorageService().deleteAll();
     state = const AsyncData(null);
   }
 }

@@ -1,8 +1,10 @@
 import 'package:dio/dio.dart';
+import 'package:onepos_admin_app/core/constants/api_endpoints.dart';
 import 'package:onepos_admin_app/core/storage/secure_storage_service.dart';
 import 'package:onepos_admin_app/core/constants/app_constants.dart';
+import 'package:onepos_admin_app/core/utils/session_manager.dart';
 
-/// Interceptor to add authentication token to requests
+/// interceptor to add authentication token to requests
 class AuthInterceptor extends Interceptor {
   final SecureStorageService _secureStorage = SecureStorageService();
 
@@ -11,7 +13,7 @@ class AuthInterceptor extends Interceptor {
     RequestOptions options,
     RequestInterceptorHandler handler,
   ) async {
-    // Get access token from secure storage
+    // get access token from secure storage
     final token = await _secureStorage.read(AppConstants.keyAccessToken);
 
     if (token != null && token.isNotEmpty) {
@@ -23,9 +25,12 @@ class AuthInterceptor extends Interceptor {
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
-    // Handle 401 errors - token refresh logic can be added here
     if (err.response?.statusCode == 401) {
-      // TODO: Implement token refresh logic
+      // skip session-expiry handling for the login endpoint itself
+      final path = err.requestOptions.path;
+      if (!path.contains(ApiEndpoints.login)) {
+        SessionManager.handleSessionExpired();
+      }
     }
     handler.next(err);
   }

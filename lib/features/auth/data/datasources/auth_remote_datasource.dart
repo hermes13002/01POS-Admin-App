@@ -10,6 +10,7 @@ import '../models/login_response_model.dart';
 abstract class AuthRemoteDatasource {
   Future<LoginResponseModel> loginWithEmail(String email, String password);
   Future<LoginResponseModel> loginWithPin(String pin);
+  Future<void> logout();
 }
 
 class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
@@ -63,6 +64,18 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
     final loginResponse = LoginResponseModel.fromJson(responseBody['data']);
     await _persistToken(loginResponse);
     return loginResponse;
+  }
+
+  @override
+  Future<void> logout() async {
+    final url = '${AppConstants.baseUrl}${ApiEndpoints.logout}';
+
+    log('logout url: $url', name: 'API');
+
+    final response = await _client.get(ApiEndpoints.logout);
+    final responseBody = response.data as Map<String, dynamic>;
+
+    log('logout response: ${jsonEncode(responseBody)}', name: 'API');
   }
 
   Future<void> _persistToken(LoginResponseModel response) async {

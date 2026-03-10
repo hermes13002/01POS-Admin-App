@@ -6,7 +6,7 @@ class LoggingInterceptor extends Interceptor {
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
     developer.log(
-      '┌──────────────────────────────────────────────────────────────',
+      '┌──────────────',
       name: 'HTTP REQUEST',
     );
     developer.log('│ ${options.method} ${options.uri}', name: 'HTTP REQUEST');
@@ -18,7 +18,7 @@ class LoggingInterceptor extends Interceptor {
       developer.log('│ Body: ${options.data}', name: 'HTTP REQUEST');
     }
     developer.log(
-      '└──────────────────────────────────────────────────────────────',
+      '└──────────────',
       name: 'HTTP REQUEST',
     );
     handler.next(options);
@@ -27,7 +27,7 @@ class LoggingInterceptor extends Interceptor {
   @override
   void onResponse(Response response, ResponseInterceptorHandler handler) {
     developer.log(
-      '┌──────────────────────────────────────────────────────────────',
+      '┌──────────────',
       name: 'HTTP RESPONSE',
     );
     developer.log(
@@ -36,7 +36,7 @@ class LoggingInterceptor extends Interceptor {
     );
     developer.log('│ Response: ${response.data}', name: 'HTTP RESPONSE');
     developer.log(
-      '└──────────────────────────────────────────────────────────────',
+      '└──────────────',
       name: 'HTTP RESPONSE',
     );
     handler.next(response);
@@ -45,7 +45,7 @@ class LoggingInterceptor extends Interceptor {
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
     developer.log(
-      '┌──────────────────────────────────────────────────────────────',
+      '┌──────────────',
       name: 'HTTP ERROR',
     );
     developer.log(
@@ -58,7 +58,7 @@ class LoggingInterceptor extends Interceptor {
       developer.log('│ Data: ${err.response?.data}', name: 'HTTP ERROR');
     }
     developer.log(
-      '└──────────────────────────────────────────────────────────────',
+      '└──────────────',
       name: 'HTTP ERROR',
     );
     handler.next(err);

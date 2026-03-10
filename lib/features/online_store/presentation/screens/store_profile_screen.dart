@@ -3,14 +3,18 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:onepos_admin_app/core/routes/app_routes.dart';
 import 'package:onepos_admin_app/core/theme/app_theme.dart';
+import 'package:onepos_admin_app/features/auth/data/models/profile_model.dart';
+import 'package:onepos_admin_app/features/online_store/presentation/providers/profile_provider.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_app_bar.dart';
 
-/// Screen for viewing and managing standard online store profile settings
+/// store profile screen — company details and admin profile
 class StoreProfileScreen extends HookConsumerWidget {
   const StoreProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final profileAsync = ref.watch(userProfileProvider);
+
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
       appBar: CustomAppBar(
@@ -23,164 +27,257 @@ class StoreProfileScreen extends HookConsumerWidget {
         ),
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(AppTheme.spacingMedium),
-          child: Column(
-            children: [
-              // Top Profile Card
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(AppTheme.spacingMedium),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(
-                    AppTheme.borderRadiusMedium,
+        child: profileAsync.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (e, _) => Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'Failed to load profile',
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    color: AppTheme.textSecondary,
                   ),
                 ),
-                child: Column(
-                  children: [
-                    // Avatar with Edit Badge
-                    Stack(
-                      alignment: Alignment.bottomRight,
-                      children: [
-                        const CircleAvatar(
-                          radius: 40,
-                          backgroundColor: Color(
-                            0xFF4A4A4A,
-                          ), // Dark grey from design
-                        ),
-                        Container(
-                          padding: const EdgeInsets.all(4),
-                          decoration: const BoxDecoration(
-                            color: Color(0xFF4A90E2), // Blue badge
-                            shape: BoxShape.rectangle,
-                          ),
-                          child: const Icon(
-                            Icons.edit_outlined,
-                            size: 16,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      'Tova Superstore',
-                      style: GoogleFonts.poppins(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: AppTheme.textPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-
-                    // Plan Details
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Your current plan',
-                          style: GoogleFonts.poppins(
-                            fontSize: 12,
-                            color: AppTheme.textSecondary,
-                          ),
-                        ),
-                        Row(
-                          children: [
-                            Text(
-                              'Standard',
-                              style: GoogleFonts.poppins(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w500,
-                                color: AppTheme.textPrimary,
-                              ),
-                            ),
-                            const SizedBox(width: 4),
-                            const Icon(
-                              Icons.arrow_forward_ios,
-                              size: 12,
-                              color: AppTheme.textPrimary,
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 12),
-                      child: Divider(height: 1),
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Expiry date',
-                          style: GoogleFonts.poppins(
-                            fontSize: 12,
-                            color: AppTheme.textSecondary,
-                          ),
-                        ),
-                        Text(
-                          '7th March, 2026',
-                          style: GoogleFonts.poppins(
-                            fontSize: 13,
-                            color: AppTheme.textPrimary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () => ref.invalidate(userProfileProvider),
+                  child: const Text('Retry'),
                 ),
-              ),
-              const SizedBox(height: AppTheme.spacingMedium),
-
-              // Settings List
-              _ProfileListItem(
-                title: 'Store Name',
-                value: 'Tova Superstore',
-                onTap: () =>
-                    Navigator.pushNamed(context, AppRoutes.editStoreName),
-              ),
-              const SizedBox(height: AppTheme.spacingMedium),
-              _ProfileListItem(
-                title: 'Email',
-                value: 'Jo***23@gmail.com',
-                onTap: () =>
-                    Navigator.pushNamed(context, AppRoutes.editEmailAddress),
-              ),
-              const SizedBox(height: AppTheme.spacingMedium),
-              _ProfileListItem(
-                title: 'Phone Number',
-                value: '07012345678',
-                onTap: () =>
-                    Navigator.pushNamed(context, AppRoutes.editPhoneNumber),
-              ),
-              const SizedBox(height: AppTheme.spacingMedium),
-              _ProfileListItem(
-                title: 'Address',
-                onTap: () =>
-                    Navigator.pushNamed(context, AppRoutes.editAddress),
-              ),
-              const SizedBox(height: AppTheme.spacingMedium),
-              _ProfileListItem(
-                title: 'Login Settings',
-                onTap: () =>
-                    Navigator.pushNamed(context, AppRoutes.loginSettings),
-              ),
-              const SizedBox(height: AppTheme.spacingMedium),
-              _ProfileListItem(title: 'Currency Settings'),
-              const SizedBox(height: AppTheme.spacingMedium),
-              _ProfileListItem(title: 'Receipt Template Settings'),
-              const SizedBox(height: AppTheme.spacingMedium),
-              _ProfileListItem(title: 'Low Stock Limit Settings'),
-              const SizedBox(height: AppTheme.spacingLarge),
-            ],
+              ],
+            ),
           ),
+          data: (profile) => _ProfileContent(profile: profile),
         ),
       ),
     );
   }
 }
 
+class _ProfileContent extends StatelessWidget {
+  final ProfileModel profile;
+
+  const _ProfileContent({required this.profile});
+
+  @override
+  Widget build(BuildContext context) {
+    final company = profile.company;
+
+    // format license expiry
+    String expiryLabel = company?.licenseDuration ?? '—';
+    if (company != null) {
+      try {
+        final parsed = DateTime.parse(company.licenseDuration);
+        const months = [
+          'January',
+          'February',
+          'March',
+          'April',
+          'May',
+          'June',
+          'July',
+          'August',
+          'September',
+          'October',
+          'November',
+          'December',
+        ];
+        expiryLabel =
+            '${parsed.day} ${months[parsed.month - 1]}, ${parsed.year}';
+      } catch (_) {}
+    }
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(AppTheme.spacingMedium),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // top store card
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(AppTheme.spacingMedium),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
+            ),
+            child: Column(
+              children: [
+                // avatar with edit badge
+                Stack(
+                  alignment: Alignment.bottomRight,
+                  children: [
+                    CircleAvatar(
+                      radius: 40,
+                      backgroundColor: const Color(0xFF4A4A4A),
+                      child: Text(
+                        (company?.companyName ?? profile.firstname).isNotEmpty
+                            ? (company?.companyName ?? profile.firstname)[0]
+                                  .toUpperCase()
+                            : 'S',
+                        style: GoogleFonts.poppins(
+                          fontSize: 28,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: const BoxDecoration(
+                        color: Color(0xFF4A90E2),
+                        shape: BoxShape.rectangle,
+                      ),
+                      child: const Icon(
+                        Icons.edit_outlined,
+                        size: 16,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  company?.companyName ?? profile.firstname,
+                  style: GoogleFonts.poppins(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: AppTheme.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 24),
+
+                // plan row
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Your current plan',
+                      style: GoogleFonts.poppins(
+                        fontSize: 12,
+                        color: AppTheme.textSecondary,
+                      ),
+                    ),
+                    Row(
+                      children: [
+                        Text(
+                          profile.plan ?? 'Standard',
+                          style: GoogleFonts.poppins(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                            color: AppTheme.textPrimary,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        const Icon(
+                          Icons.arrow_forward_ios,
+                          size: 12,
+                          color: AppTheme.textPrimary,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 12),
+                  child: Divider(height: 1),
+                ),
+
+                // expiry row
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Expiry date',
+                      style: GoogleFonts.poppins(
+                        fontSize: 12,
+                        color: AppTheme.textSecondary,
+                      ),
+                    ),
+                    Text(
+                      expiryLabel,
+                      style: GoogleFonts.poppins(
+                        fontSize: 13,
+                        color: AppTheme.textPrimary,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: AppTheme.spacingMedium),
+
+          // settings list
+          _ProfileListItem(
+            title: 'Store Name',
+            value: company?.companyName,
+            onTap: () => Navigator.pushNamed(context, AppRoutes.editStoreName),
+          ),
+          const SizedBox(height: AppTheme.spacingMedium),
+          _ProfileListItem(
+            title: 'Email',
+            value: company?.companyEmail,
+            onTap: () =>
+                Navigator.pushNamed(context, AppRoutes.editEmailAddress),
+          ),
+          const SizedBox(height: AppTheme.spacingMedium),
+          _ProfileListItem(
+            title: 'Phone Number',
+            value: company?.companyNumber,
+            onTap: () =>
+                Navigator.pushNamed(context, AppRoutes.editPhoneNumber),
+          ),
+          const SizedBox(height: AppTheme.spacingMedium),
+          _ProfileListItem(
+            title: 'Address',
+            value: company?.companyAddress,
+            onTap: () => Navigator.pushNamed(context, AppRoutes.editAddress),
+          ),
+          const SizedBox(height: AppTheme.spacingMedium),
+          _ProfileListItem(
+            title: 'Login Settings',
+            onTap: () => Navigator.pushNamed(context, AppRoutes.loginSettings),
+          ),
+          const SizedBox(height: AppTheme.spacingMedium),
+          _ProfileListItem(title: 'Currency Settings'),
+          const SizedBox(height: AppTheme.spacingMedium),
+          _ProfileListItem(title: 'Receipt Template Settings'),
+          const SizedBox(height: AppTheme.spacingMedium),
+          _ProfileListItem(
+            title: 'Low Stock Limit Settings',
+            value: company?.lowStockLimit,
+          ),
+          const SizedBox(height: AppTheme.spacingLarge),
+
+          // profile details section
+          Text(
+            'Profile Details',
+            style: GoogleFonts.poppins(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: AppTheme.textPrimary,
+            ),
+          ),
+          const SizedBox(height: AppTheme.spacingMedium),
+
+          _ProfileDetailField(label: 'First Name', value: profile.firstname),
+          const SizedBox(height: AppTheme.spacingMedium),
+          _ProfileDetailField(label: 'Last Name', value: profile.lastname),
+          const SizedBox(height: AppTheme.spacingMedium),
+          _ProfileDetailField(label: 'Email', value: profile.email),
+          const SizedBox(height: AppTheme.spacingMedium),
+          _ProfileDetailField(label: 'Phone Number', value: profile.phoneno),
+          const SizedBox(height: AppTheme.spacingMedium),
+          _ProfileDetailField(label: 'Address', value: profile.address ?? '—'),
+          const SizedBox(height: AppTheme.spacingLarge),
+        ],
+      ),
+    );
+  }
+}
+
+/// tappable list row for settings section
 class _ProfileListItem extends StatelessWidget {
   final String title;
   final String? value;
@@ -193,46 +290,96 @@ class _ProfileListItem extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppTheme.spacingMedium,
-        vertical: 20,
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppTheme.spacingMedium,
+          vertical: 20,
+        ),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+              child: Text(
+                title,
+                style: GoogleFonts.poppins(
+                  fontSize: 13,
+                  color: AppTheme.textSecondary,
+                ),
+              ),
+            ),
+            Row(
+              children: [
+                if (value != null) ...[
+                  ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxWidth: MediaQuery.of(context).size.width * 0.4,
+                    ),
+                    child: Text(
+                      value!,
+                      style: GoogleFonts.poppins(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: AppTheme.textPrimary,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.right,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                ],
+                const Icon(
+                  Icons.arrow_forward_ios,
+                  size: 14,
+                  color: AppTheme.textPrimary,
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            title,
+    );
+  }
+}
+
+/// read-only labelled field for profile details section
+class _ProfileDetailField extends StatelessWidget {
+  final String label;
+  final String value;
+
+  const _ProfileDetailField({required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: GoogleFonts.poppins(
+            fontSize: 12,
+            color: AppTheme.textSecondary,
+          ),
+        ),
+        const SizedBox(height: 6),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
+          ),
+          child: Text(
+            value,
             style: GoogleFonts.poppins(
-              fontSize: 13,
-              color: AppTheme.textSecondary,
+              fontSize: 14,
+              color: AppTheme.textPrimary,
             ),
           ),
-          Row(
-            children: [
-              if (value != null) ...[
-                Text(
-                  value!,
-                  style: GoogleFonts.poppins(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: AppTheme.textPrimary,
-                  ),
-                ),
-                const SizedBox(width: 8),
-              ],
-              const Icon(
-                Icons.arrow_forward_ios,
-                size: 14,
-                color: AppTheme.textPrimary,
-              ),
-            ],
-          ),
-        ],
-      ),
-    ));
+        ),
+      ],
+    );
   }
 }

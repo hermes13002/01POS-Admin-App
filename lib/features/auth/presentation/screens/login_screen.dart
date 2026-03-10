@@ -3,10 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:onepos_admin_app/core/storage/secure_storage_service.dart';
+import 'package:onepos_admin_app/core/storage/shared_prefs_service.dart';
 import 'package:onepos_admin_app/core/theme/app_theme.dart';
 import 'package:onepos_admin_app/core/utils/validators.dart';
 import 'package:onepos_admin_app/presentation/screens/main_navigation_screen.dart';
 import 'package:onepos_admin_app/shared/widgets/app_snackbar.dart';
+import 'package:onepos_admin_app/features/online_store/presentation/providers/profile_provider.dart';
 import '../providers/auth_provider.dart';
 
 const List<String> _backgroundImages = [
@@ -17,6 +20,11 @@ const List<String> _backgroundImages = [
   'https://images.unsplash.com/photo-1501594907352-04cda38ebc29?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80',
 ];
 
+// secure storage keys for remembered credentials
+const _keyRememberMe = 'remember_me';
+const _keyRememberedEmail = 'remembered_email';
+const _keyRememberedPassword = 'remembered_password';
+
 class LoginScreen extends HookConsumerWidget {
   const LoginScreen({super.key});
 
@@ -24,6 +32,7 @@ class LoginScreen extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final bgIndex = useState(0);
     final isLoading = useState(false);
+    final rememberMe = useState(false);
 
     // cycle background images every 5 seconds
     useEffect(() {
@@ -38,6 +47,26 @@ class LoginScreen extends HookConsumerWidget {
     final passwordCtrl = useTextEditingController();
     final obscure = useState(true);
 
+    // load saved credentials on mount
+    useEffect(() {
+      Future<void> load() async {
+        final prefs = SharedPrefsService();
+        await prefs.init();
+        final saved = prefs.readBool(_keyRememberMe) ?? false;
+        if (saved) {
+          final secure = SecureStorageService();
+          final email = await secure.read(_keyRememberedEmail);
+          final password = await secure.read(_keyRememberedPassword);
+          if (email != null) emailCtrl.text = email;
+          if (password != null) passwordCtrl.text = password;
+          rememberMe.value = true;
+        }
+      }
+
+      load();
+      return null;
+    }, []);
+
     Future<void> submit() async {
       if (!formKey.currentState!.validate()) return;
       isLoading.value = true;
@@ -50,6 +79,25 @@ class LoginScreen extends HookConsumerWidget {
       if (error != null) {
         AppSnackbar.showError(context, error);
       } else {
+        // persist or clear credentials based on checkbox
+        final prefs = SharedPrefsService();
+        final secure = SecureStorageService();
+        if (rememberMe.value) {
+          await prefs.writeBool(_keyRememberMe, true);
+          await secure.write(_keyRememberedEmail, emailCtrl.text.trim());
+          await secure.write(_keyRememberedPassword, passwordCtrl.text);
+        } else {
+          await prefs.writeBool(_keyRememberMe, false);
+          await secure.delete(_keyRememberedEmail);
+          await secure.delete(_keyRememberedPassword);
+        }
+
+        // pre-fetch user profile so home & store screens have data immediately
+        ref.invalidate(userProfileProvider);
+        // ignore errors — screens will handle their own error/retry states
+        ref.read(userProfileProvider.future).ignore();
+
+        if (!context.mounted) return;
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(builder: (_) => const MainNavigationScreen()),
           (_) => false,
@@ -171,21 +219,62 @@ class LoginScreen extends HookConsumerWidget {
                               ),
                             ),
                             const SizedBox(height: 8),
-                            Align(
-                              alignment: Alignment.centerRight,
-                              child: TextButton(
-                                onPressed: () {},
-                                child: Text(
-                                  'Forgot password?',
-                                  style: GoogleFonts.poppins(
-                                    color: AppTheme.blue,
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w500,
+
+                            // remember me + forgot password row
+                            Row(
+                              children: [
+                                SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: Checkbox(
+                                    value: rememberMe.value,
+                                    onChanged: (v) =>
+                                        rememberMe.value = v ?? false,
+                                    activeColor: Colors.black,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    side: const BorderSide(
+                                      color: AppTheme.grey500,
+                                      width: 1.5,
+                                    ),
+                                    materialTapTargetSize:
+                                        MaterialTapTargetSize.shrinkWrap,
                                   ),
                                 ),
-                              ),
+                                const SizedBox(width: 8),
+                                GestureDetector(
+                                  onTap: () =>
+                                      rememberMe.value = !rememberMe.value,
+                                  child: Text(
+                                    'Remember me',
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 13,
+                                      color: AppTheme.textSecondary,
+                                    ),
+                                  ),
+                                ),
+                                const Spacer(),
+                                TextButton(
+                                  onPressed: () {},
+                                  style: TextButton.styleFrom(
+                                    padding: EdgeInsets.zero,
+                                    tapTargetSize:
+                                        MaterialTapTargetSize.shrinkWrap,
+                                  ),
+                                  child: Text(
+                                    'Forgot password?',
+                                    style: GoogleFonts.poppins(
+                                      color: AppTheme.blue,
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
-                            const SizedBox(height: 8),
+
+                            const SizedBox(height: 16),
                             _LoginButton(
                               onPressed: submit,
                               isLoading: isLoading,

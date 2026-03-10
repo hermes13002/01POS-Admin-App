@@ -3,6 +3,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../features/dashboard/presentation/screens/home_screen.dart';
 import '../../features/dashboard/presentation/screens/tools_screen.dart';
 import '../../features/loan/presentation/screens/loan_screen.dart';
+import '../../features/online_store/presentation/providers/profile_provider.dart';
 import '../../shared/widgets/custom_bottom_navigation_bar.dart';
 
 /// Main navigation screen with bottom navigation
@@ -21,6 +22,13 @@ class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
     LoanScreen(),
     ToolsScreen(),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    // pre-fetch user profile on app startup so screens have data immediately
+    ref.read(userProfileProvider.future).ignore();
+  }
 
   @override
   Widget build(BuildContext context) {

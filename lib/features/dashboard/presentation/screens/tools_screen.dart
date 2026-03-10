@@ -4,7 +4,9 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:onepos_admin_app/core/theme/app_theme.dart';
+import 'package:onepos_admin_app/core/routes/app_routes.dart';
 import 'package:onepos_admin_app/data/models/tool_model.dart';
+import 'package:onepos_admin_app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:onepos_admin_app/presentation/providers/quick_actions_provider.dart';
 
 /// Tools screen showing all available tools
@@ -146,8 +148,103 @@ class ToolsScreen extends HookConsumerWidget {
                       ),
               ),
             ),
+
+            // logout button
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppTheme.spacingMedium,
+                vertical: AppTheme.spacingMedium,
+              ),
+              child: SizedBox(
+                width: double.infinity,
+                child: InkWell(
+                  onTap: () => _showLogoutDialog(context, ref),
+                  borderRadius: BorderRadius.circular(
+                    AppTheme.borderRadiusMedium,
+                  ),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    decoration: BoxDecoration(
+                      color: AppTheme.white,
+                      borderRadius: BorderRadius.circular(
+                        AppTheme.borderRadiusMedium,
+                      ),
+                      border: Border.all(
+                        color: AppTheme.errorColor.withValues(alpha: 0.3),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.logout,
+                          color: AppTheme.errorColor,
+                          size: 22,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Logout',
+                          style: GoogleFonts.poppins(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: AppTheme.errorColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
+      ),
+    );
+  }
+
+  /// show logout confirmation dialog
+  void _showLogoutDialog(BuildContext context, WidgetRef ref) {
+    final navigator = Navigator.of(context);
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
+        ),
+        title: Text(
+          'Logout',
+          style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+        ),
+        content: Text(
+          'Are you sure you want to logout?',
+          style: GoogleFonts.poppins(fontSize: 14),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: Text(
+              'Cancel',
+              style: GoogleFonts.poppins(color: AppTheme.textSecondary),
+            ),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.of(dialogContext).pop();
+              await ref.read(authProvider.notifier).logout();
+              navigator.pushNamedAndRemoveUntil(
+                AppRoutes.login,
+                (route) => false,
+              );
+            },
+            child: Text(
+              'Logout',
+              style: GoogleFonts.poppins(
+                color: AppTheme.errorColor,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

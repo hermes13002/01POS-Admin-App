@@ -8,6 +8,7 @@ import 'package:onepos_admin_app/core/routes/app_routes.dart';
 import 'package:onepos_admin_app/core/theme/app_theme.dart';
 import 'package:onepos_admin_app/data/models/tool_model.dart';
 import 'package:onepos_admin_app/features/dashboard/presentation/screens/_quick_action_card.dart';
+import 'package:onepos_admin_app/features/online_store/presentation/providers/profile_provider.dart';
 import 'package:onepos_admin_app/presentation/providers/quick_actions_provider.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 
@@ -28,6 +29,7 @@ class HomeScreen extends HookConsumerWidget {
     final quickActions = ref.watch(quickActionsProvider);
     final selectedPeriod = useState<String>('This week');
     final bgIndex = useState(0);
+    final profileAsync = ref.watch(userProfileProvider);
 
     // cycle background images every 5 seconds
     useEffect(() {
@@ -63,7 +65,11 @@ class HomeScreen extends HookConsumerWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        'Welcome John',
+                        profileAsync.when(
+                          data: (p) => 'Welcome, ${p.firstname}',
+                          loading: () => 'Welcome...',
+                          error: (_, __) => 'Welcome',
+                        ),
                         style: GoogleFonts.poppins(
                           fontSize: 20,
                           fontWeight: FontWeight.w700,
