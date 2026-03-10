@@ -10,7 +10,7 @@ class LoadingWidget extends StatefulWidget {
     super.key,
     this.message,
     this.color,
-    this.size = 80,
+    this.size = 65,
   });
 
   @override
@@ -26,7 +26,7 @@ class _LoadingWidgetState extends State<LoadingWidget>
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: const Duration(milliseconds: 1000),
+      duration: const Duration(milliseconds: 500),
       vsync: this,
     )..repeat(reverse: true);
 
@@ -61,7 +61,7 @@ class _LoadingWidgetState extends State<LoadingWidget>
             child: ClipRRect(
               borderRadius: BorderRadius.circular(12),
               child: Image.asset(
-                'assets/images/logo.jpeg',
+                'assets/images/logo/logo-single.png',
                 width: widget.size,
                 height: widget.size,
                 fit: BoxFit.cover,

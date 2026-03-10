@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -56,6 +57,14 @@ class ConnectivityBanner extends ConsumerStatefulWidget {
 
 class _ConnectivityBannerState extends ConsumerState<ConnectivityBanner> {
   bool? _previousStatus;
+  bool _showRestoredBanner = false;
+  Timer? _dismissTimer;
+
+  @override
+  void dispose() {
+    _dismissTimer?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -63,8 +72,24 @@ class _ConnectivityBannerState extends ConsumerState<ConnectivityBanner> {
 
     return connectivityAsync.when(
       data: (isOnline) {
-        final showRestored = _previousStatus == false && isOnline;
+        final justRestored = _previousStatus == false && isOnline;
         _previousStatus = isOnline;
+
+        if (justRestored) {
+          _showRestoredBanner = true;
+          _dismissTimer?.cancel();
+          _dismissTimer = Timer(const Duration(seconds: 3), () {
+            if (mounted) {
+              setState(() => _showRestoredBanner = false);
+            }
+          });
+        }
+
+        // hide restored banner when going offline again
+        if (!isOnline) {
+          _showRestoredBanner = false;
+          _dismissTimer?.cancel();
+        }
 
         return Column(
           children: [
@@ -74,7 +99,7 @@ class _ConnectivityBannerState extends ConsumerState<ConnectivityBanner> {
                 color: AppTheme.errorColor,
                 icon: Icons.wifi_off_rounded,
               )
-            else if (showRestored)
+            else if (_showRestoredBanner)
               _StatusBanner(
                 message: 'Back online',
                 color: AppTheme.successColor,

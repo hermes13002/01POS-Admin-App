@@ -52,7 +52,12 @@ class ApiEndpoints {
 
   // Users
   static const String users = '/users';
+  static const String allUsers = '/admin/users';
   static const String userById = '/users/{id}';
+  static const String showUser = '/admin/users/show';
+  static const String activateUser = '/admin/users/activate';
+  static const String deactivateUser = '/admin/users/deactivate';
+  static const String deleteUser = '/admin/users/delete';
 
   // Payment Methods
   static const String paymentMethods = '/payment-methods';

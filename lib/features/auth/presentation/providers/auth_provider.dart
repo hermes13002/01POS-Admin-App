@@ -1,7 +1,8 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:onepos_admin_app/core/network/dio_client.dart';
 import 'package:onepos_admin_app/core/storage/secure_storage_service.dart';
-import 'package:onepos_admin_app/core/constants/app_constants.dart';
+import 'package:onepos_admin_app/features/online_store/presentation/providers/profile_provider.dart';
+import 'package:onepos_admin_app/features/users/presentation/providers/users_provider.dart';
 import '../../data/datasources/auth_remote_datasource.dart';
 import '../../data/models/login_response_model.dart';
 import '../../data/repositories/auth_repository_impl.dart';
@@ -54,6 +55,11 @@ class Auth extends _$Auth {
       await _repo.logout();
     } catch (_) {}
     await SecureStorageService().deleteAll();
+
+    // invalidate all keepAlive data providers so stale data is cleared
+    ref.invalidate(allUsersProvider);
+    ref.invalidate(userProfileProvider);
+
     state = const AsyncData(null);
   }
 }
