@@ -252,7 +252,7 @@ class AddProductScreen extends HookConsumerWidget {
                   isLoading.value = true;
 
                   final product = ProductModel(
-                    id: DateTime.now().millisecondsSinceEpoch.toString(),
+                    id: DateTime.now().millisecondsSinceEpoch,
                     name: nameController.text.trim(),
                     price: double.parse(priceController.text.trim()),
                     category: selectedCategory.value ?? '',
@@ -274,14 +274,19 @@ class AddProductScreen extends HookConsumerWidget {
                     barcode: barcodeController.text.trim().isNotEmpty
                         ? barcodeController.text.trim()
                         : null,
-                    manufacturingDate: manufacturingDate.value,
-                    expiryDate: expiryDate.value,
+                    manufacturingDate: manufacturingDate.value != null
+                        ? manufacturingDate.value!.toIso8601String()
+                        : null,
+                    expiryDate: expiryDate.value != null
+                        ? expiryDate.value!.toIso8601String()
+                        : null,
                     description: descriptionController.text.trim().isNotEmpty
                         ? descriptionController.text.trim()
                         : null,
                   );
 
-                  await ref.read(productsProvider.notifier).addProduct(product);
+                  // TODO: Wire to real add product remote datasource when implemented
+                  // await ref.read(productsProvider.notifier).addProduct(product);
 
                   isLoading.value = false;
 

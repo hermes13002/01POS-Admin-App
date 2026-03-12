@@ -6,6 +6,7 @@ import 'package:onepos_admin_app/core/theme/app_theme.dart';
 import 'package:onepos_admin_app/core/utils/amount_formatter.dart';
 import 'package:onepos_admin_app/features/products/data/models/product_model.dart';
 import 'package:onepos_admin_app/features/products/presentation/providers/products_provider.dart';
+import 'package:onepos_admin_app/features/products/presentation/widgets/edit_product_dialog.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_app_bar2.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_search_bar.dart';
 import 'package:onepos_admin_app/shared/widgets/loading_widget.dart';
@@ -18,8 +19,9 @@ class ProductsScreen extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final searchController = useTextEditingController();
     final searchQuery = useState('');
-    final expandedProductId = useState<String?>(null);
+    final expandedProductId = useState<int?>(null);
     final productsAsync = ref.watch(productsProvider);
+    final scrollController = useScrollController();
 
     // listen for search changes
     useEffect(() {
@@ -30,6 +32,19 @@ class ProductsScreen extends HookConsumerWidget {
       searchController.addListener(listener);
       return () => searchController.removeListener(listener);
     }, [searchController]);
+
+    // listen for pagination
+    useEffect(() {
+      void scrollListener() {
+        if (scrollController.position.pixels >=
+            scrollController.position.maxScrollExtent - 200) {
+          ref.read(productsProvider.notifier).fetchNextPage();
+        }
+      }
+
+      scrollController.addListener(scrollListener);
+      return () => scrollController.removeListener(scrollListener);
+    }, [scrollController]);
 
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
@@ -57,14 +72,16 @@ class ProductsScreen extends HookConsumerWidget {
           // products list
           Expanded(
             child: productsAsync.when(
-              data: (products) {
+              data: (productsState) {
                 final filtered = searchQuery.value.isEmpty
-                    ? products
-                    : products
-                        .where((p) => p.name
-                            .toLowerCase()
-                            .contains(searchQuery.value.toLowerCase()))
-                        .toList();
+                    ? productsState.products
+                    : productsState.products
+                          .where(
+                            (p) => p.name.toLowerCase().contains(
+                              searchQuery.value.toLowerCase(),
+                            ),
+                          )
+                          .toList();
 
                 if (filtered.isEmpty) {
                   return Center(
@@ -79,27 +96,53 @@ class ProductsScreen extends HookConsumerWidget {
                 }
 
                 return ListView.separated(
+                  controller: scrollController,
                   padding: const EdgeInsets.symmetric(
                     horizontal: AppTheme.spacingMedium,
                     vertical: AppTheme.spacingSmall,
                   ),
-                  itemCount: filtered.length,
+                  itemCount:
+                      filtered.length + (productsState.hasMorePages ? 1 : 0),
                   separatorBuilder: (_, __) =>
                       const SizedBox(height: AppTheme.spacingSmall),
                   itemBuilder: (context, index) {
+                    if (index == filtered.length) {
+                      return const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 16.0),
+                        child: Center(
+                          child: SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                        ),
+                      );
+                    }
+
                     final product = filtered[index];
-                    final isExpanded =
-                        expandedProductId.value == product.id;
+                    final isExpanded = expandedProductId.value == product.id;
 
                     return _ProductTile(
                       product: product,
                       isExpanded: isExpanded,
                       onToggle: () {
-                        expandedProductId.value =
-                            isExpanded ? null : product.id;
+                        expandedProductId.value = isExpanded
+                            ? null
+                            : product.id;
+                      },
+                      onView: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) =>
+                              ViewProductDialog(productId: product.id),
+                        );
                       },
                       onEdit: () {
-                        // TODO: navigate to edit screen
+                        showDialog(
+                          context: context,
+                          builder: (context) =>
+                              EditProductDialog(product: product),
+                        );
                       },
                       onDelete: () {
                         _showDeleteDialog(context, ref, product);
@@ -149,7 +192,10 @@ class ProductsScreen extends HookConsumerWidget {
   }
 
   void _showDeleteDialog(
-      BuildContext context, WidgetRef ref, ProductModel product) {
+    BuildContext context,
+    WidgetRef ref,
+    ProductModel product,
+  ) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -158,9 +204,7 @@ class ProductsScreen extends HookConsumerWidget {
         ),
         title: Text(
           'Delete Product',
-          style: GoogleFonts.poppins(
-            fontWeight: FontWeight.w600,
-          ),
+          style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
         ),
         content: Text(
           'Are you sure you want to delete "${product.name}"?',
@@ -176,7 +220,7 @@ class ProductsScreen extends HookConsumerWidget {
           ),
           TextButton(
             onPressed: () {
-              ref.read(productsProvider.notifier).deleteProduct(product.id);
+              ref.read(productsProvider.notifier).deleteProductItem(product.id);
               Navigator.pop(context);
             },
             child: Text(
@@ -195,6 +239,7 @@ class _ProductTile extends StatelessWidget {
   final ProductModel product;
   final bool isExpanded;
   final VoidCallback onToggle;
+  final VoidCallback onView;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
 
@@ -202,6 +247,7 @@ class _ProductTile extends StatelessWidget {
     required this.product,
     required this.isExpanded,
     required this.onToggle,
+    required this.onView,
     required this.onEdit,
     required this.onDelete,
   });
@@ -230,13 +276,15 @@ class _ProductTile extends StatelessWidget {
                     height: 40,
                     decoration: BoxDecoration(
                       color: AppTheme.grey800,
-                      borderRadius:
-                          BorderRadius.circular(AppTheme.borderRadiusSmall),
+                      borderRadius: BorderRadius.circular(
+                        AppTheme.borderRadiusSmall,
+                      ),
                     ),
                     child: product.imageUrl != null
                         ? ClipRRect(
                             borderRadius: BorderRadius.circular(
-                                AppTheme.borderRadiusSmall),
+                              AppTheme.borderRadiusSmall,
+                            ),
                             child: Image.network(
                               product.imageUrl!,
                               fit: BoxFit.cover,
@@ -269,8 +317,10 @@ class _ProductTile extends StatelessWidget {
 
                   // price
                   Text(
-                    AmountFormatter.formatCurrency(product.price,
-                        showDecimals: false),
+                    AmountFormatter.formatCurrency(
+                      product.price,
+                      showDecimals: false,
+                    ),
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
@@ -295,8 +345,9 @@ class _ProductTile extends StatelessWidget {
           // expanded content
           if (isExpanded) ...[
             Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: AppTheme.spacingMedium),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppTheme.spacingMedium,
+              ),
               child: Divider(color: AppTheme.grey200, height: 1),
             ),
             Padding(
@@ -309,7 +360,7 @@ class _ProductTile extends StatelessWidget {
               child: Column(
                 children: [
                   // category row
-                  _DetailRow(label: 'Category:', value: product.category),
+                  _DetailRow(label: 'Category:', value: product.category ?? ''),
                   const SizedBox(height: AppTheme.spacingSmall),
 
                   // stock row
@@ -337,19 +388,19 @@ class _ProductTile extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  // edit button
+                  // view button
                   Expanded(
                     child: OutlinedButton.icon(
-                      onPressed: onEdit,
+                      onPressed: onView,
                       icon: Icon(
-                        Icons.edit_outlined,
-                        size: 18,
+                        Icons.visibility_outlined,
+                        size: 16,
                         color: AppTheme.textSecondary,
                       ),
                       label: Text(
-                        'Edit',
+                        'View',
                         style: GoogleFonts.poppins(
-                          fontSize: 14,
+                          fontSize: 13,
                           color: AppTheme.textSecondary,
                         ),
                       ),
@@ -358,12 +409,42 @@ class _ProductTile extends StatelessWidget {
                         side: const BorderSide(color: AppTheme.grey300),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(
-                              AppTheme.borderRadiusMedium),
+                            AppTheme.borderRadiusMedium,
+                          ),
                         ),
                       ),
                     ),
                   ),
-                  const SizedBox(width: AppTheme.spacingMedium),
+                  const SizedBox(width: AppTheme.spacingSmall),
+
+                  // edit button
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: onEdit,
+                      icon: Icon(
+                        Icons.edit_outlined,
+                        size: 16,
+                        color: AppTheme.textSecondary,
+                      ),
+                      label: Text(
+                        'Edit',
+                        style: GoogleFonts.poppins(
+                          fontSize: 13,
+                          color: AppTheme.textSecondary,
+                        ),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        side: const BorderSide(color: AppTheme.grey300),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(
+                            AppTheme.borderRadiusMedium,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: AppTheme.spacingSmall),
 
                   // delete button
                   Expanded(
@@ -371,13 +452,13 @@ class _ProductTile extends StatelessWidget {
                       onPressed: onDelete,
                       icon: const Icon(
                         Icons.delete_outline,
-                        size: 18,
+                        size: 16,
                         color: AppTheme.errorColor,
                       ),
                       label: Text(
                         'Delete',
                         style: GoogleFonts.poppins(
-                          fontSize: 14,
+                          fontSize: 13,
                           color: AppTheme.errorColor,
                         ),
                       ),
@@ -386,7 +467,8 @@ class _ProductTile extends StatelessWidget {
                         side: const BorderSide(color: Color(0xFFFFCDD2)),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(
-                              AppTheme.borderRadiusMedium),
+                            AppTheme.borderRadiusMedium,
+                          ),
                         ),
                       ),
                     ),
@@ -406,10 +488,7 @@ class _DetailRow extends StatelessWidget {
   final String label;
   final String value;
 
-  const _DetailRow({
-    required this.label,
-    required this.value,
-  });
+  const _DetailRow({required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {
@@ -426,6 +505,37 @@ class _DetailRow extends StatelessWidget {
         Text(
           value,
           style: GoogleFonts.poppins(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            color: AppTheme.textPrimary,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _AmountDetailRow extends StatelessWidget {
+  final String label;
+  final String value;
+
+  const _AmountDetailRow({required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: GoogleFonts.poppins(
+            fontSize: 14,
+            color: AppTheme.textSecondary,
+          ),
+        ),
+        Text(
+          value,
+          style: GoogleFonts.plusJakartaSans(
             fontSize: 14,
             fontWeight: FontWeight.w500,
             color: AppTheme.textPrimary,
@@ -569,6 +679,285 @@ class _FabOption extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class ViewProductDialog extends HookConsumerWidget {
+  final int productId;
+
+  const ViewProductDialog({super.key, required this.productId});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final animationController = useAnimationController(
+      duration: const Duration(milliseconds: 300),
+    );
+
+    useEffect(() {
+      animationController.forward();
+      return null;
+    }, const []);
+
+    final singleProductAsync = ref.watch(singleProductProvider(productId));
+
+    return FadeTransition(
+      opacity: CurvedAnimation(
+        parent: animationController,
+        curve: Curves.easeIn,
+      ),
+      child: Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
+        ),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+        child: Container(
+          width: 700,
+          padding: const EdgeInsets.all(AppTheme.spacingLarge),
+          constraints: const BoxConstraints(maxHeight: 700),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Header
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Product Details',
+                          style: GoogleFonts.poppins(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w600,
+                            color: AppTheme.textPrimary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(
+                      Icons.close,
+                      color: AppTheme.textSecondary,
+                    ),
+                    onPressed: () async {
+                      await animationController.reverse();
+                      if (context.mounted) Navigator.pop(context);
+                    },
+                    padding: EdgeInsets.zero,
+                    splashRadius: 24,
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppTheme.spacingMedium),
+              const Divider(height: 1, color: AppTheme.grey200),
+
+              // Content
+              Expanded(
+                child: singleProductAsync.when(
+                  data: (response) {
+                    if (!response.success || response.data == null) {
+                      return const Center(
+                        child: Text('Failed to load details.'),
+                      );
+                    }
+                    final p = response.data!;
+                    return SingleChildScrollView(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: AppTheme.spacingMedium,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildSectionTitle('Basic Information'),
+                          Container(
+                            padding: const EdgeInsets.all(
+                              AppTheme.spacingMedium,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade50,
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: AppTheme.grey200),
+                            ),
+                            child: Column(
+                              children: [
+                                _DetailRow(label: 'Name', value: p.name),
+                                const SizedBox(height: 8),
+                                _DetailRow(
+                                  label: 'Category',
+                                  value: p.category ?? 'N/A',
+                                ),
+                                const SizedBox(height: 8),
+                                _DetailRow(
+                                  label: 'Sub Category',
+                                  value: p.subCategory ?? 'N/A',
+                                ),
+                                const SizedBox(height: 8),
+                                _AmountDetailRow(
+                                  label: 'Price',
+                                  value: AmountFormatter.formatCurrency(
+                                    p.price,
+                                    showDecimals: false,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                _DetailRow(
+                                  label: 'Status',
+                                  value: p.isActive == 1
+                                      ? 'Active'
+                                      : 'Inactive',
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          if (p.description != null &&
+                              p.description!.isNotEmpty) ...[
+                            const SizedBox(height: AppTheme.spacingLarge),
+                            _buildSectionTitle('Description'),
+                            Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.all(
+                                AppTheme.spacingMedium,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.grey.shade50,
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: AppTheme.grey200),
+                              ),
+                              child: Text(
+                                p.description!,
+                                textAlign: TextAlign.justify,
+                                style: GoogleFonts.poppins(
+                                  fontSize: 14,
+                                  color: AppTheme.textPrimary,
+                                ),
+                              ),
+                            ),
+                          ],
+
+                          const SizedBox(height: AppTheme.spacingLarge),
+                          _buildSectionTitle('Inventory'),
+                          Container(
+                            padding: const EdgeInsets.all(
+                              AppTheme.spacingMedium,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade50,
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: AppTheme.grey200),
+                            ),
+                            child: Column(
+                              children: [
+                                _DetailRow(
+                                  label: 'Available Quantity',
+                                  value: '${p.stock}',
+                                ),
+                                const SizedBox(height: 8),
+                                _DetailRow(
+                                  label: 'Quantity Purchased',
+                                  value: '${p.quantityPurchased}',
+                                ),
+                                const SizedBox(height: 8),
+                                _DetailRow(label: 'SKU', value: p.sku ?? 'N/A'),
+                                const SizedBox(height: 8),
+                                _DetailRow(
+                                  label: 'Barcode',
+                                  value: p.barcode ?? 'N/A',
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          const SizedBox(height: AppTheme.spacingLarge),
+                          _buildSectionTitle('Vendor & Dates'),
+                          Container(
+                            padding: const EdgeInsets.all(
+                              AppTheme.spacingMedium,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade50,
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: AppTheme.grey200),
+                            ),
+                            child: Column(
+                              children: [
+                                _DetailRow(
+                                  label: 'Store',
+                                  value: p.store ?? 'N/A',
+                                ),
+                                const SizedBox(height: 8),
+                                _DetailRow(
+                                  label: 'Warehouse',
+                                  value: p.warehouse ?? 'N/A',
+                                ),
+                                const SizedBox(height: 8),
+                                _DetailRow(
+                                  label: 'Supplier',
+                                  value: p.supplier ?? 'N/A',
+                                ),
+                                const SizedBox(height: 8),
+                                _DetailRow(
+                                  label: 'Mfg Date',
+                                  value: p.manufacturingDate ?? 'N/A',
+                                ),
+                                const SizedBox(height: 8),
+                                _DetailRow(
+                                  label: 'Exp Date',
+                                  value: p.expiryDate ?? 'N/A',
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
+                  error: (e, _) => Center(child: Text('Error: $e')),
+                ),
+              ),
+
+              const Divider(height: 1, color: AppTheme.grey200),
+              const SizedBox(height: AppTheme.spacingMedium),
+
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: () async {
+                    await animationController.reverse();
+                    if (context.mounted) Navigator.pop(context);
+                  },
+                  child: Text(
+                    'Close',
+                    style: GoogleFonts.poppins(
+                      color: AppTheme.textSecondary,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppTheme.spacingSmall),
+      child: Text(
+        title,
+        style: GoogleFonts.poppins(
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+          color: AppTheme.primaryColor,
+        ),
+      ),
     );
   }
 }

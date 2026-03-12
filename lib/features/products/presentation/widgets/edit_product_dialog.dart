@@ -1,0 +1,549 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:onepos_admin_app/core/theme/app_theme.dart';
+import 'package:onepos_admin_app/features/products/data/models/product_model.dart';
+import 'package:onepos_admin_app/features/products/presentation/providers/products_provider.dart';
+import 'package:onepos_admin_app/shared/widgets/app_snackbar.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
+
+class EditProductDialog extends HookConsumerWidget {
+  final ProductModel product;
+
+  const EditProductDialog({super.key, required this.product});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    // initialize controllers immediately with the current product values
+    final storeController = useTextEditingController(text: product.store ?? '');
+    final warehouseController = useTextEditingController(
+      text: product.warehouse ?? '',
+    );
+    final supplierController = useTextEditingController(
+      text: product.supplier ?? '',
+    );
+    final nameController = useTextEditingController(text: product.name);
+    final skuController = useTextEditingController(text: product.sku ?? '');
+    final barcodeController = useTextEditingController(
+      text: product.barcode ?? '',
+    );
+    final qtyController = useTextEditingController(
+      text: product.stock.toString(),
+    );
+    final priceController = useTextEditingController(
+      text: product.price.toString(),
+    );
+    final mfgDateController = useTextEditingController(
+      text: product.manufacturingDate ?? '',
+    );
+    final expDateController = useTextEditingController(
+      text: product.expiryDate ?? '',
+    );
+    final descController = useTextEditingController(
+      text: product.description ?? '',
+    );
+    final pickedImage = useState<XFile?>(null);
+    final picker = ImagePicker();
+
+    Future<void> pickImage() async {
+      final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+      if (image != null) {
+        pickedImage.value = image;
+      }
+    }
+
+    // Fade animation setup
+    final animationController = useAnimationController(
+      duration: const Duration(milliseconds: 300),
+    );
+    useEffect(() {
+      animationController.forward();
+      return null;
+    }, const []);
+
+    final isSubmitting = useState(false);
+
+    Future<void> saveChanges() async {
+      isSubmitting.value = true;
+
+      // prepare body based strictly on textfield content
+      final data = {
+        "store": storeController.text.trim(),
+        "warehouse": warehouseController.text.trim(),
+        "supplier": supplierController.text.trim(),
+        "cat_id": product.catId, // keeping existing cat_id
+        "sub_cat_id": product.subCatId, // keeping existing sub_cat_id
+        "product_name": nameController.text.trim(),
+        "sku": skuController.text.trim(),
+        "barcode": barcodeController.text.trim(),
+        "available_quantity":
+            int.tryParse(qtyController.text.trim()) ??
+            0, // Using proper api field
+        "quantity":
+            int.tryParse(qtyController.text.trim()) ??
+            0, // Mandatory for backend
+        "price": priceController.text.trim(),
+        "manufacturing_date": mfgDateController.text.trim(),
+        "expiring_date": expDateController.text.trim(),
+        "description": descController.text.trim().isEmpty
+            ? null
+            : descController.text.trim(),
+        "product_image":
+            pickedImage.value?.path ??
+            product.imageUrl ??
+            "", // Mandatory for backend
+      };
+
+      try {
+        final response = await ref
+            .read(productsProvider.notifier)
+            .updateProductItem(product.id, data);
+
+        if (context.mounted) {
+          if (response.success) {
+            AppSnackbar.showSuccess(
+              context,
+              response.message ?? 'Product updated successfully',
+            );
+            await animationController.reverse(); // Fade out before closing
+            if (context.mounted) Navigator.pop(context);
+          } else {
+            AppSnackbar.showError(context, response.message ?? 'Update failed');
+          }
+        }
+      } catch (e) {
+        if (context.mounted) {
+          AppSnackbar.showError(context, e.toString());
+        }
+      } finally {
+        if (context.mounted) {
+          isSubmitting.value = false;
+        }
+      }
+    }
+
+    return FadeTransition(
+      opacity: animationController,
+      child: Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
+        ),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+        child: Container(
+          width: 800, // wider, desktop-friendly layout
+          padding: const EdgeInsets.all(AppTheme.spacingLarge),
+          constraints: const BoxConstraints(maxHeight: 750),
+          child: Column(
+            children: [
+              // Header
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Edit Product Details',
+                          style: GoogleFonts.poppins(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w600,
+                            color: AppTheme.textPrimary,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Update the properties below, untouched fields will retain their original values.',
+                          style: GoogleFonts.poppins(
+                            fontSize: 13,
+                            color: AppTheme.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(
+                      Icons.close,
+                      color: AppTheme.textSecondary,
+                    ),
+                    onPressed: () async {
+                      await animationController.reverse();
+                      if (context.mounted) Navigator.pop(context);
+                    },
+                    padding: EdgeInsets.zero,
+                    splashRadius: 24,
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppTheme.spacingLarge),
+              const Divider(height: 1, color: AppTheme.grey200),
+              const SizedBox(height: AppTheme.spacingLarge),
+
+              // Image Picker
+              Center(
+                child: Stack(
+                  children: [
+                    Container(
+                      width: 100,
+                      height: 100,
+                      decoration: BoxDecoration(
+                        color: AppTheme.grey100,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: AppTheme.grey300, width: 2),
+                        image: pickedImage.value != null
+                            ? DecorationImage(
+                                image: FileImage(File(pickedImage.value!.path)),
+                                fit: BoxFit.cover,
+                              )
+                            : (product.imageUrl != null
+                                  ? DecorationImage(
+                                      image: NetworkImage(product.imageUrl!),
+                                      fit: BoxFit.cover,
+                                    )
+                                  : null),
+                      ),
+                      child:
+                          (pickedImage.value == null &&
+                              product.imageUrl == null)
+                          ? const Icon(
+                              Icons.image_outlined,
+                              size: 40,
+                              color: AppTheme.grey400,
+                            )
+                          : null,
+                    ),
+                    Positioned(
+                      bottom: 0,
+                      right: 0,
+                      child: InkWell(
+                        onTap: pickImage,
+                        child: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: const BoxDecoration(
+                            color: AppTheme.primaryColor,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.camera_alt,
+                            color: Colors.white,
+                            size: 16,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: AppTheme.spacingLarge),
+
+              // Form Content
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Wrap(
+                    spacing: 24,
+                    runSpacing: 20,
+                    children: [
+                      // Section 1: Basic Info
+                      _buildSectionTitle('Basic Information'),
+                      _buildFieldRow(
+                        _buildField('Product Name', nameController, flex: 2),
+                        _AmountbuildField(
+                          'Price',
+                          priceController,
+                          keyboardType: TextInputType.number,
+                          prefixText: '₦ ',
+                        ),
+                      ),
+
+                      const SizedBox(height: 8),
+                      // Section 2: Description
+                      _buildSectionTitle('Description'),
+                      _buildFieldRow(
+                        _buildField(
+                          'Description',
+                          descController,
+                          minLines: 3,
+                          maxLines: null,
+                          hintText: 'Enter product description...',
+                        ),
+                      ),
+
+                      const SizedBox(height: 8),
+                      // Section 3: Inventory
+                      _buildSectionTitle('Inventory Details'),
+                      _buildFieldRow(
+                        _buildField(
+                          'Available Quantity',
+                          qtyController,
+                          keyboardType: TextInputType.number,
+                        ),
+                      ),
+                      _buildFieldRow(
+                        _buildField('SKU', skuController),
+                        _buildField('Barcode', barcodeController),
+                      ),
+
+                      const SizedBox(height: 8),
+                      // Section 3: Vendor & Dates
+                      _buildSectionTitle('Vendor & Dates Information'),
+                      _buildFieldRow(
+                        _buildField('Store', storeController),
+                        _buildField('Warehouse', warehouseController),
+                        _buildField('Supplier', supplierController),
+                      ),
+                      _buildFieldRow(
+                        _buildField(
+                          'Manufacturing Date',
+                          mfgDateController,
+                          hintText: 'YYYY-MM-DD',
+                        ),
+                        _buildField(
+                          'Expiring Date',
+                          expDateController,
+                          hintText: 'YYYY-MM-DD',
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: AppTheme.spacingLarge),
+              const Divider(height: 1, color: AppTheme.grey200),
+              const SizedBox(height: AppTheme.spacingMedium),
+
+              // Action Buttons
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  OutlinedButton(
+                    onPressed: isSubmitting.value
+                        ? null
+                        : () async {
+                            await animationController.reverse();
+                            if (context.mounted) Navigator.pop(context);
+                          },
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 14,
+                      ),
+                      side: const BorderSide(color: AppTheme.grey300),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: Text(
+                      'Cancel',
+                      style: GoogleFonts.poppins(
+                        color: AppTheme.textSecondary,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: AppTheme.spacingMedium),
+                  ElevatedButton(
+                    onPressed: isSubmitting.value ? null : saveChanges,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppTheme.primaryColor,
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 14,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: isSubmitting.value
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : Text(
+                            'Save Changes',
+                            style: GoogleFonts.poppins(
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Text(
+        title,
+        style: GoogleFonts.poppins(
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+          color: AppTheme.primaryColor,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFieldRow(Widget child1, [Widget? child2, Widget? child3]) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(child: child1),
+        if (child2 != null) ...[
+          const SizedBox(width: 24),
+          Expanded(child: child2),
+        ],
+        if (child3 != null) ...[
+          const SizedBox(width: 24),
+          Expanded(child: child3),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildField(
+    String label,
+    TextEditingController controller, {
+    TextInputType? keyboardType,
+    int? maxLines = 1,
+    int? minLines,
+    int flex = 1,
+    String? hintText,
+    String? prefixText,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: GoogleFonts.poppins(
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+            color: AppTheme.textPrimary.withOpacity(0.8),
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: controller,
+          keyboardType: keyboardType,
+          maxLines: maxLines,
+          minLines: minLines,
+          style: GoogleFonts.poppins(fontSize: 14, color: AppTheme.textPrimary),
+          decoration: InputDecoration(
+            hintText: hintText,
+            hintStyle: GoogleFonts.poppins(
+              fontSize: 14,
+              color: AppTheme.grey400,
+            ),
+            prefixText: prefixText,
+            prefixStyle: GoogleFonts.poppins(
+              fontSize: 14,
+              color: AppTheme.textPrimary,
+            ),
+            isDense: true,
+            filled: true,
+            fillColor: Colors.grey.shade50,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 14,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(color: AppTheme.grey200),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(color: AppTheme.grey200),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(color: AppTheme.primaryColor),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+Widget _AmountbuildField(
+  String label,
+  TextEditingController controller, {
+  TextInputType? keyboardType,
+  int? maxLines = 1,
+  int? minLines,
+  int flex = 1,
+  String? hintText,
+  String? prefixText,
+}) {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(
+        label,
+        style: GoogleFonts.poppins(
+          fontSize: 13,
+          fontWeight: FontWeight.w500,
+          color: AppTheme.textPrimary.withOpacity(0.8),
+        ),
+      ),
+      const SizedBox(height: 8),
+      TextFormField(
+        controller: controller,
+        keyboardType: keyboardType,
+        maxLines: maxLines,
+        minLines: minLines,
+        style: GoogleFonts.plusJakartaSans(
+          fontSize: 14,
+          color: AppTheme.textPrimary,
+        ),
+        decoration: InputDecoration(
+          hintText: hintText,
+          hintStyle: GoogleFonts.plusJakartaSans(
+            fontSize: 14,
+            color: AppTheme.grey400,
+          ),
+          prefixText: prefixText,
+          prefixStyle: GoogleFonts.plusJakartaSans(
+            fontSize: 14,
+            color: AppTheme.textPrimary,
+          ),
+          isDense: true,
+          filled: true,
+          fillColor: Colors.grey.shade50,
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 14,
+          ),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: const BorderSide(color: AppTheme.grey200),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: const BorderSide(color: AppTheme.grey200),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: const BorderSide(color: AppTheme.primaryColor),
+          ),
+        ),
+      ),
+    ],
+  );
+}

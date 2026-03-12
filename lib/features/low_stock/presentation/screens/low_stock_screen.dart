@@ -18,7 +18,7 @@ class LowStockScreen extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final searchController = useTextEditingController();
     final searchQuery = useState('');
-    final expandedProductId = useState<String?>(null);
+    final expandedProductId = useState<int?>(null);
     final productsAsync = ref.watch(lowStockProductsProvider);
 
     // listen for search changes
@@ -53,10 +53,12 @@ class LowStockScreen extends HookConsumerWidget {
                 final filtered = searchQuery.value.isEmpty
                     ? products
                     : products
-                        .where((p) => p.name
-                            .toLowerCase()
-                            .contains(searchQuery.value.toLowerCase()))
-                        .toList();
+                          .where(
+                            (p) => p.name.toLowerCase().contains(
+                              searchQuery.value.toLowerCase(),
+                            ),
+                          )
+                          .toList();
 
                 if (filtered.isEmpty) {
                   return Center(
@@ -80,15 +82,15 @@ class LowStockScreen extends HookConsumerWidget {
                       const SizedBox(height: AppTheme.spacingSmall),
                   itemBuilder: (context, index) {
                     final product = filtered[index];
-                    final isExpanded =
-                        expandedProductId.value == product.id;
+                    final isExpanded = expandedProductId.value == product.id;
 
                     return _LowStockTile(
                       product: product,
                       isExpanded: isExpanded,
                       onToggle: () {
-                        expandedProductId.value =
-                            isExpanded ? null : product.id;
+                        expandedProductId.value = isExpanded
+                            ? null
+                            : product.id;
                       },
                       onEdit: () {
                         // TODO: navigate to edit product screen
@@ -111,8 +113,7 @@ class LowStockScreen extends HookConsumerWidget {
                     ),
                     const SizedBox(height: AppTheme.spacingMedium),
                     ElevatedButton(
-                      onPressed: () =>
-                          ref.invalidate(lowStockProductsProvider),
+                      onPressed: () => ref.invalidate(lowStockProductsProvider),
                       child: const Text('Retry'),
                     ),
                   ],
@@ -174,13 +175,15 @@ class _LowStockTile extends StatelessWidget {
                     height: 40,
                     decoration: BoxDecoration(
                       color: AppTheme.grey800,
-                      borderRadius:
-                          BorderRadius.circular(AppTheme.borderRadiusSmall),
+                      borderRadius: BorderRadius.circular(
+                        AppTheme.borderRadiusSmall,
+                      ),
                     ),
                     child: product.imageUrl != null
                         ? ClipRRect(
                             borderRadius: BorderRadius.circular(
-                                AppTheme.borderRadiusSmall),
+                              AppTheme.borderRadiusSmall,
+                            ),
                             child: Image.network(
                               product.imageUrl!,
                               fit: BoxFit.cover,
@@ -213,8 +216,10 @@ class _LowStockTile extends StatelessWidget {
 
                   // price
                   Text(
-                    AmountFormatter.formatCurrency(product.price,
-                        showDecimals: false),
+                    AmountFormatter.formatCurrency(
+                      product.price,
+                      showDecimals: false,
+                    ),
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
@@ -239,8 +244,9 @@ class _LowStockTile extends StatelessWidget {
           // expanded content
           if (isExpanded) ...[
             Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: AppTheme.spacingMedium),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppTheme.spacingMedium,
+              ),
               child: Divider(color: AppTheme.grey200, height: 1),
             ),
             Padding(
@@ -253,7 +259,7 @@ class _LowStockTile extends StatelessWidget {
               child: Column(
                 children: [
                   // category row
-                  _DetailRow(label: 'Category:', value: product.category),
+                  _DetailRow(label: 'Category:', value: product.category ?? ''),
                   const SizedBox(height: AppTheme.spacingSmall),
 
                   // stock row
@@ -299,8 +305,9 @@ class _LowStockTile extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     side: const BorderSide(color: AppTheme.grey300),
                     shape: RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.circular(AppTheme.borderRadiusMedium),
+                      borderRadius: BorderRadius.circular(
+                        AppTheme.borderRadiusMedium,
+                      ),
                     ),
                   ),
                 ),
@@ -318,10 +325,7 @@ class _DetailRow extends StatelessWidget {
   final String label;
   final String value;
 
-  const _DetailRow({
-    required this.label,
-    required this.value,
-  });
+  const _DetailRow({required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {

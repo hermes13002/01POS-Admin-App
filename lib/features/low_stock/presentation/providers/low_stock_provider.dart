@@ -27,35 +27,35 @@ class LowStockProducts extends _$LowStockProducts {
   List<ProductModel> _getMockLowStockProducts() {
     return const [
       ProductModel(
-        id: '1',
+        id: 1,
         name: 'Ultrabook pro 15',
         price: 70000,
         category: 'Electronics',
         stock: 25,
       ),
       ProductModel(
-        id: '2',
+        id: 2,
         name: 'Herbal sleep aid',
         price: 70000,
         category: 'Health',
         stock: 1,
       ),
       ProductModel(
-        id: '3',
+        id: 3,
         name: 'Cross sectional sofa',
         price: 70000,
         category: 'Furniture',
         stock: 10,
       ),
       ProductModel(
-        id: '4',
+        id: 4,
         name: 'Cold brew coffee',
         price: 70000,
         category: 'Food & Drinks',
         stock: 15,
       ),
       ProductModel(
-        id: '5',
+        id: 5,
         name: 'Organic whole milk',
         price: 70000,
         category: 'Food & Drinks',

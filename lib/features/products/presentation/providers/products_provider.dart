@@ -1,85 +1,133 @@
+import 'package:onepos_admin_app/data/models/api_response_model.dart';
+import 'package:onepos_admin_app/features/products/data/models/product_model.dart';
+import 'package:onepos_admin_app/features/products/data/repositories/product_repository_impl.dart';
+import 'package:onepos_admin_app/features/products/presentation/providers/products_state.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import '../../data/models/product_model.dart';
 
 part 'products_provider.g.dart';
 
-/// products data provider
+final _productRepository = ProductRepositoryImpl();
+
+/// products paginated data provider
 @riverpod
 class Products extends _$Products {
   @override
-  Future<List<ProductModel>> build() async {
-    // TODO: replace with actual api call
-    return _getMockProducts();
+  FutureOr<ProductsState> build() async {
+    // initial fetch
+    final response = await _productRepository.fetchProducts(1);
+
+    if (response.success && response.data != null) {
+      final meta = response.meta;
+      final hasMorePages = meta == null
+          ? false
+          : meta.currentPage < meta.totalPages;
+
+      return ProductsState(
+        products: response.data!,
+        currentPage: meta?.currentPage ?? 1,
+        hasMorePages: hasMorePages,
+      );
+    } else {
+      return ProductsState(error: response.message);
+    }
   }
 
-  /// add a new product
-  Future<void> addProduct(ProductModel product) async {
-    final current = state.valueOrNull ?? [];
-    state = AsyncData([...current, product]);
+  /// load next page of products
+  Future<void> fetchNextPage() async {
+    final current = state.valueOrNull;
+    if (current == null || !current.hasMorePages || current.isLoading) return;
+
+    state = AsyncData(current.copyWith(isLoading: true));
+
+    final nextPage = current.currentPage + 1;
+    final response = await _productRepository.fetchProducts(nextPage);
+
+    if (response.success && response.data != null) {
+      final meta = response.meta;
+      final hasMorePages = meta == null
+          ? false
+          : meta.currentPage < meta.totalPages;
+
+      state = AsyncData(
+        current.copyWith(
+          products: [...current.products, ...response.data!],
+          currentPage: meta?.currentPage ?? nextPage,
+          hasMorePages: hasMorePages,
+          isLoading: false,
+        ),
+      );
+    } else {
+      state = AsyncData(
+        current.copyWith(isLoading: false, error: response.message),
+      );
+    }
   }
 
-  /// update an existing product
-  Future<void> updateProduct(ProductModel product) async {
-    final current = state.valueOrNull ?? [];
-    state = AsyncData(
-      current.map((p) => p.id == product.id ? product : p).toList(),
-    );
-  }
-
-  /// delete a product by id
-  Future<void> deleteProduct(String productId) async {
-    final current = state.valueOrNull ?? [];
-    state = AsyncData(current.where((p) => p.id != productId).toList());
-  }
-
-  /// refresh products list
-  Future<void> refreshProducts() async {
+  /// refresh products list back to page 1
+  Future<void> refresh() async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
-      return _getMockProducts();
+      final response = await _productRepository.fetchProducts(1);
+      if (response.success && response.data != null) {
+        final meta = response.meta;
+        final hasMorePages = meta == null
+            ? false
+            : meta.currentPage < meta.totalPages;
+        return ProductsState(
+          products: response.data!,
+          currentPage: meta?.currentPage ?? 1,
+          hasMorePages: hasMorePages,
+        );
+      } else {
+        return ProductsState(error: response.message);
+      }
     });
   }
 
-  /// mock data for development
-  List<ProductModel> _getMockProducts() {
-    return const [
-      ProductModel(
-        id: '1',
-        name: 'Ultrabook pro 15',
-        price: 70000,
-        category: 'Electronics',
-        stock: 25,
-      ),
-      ProductModel(
-        id: '2',
-        name: 'Herbal sleep aid',
-        price: 70000,
-        category: 'Health',
-        stock: 1,
-      ),
-      ProductModel(
-        id: '3',
-        name: 'Cross sectional sofa',
-        price: 70000,
-        category: 'Furniture',
-        stock: 10,
-      ),
-      ProductModel(
-        id: '4',
-        name: 'Cold brew coffee',
-        price: 70000,
-        category: 'Food & Drinks',
-        stock: 15,
-      ),
-      ProductModel(
-        id: '5',
-        name: 'Organic whole milk',
-        price: 70000,
-        category: 'Food & Drinks',
-        stock: 30,
-      ),
-    ];
+  /// delete a product by id via api
+  Future<ApiResponse<void>> deleteProductItem(int productId) async {
+    final response = await _productRepository.deleteProduct(productId);
+
+    if (response.success) {
+      final current = state.valueOrNull;
+      if (current != null) {
+        state = AsyncData(
+          current.copyWith(
+            products: current.products.where((p) => p.id != productId).toList(),
+          ),
+        );
+      }
+    }
+    return response;
   }
+
+  /// update a product by id via api
+  Future<ApiResponse<ProductModel>> updateProductItem(
+    int productId,
+    Map<String, dynamic> data,
+  ) async {
+    final response = await _productRepository.updateProduct(productId, data);
+
+    if (response.success && response.data != null) {
+      final current = state.valueOrNull;
+      if (current != null) {
+        state = AsyncData(
+          current.copyWith(
+            products: current.products.map((p) {
+              return p.id == productId ? response.data! : p;
+            }).toList(),
+          ),
+        );
+      }
+    }
+    return response;
+  }
+}
+
+/// fetch single product by id endpoint
+@riverpod
+Future<ApiResponse<ProductModel>> singleProduct(SingleProductRef ref, int id) {
+  return _productRepository.fetchSingleProduct(id);
 }
 
 /// categories provider

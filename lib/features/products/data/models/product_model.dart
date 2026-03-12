@@ -1,9 +1,9 @@
 /// model for a product
 class ProductModel {
-  final String id;
+  final int id;
   final String name;
   final double price;
-  final String category;
+  final String? category;
   final String? subCategory;
   final int stock;
   final String? imageUrl;
@@ -12,17 +12,22 @@ class ProductModel {
   final String? supplier;
   final String? sku;
   final String? barcode;
-  final DateTime? manufacturingDate;
-  final DateTime? expiryDate;
+  final String? manufacturingDate;
+  final String? expiryDate;
   final String? description;
+  final int? catId;
+  final int? subCatId;
+  final int quantityPurchased;
+  final int inStock;
+  final int isActive;
 
   const ProductModel({
     required this.id,
     required this.name,
     required this.price,
-    required this.category,
+    this.category,
     this.subCategory,
-    required this.stock,
+    this.stock = 0,
     this.imageUrl,
     this.store,
     this.warehouse,
@@ -32,10 +37,71 @@ class ProductModel {
     this.manufacturingDate,
     this.expiryDate,
     this.description,
+    this.catId,
+    this.subCatId,
+    this.quantityPurchased = 0,
+    this.inStock = 0,
+    this.isActive = 0,
   });
 
+  factory ProductModel.fromJson(Map<String, dynamic> json) {
+    // raw values
+    final rawCategory = json['category'];
+    final rawSubCategory = json['subcategory'];
+
+    // map category name & id
+    String? catName;
+    int? parsedCatId;
+    if (rawCategory is Map<String, dynamic>) {
+      catName = rawCategory['cat_name']?.toString();
+      parsedCatId = int.tryParse(rawCategory['id']?.toString() ?? '');
+    } else {
+      catName = rawCategory?.toString();
+    }
+
+    // fallback mapping if API returns integers straight on the root
+    parsedCatId ??= int.tryParse(json['cat_id']?.toString() ?? '');
+
+    // map subcat name & id
+    String? subCatName;
+    int? parsedSubCatId;
+    if (rawSubCategory is Map<String, dynamic>) {
+      subCatName = rawSubCategory['cat_name']?.toString();
+      parsedSubCatId = int.tryParse(rawSubCategory['id']?.toString() ?? '');
+    } else {
+      subCatName = rawSubCategory?.toString();
+    }
+
+    // fallback mapping
+    parsedSubCatId ??= int.tryParse(json['sub_cat_id']?.toString() ?? '');
+
+    return ProductModel(
+      id: json['id'] as int,
+      name: json['product_name']?.toString() ?? '',
+      price: double.tryParse(json['price']?.toString() ?? '0') ?? 0.0,
+      category: catName,
+      subCategory: subCatName,
+      stock: int.tryParse(json['available_quantity']?.toString() ?? '0') ?? 0,
+      imageUrl: json['product_image']?.toString(),
+      store: json['store']?.toString(),
+      warehouse: json['warehouse']?.toString(),
+      supplier: json['supplier']?.toString(),
+      sku: json['sku']?.toString(),
+      barcode: json['barcode']?.toString(),
+      manufacturingDate: json['manufacturing_date']?.toString(),
+      expiryDate: json['expiring_date']?.toString(),
+      description: json['description']?.toString(),
+      catId: parsedCatId,
+      subCatId: parsedSubCatId,
+      quantityPurchased:
+          int.tryParse(json['quantity_purchased']?.toString() ?? '0') ?? 0,
+      inStock: int.tryParse(json['in_stock']?.toString() ?? '0') ?? 0,
+      isActive: int.tryParse(json['is_active']?.toString() ?? '0') ?? 0,
+    );
+  }
+
   ProductModel copyWith({
-    String? id,
+    int? id,
     String? name,
     double? price,
     String? category,
@@ -47,9 +113,14 @@ class ProductModel {
     String? supplier,
     String? sku,
     String? barcode,
-    DateTime? manufacturingDate,
-    DateTime? expiryDate,
+    String? manufacturingDate,
+    String? expiryDate,
     String? description,
+    int? catId,
+    int? subCatId,
+    int? quantityPurchased,
+    int? inStock,
+    int? isActive,
   }) {
     return ProductModel(
       id: id ?? this.id,
@@ -67,6 +138,11 @@ class ProductModel {
       manufacturingDate: manufacturingDate ?? this.manufacturingDate,
       expiryDate: expiryDate ?? this.expiryDate,
       description: description ?? this.description,
+      catId: catId ?? this.catId,
+      subCatId: subCatId ?? this.subCatId,
+      quantityPurchased: quantityPurchased ?? this.quantityPurchased,
+      inStock: inStock ?? this.inStock,
+      isActive: isActive ?? this.isActive,
     );
   }
 }
