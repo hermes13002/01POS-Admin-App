@@ -77,6 +77,11 @@ class ApiEndpoints {
   // Store Settings
   static const String storeSettings = '/store/settings';
   static const String myStore = '/store/my-store';
+  static const String receiptTemplate = '/admin/receipt-template';
+  static const String currencySettings = '/admin/currency-settings';
+  static const String currencySettingsCurrencies =
+      '/admin/currency-settings/currencies';
+  static const String currencySettingsUpdate = '/admin/currency-settings/update';
 
   // Discounts
   static const String discounts = '/discounts';

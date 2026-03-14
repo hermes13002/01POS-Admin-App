@@ -27,6 +27,9 @@ import 'package:onepos_admin_app/features/online_store/presentation/screens/edit
 import 'package:onepos_admin_app/features/online_store/presentation/screens/edit_phone_number_screen.dart';
 import 'package:onepos_admin_app/features/online_store/presentation/screens/edit_address_screen.dart';
 import 'package:onepos_admin_app/features/online_store/presentation/screens/login_settings_screen.dart';
+import 'package:onepos_admin_app/features/online_store/presentation/screens/receipt_template_screen.dart';
+import 'package:onepos_admin_app/features/online_store/presentation/screens/update_receipt_template_screen.dart';
+import 'package:onepos_admin_app/features/online_store/presentation/screens/currency_settings_screen.dart';
 
 /// centralized route configuration
 class AppRoutes {
@@ -62,6 +65,9 @@ class AppRoutes {
   static const String editPhoneNumber = '/edit-phone-number';
   static const String editAddress = '/edit-address';
   static const String loginSettings = '/login-settings';
+  static const String currencySettings = '/currency-settings';
+  static const String receiptTemplateSettings = '/receipt-template-settings';
+  static const String updateReceiptTemplate = '/update-receipt-template';
 
   // route map
   static Map<String, WidgetBuilder> get routes => {
@@ -93,5 +99,8 @@ class AppRoutes {
     editPhoneNumber: (context) => const EditPhoneNumberScreen(),
     editAddress: (context) => const EditAddressScreen(),
     loginSettings: (context) => const LoginSettingsScreen(),
+    currencySettings: (context) => const CurrencySettingsScreen(),
+    receiptTemplateSettings: (context) => const ReceiptTemplateScreen(),
+    updateReceiptTemplate: (context) => const UpdateReceiptTemplateScreen(),
   };
 }

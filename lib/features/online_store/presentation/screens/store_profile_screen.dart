@@ -240,9 +240,17 @@ class _ProfileContent extends StatelessWidget {
             onTap: () => Navigator.pushNamed(context, AppRoutes.loginSettings),
           ),
           const SizedBox(height: AppTheme.spacingMedium),
-          _ProfileListItem(title: 'Currency Settings'),
+          _ProfileListItem(
+            title: 'Currency Settings',
+            onTap: () =>
+                Navigator.pushNamed(context, AppRoutes.currencySettings),
+          ),
           const SizedBox(height: AppTheme.spacingMedium),
-          _ProfileListItem(title: 'Receipt Template Settings'),
+          _ProfileListItem(
+            title: 'Receipt Template Settings',
+            onTap: () =>
+                Navigator.pushNamed(context, AppRoutes.receiptTemplateSettings),
+          ),
           const SizedBox(height: AppTheme.spacingMedium),
           _ProfileListItem(
             title: 'Low Stock Limit Settings',
