@@ -5,32 +5,30 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:onepos_admin_app/core/routes/app_routes.dart';
 import 'package:onepos_admin_app/core/theme/app_theme.dart';
 import 'package:onepos_admin_app/features/payment_method/data/models/payment_method_model.dart';
+import 'package:onepos_admin_app/features/payment_method/presentation/providers/payment_method_provider.dart';
+import 'package:onepos_admin_app/features/payment_method/presentation/screens/connect_bank_account_screen.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_app_bar.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_button_with_icon.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_search_bar.dart';
+import 'package:onepos_admin_app/shared/widgets/loading_widget.dart';
 
-/// Screen for viewing and managing payment methods
 class PaymentMethodScreen extends HookConsumerWidget {
   const PaymentMethodScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // mock data
-    final paymentMethods = useMemoized(
-      () => [
-        PaymentMethodModel(
-          id: '1',
-          name: 'John Doe',
-          bankName: 'Access Bank',
-          accountNumber: '**** 54321',
-          accountName: 'John Doe',
-        ),
-      ],
-    );
-
-    final expandedIndex = useState<int?>(0);
     final searchController = useTextEditingController();
+    final searchQuery = useState('');
+    final expandedMethodId = useState<int?>(null);
     final isFabExpanded = useState<bool>(false);
+    final methodsAsync = ref.watch(paymentMethodsProvider);
+
+    useEffect(() {
+      Future.microtask(() {
+        ref.read(paymentMethodsProvider.notifier).refreshPaymentMethods();
+      });
+      return null;
+    }, const []);
 
     return Scaffold(
       appBar: CustomAppBar(
@@ -55,70 +53,80 @@ class PaymentMethodScreen extends HookConsumerWidget {
                     controller: searchController,
                     hintText: 'Search',
                     padding: EdgeInsets.zero,
+                    onChanged: (value) => searchQuery.value = value,
+                    onClear: () => searchQuery.value = '',
                   ),
                 ),
                 const SizedBox(height: AppTheme.spacingSmall),
                 Expanded(
-                  child: ListView.separated(
-                    padding: const EdgeInsets.all(
-                      AppTheme.spacingMedium,
-                    ).copyWith(bottom: 120), // space for fab & menu
-                    itemCount: paymentMethods.length,
-                    separatorBuilder: (context, index) =>
-                        const SizedBox(height: AppTheme.spacingMedium),
-                    itemBuilder: (context, index) {
-                      final method = paymentMethods[index];
-                      final isExpanded = expandedIndex.value == index;
+                  child: methodsAsync.when(
+                    data: (state) {
+                      final filtered = _filterMethods(state.methods, searchQuery.value);
 
-                      return GestureDetector(
-                        onTap: () {
-                          if (isExpanded) {
-                            expandedIndex.value = null;
-                          } else {
-                            expandedIndex.value = index;
-                          }
-                        },
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 300),
-                          padding: const EdgeInsets.all(AppTheme.spacingMedium),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(
-                              AppTheme.borderRadiusMedium,
+                      if (filtered.isEmpty) {
+                        return Center(
+                          child: Text(
+                            'No payment methods found',
+                            style: GoogleFonts.poppins(
+                              fontSize: 14,
+                              color: AppTheme.textSecondary,
                             ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.04),
-                                blurRadius: 8,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
                           ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // Top row: Name and Bank
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Expanded(
-                                    child: Text(
-                                      method.name,
-                                      style: GoogleFonts.poppins(
-                                        fontSize: 14,
-                                        color: AppTheme.textPrimary,
-                                      ),
-                                    ),
+                        );
+                      }
+
+                      return ListView.separated(
+                        padding: const EdgeInsets.all(
+                          AppTheme.spacingMedium,
+                        ).copyWith(bottom: 120),
+                        itemCount: filtered.length,
+                        separatorBuilder: (context, index) =>
+                            const SizedBox(height: AppTheme.spacingMedium),
+                        itemBuilder: (context, index) {
+                          final method = filtered[index];
+                          final isExpanded = expandedMethodId.value == method.id;
+
+                          return GestureDetector(
+                            onTap: () {
+                              expandedMethodId.value = isExpanded ? null : method.id;
+                            },
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 250),
+                              padding: const EdgeInsets.all(AppTheme.spacingMedium),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(
+                                  AppTheme.borderRadiusMedium,
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.04),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 2),
                                   ),
+                                ],
+                              ),
+                              child: Column(
+                                children: [
                                   Row(
                                     children: [
+                                      Expanded(
+                                        child: Text(
+                                          method.methodName.isEmpty
+                                              ? 'N/A'
+                                              : method.methodName,
+                                          style: GoogleFonts.poppins(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w500,
+                                            color: AppTheme.textPrimary,
+                                          ),
+                                        ),
+                                      ),
                                       Text(
-                                        method.bankName,
+                                        '#${method.id}',
                                         style: GoogleFonts.poppins(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w500,
-                                          color: AppTheme.textPrimary,
+                                          fontSize: 12,
+                                          color: AppTheme.textSecondary,
                                         ),
                                       ),
                                       const SizedBox(width: 8),
@@ -131,130 +139,87 @@ class PaymentMethodScreen extends HookConsumerWidget {
                                       ),
                                     ],
                                   ),
+                                  if (isExpanded) ...[
+                                    const SizedBox(height: 16),
+                                    const Divider(height: 1),
+                                    const SizedBox(height: 16),
+                                    Row(
+                                      children: [
+                                        Expanded(
+                                          child: CustomButtonWithIcon(
+                                            text: 'Edit',
+                                            icon: Icons.edit_outlined,
+                                            onPressed: () => _showEditDialog(
+                                              context,
+                                              ref,
+                                              method.id,
+                                            ),
+                                            isOutlined: true,
+                                            textColor: AppTheme.blue,
+                                            iconColor: AppTheme.blue,
+                                            borderColor: AppTheme.blue,
+                                            height: 44,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Expanded(
+                                          child: CustomButtonWithIcon(
+                                            text: 'Delete',
+                                            icon: Icons.delete_outline,
+                                            onPressed: () => _showDeleteConfirmation(
+                                              context,
+                                              ref,
+                                              method,
+                                            ),
+                                            isOutlined: true,
+                                            textColor: AppTheme.errorColor,
+                                            iconColor: AppTheme.errorColor,
+                                            borderColor: AppTheme.errorColor,
+                                            height: 44,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
                                 ],
                               ),
-
-                              // Expanded content
-                              if (isExpanded) ...[
-                                const SizedBox(height: 16),
-                                const Divider(),
-                                const SizedBox(height: 16),
-                                // Account Number row
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      'Account number',
-                                      style: GoogleFonts.poppins(
-                                        fontSize: 10,
-                                        color: AppTheme.textSecondary,
-                                      ),
-                                    ),
-                                    Text(
-                                      method.accountNumber,
-                                      style: GoogleFonts.poppins(
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w500,
-                                        color: AppTheme.textSecondary,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 12),
-                                // Bank row
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      'Bank',
-                                      style: GoogleFonts.poppins(
-                                        fontSize: 10,
-                                        color: AppTheme.textSecondary,
-                                      ),
-                                    ),
-                                    Text(
-                                      method.bankName,
-                                      style: GoogleFonts.poppins(
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w500,
-                                        color: AppTheme.textSecondary,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 12),
-                                // Account Name row
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      'Account name',
-                                      style: GoogleFonts.poppins(
-                                        fontSize: 10,
-                                        color: AppTheme.textSecondary,
-                                      ),
-                                    ),
-                                    Text(
-                                      method.accountName,
-                                      style: GoogleFonts.poppins(
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w500,
-                                        color: AppTheme.textSecondary,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 20),
-                                // Action Buttons
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: CustomButtonWithIcon(
-                                        text: 'Edit',
-                                        icon: Icons.edit_outlined,
-                                        onPressed: () {},
-                                        isOutlined: true,
-                                        textColor: AppTheme.blue,
-                                        iconColor: AppTheme.blue,
-                                        borderColor: AppTheme.blue,
-                                        height: 44,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: CustomButtonWithIcon(
-                                        text: 'Delete',
-                                        icon: Icons.delete_outline,
-                                        onPressed: () {},
-                                        isOutlined: true,
-                                        textColor: const Color(0xFFD32F2F),
-                                        iconColor: const Color(0xFFD32F2F),
-                                        borderColor: const Color(0xFFD32F2F),
-                                        height: 44,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ],
-                          ),
-                        ),
+                            ),
+                          );
+                        },
                       );
                     },
+                    loading: () => const Center(child: LoadingWidget()),
+                    error: (error, stack) => Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'Failed to load payment methods',
+                            style: GoogleFonts.poppins(
+                              fontSize: 14,
+                              color: AppTheme.textSecondary,
+                            ),
+                          ),
+                          const SizedBox(height: AppTheme.spacingMedium),
+                          ElevatedButton(
+                            onPressed: () => ref
+                                .read(paymentMethodsProvider.notifier)
+                                .refreshPaymentMethods(),
+                            child: const Text('Retry'),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
               ],
             ),
 
-            // Dim Background Overlay when FAB is open
             if (isFabExpanded.value)
               GestureDetector(
                 onTap: () => isFabExpanded.value = false,
                 child: Container(
-                  color: Colors.black.withOpacity(0.5),
+                  color: Colors.black.withValues(alpha: 0.5),
                   width: double.infinity,
                   height: double.infinity,
                 ),
@@ -266,9 +231,7 @@ class PaymentMethodScreen extends HookConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          // Expandable menu items
           if (isFabExpanded.value) ...[
-            // Connect Bank Account
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -282,9 +245,36 @@ class PaymentMethodScreen extends HookConsumerWidget {
                 ),
                 const SizedBox(width: 12),
                 InkWell(
-                  onTap: () {
+                  onTap: () async {
                     isFabExpanded.value = false;
-                    Navigator.pushNamed(context, AppRoutes.connectBankAccount);
+                    await showGeneralDialog<void>(
+                      context: context,
+                      barrierDismissible: true,
+                      barrierLabel: 'Connect Bank Account',
+                      barrierColor: Colors.black.withValues(alpha: 0.5),
+                      transitionDuration: const Duration(milliseconds: 260),
+                      pageBuilder: (_, __, ___) =>
+                          const ConnectBankAccountDialog(),
+                      transitionBuilder:
+                          (dialogContext, animation, secondaryAnimation, child) {
+                        final curvedAnimation = CurvedAnimation(
+                          parent: animation,
+                          curve: Curves.easeOutCubic,
+                          reverseCurve: Curves.easeInCubic,
+                        );
+
+                        return FadeTransition(
+                          opacity: curvedAnimation,
+                          child: ScaleTransition(
+                            scale: Tween<double>(
+                              begin: 0.94,
+                              end: 1,
+                            ).animate(curvedAnimation),
+                            child: child,
+                          ),
+                        );
+                      },
+                    );
                   },
                   child: Container(
                     width: 48,
@@ -304,7 +294,6 @@ class PaymentMethodScreen extends HookConsumerWidget {
             ),
             const SizedBox(height: 16),
 
-            // Add Payment Method
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -318,9 +307,17 @@ class PaymentMethodScreen extends HookConsumerWidget {
                 ),
                 const SizedBox(width: 12),
                 InkWell(
-                  onTap: () {
+                  onTap: () async {
                     isFabExpanded.value = false;
-                    Navigator.pushNamed(context, AppRoutes.addPaymentMethod);
+                    final created = await Navigator.pushNamed(
+                      context,
+                      AppRoutes.addPaymentMethod,
+                    );
+                    if (created == true) {
+                      await ref
+                          .read(paymentMethodsProvider.notifier)
+                          .refreshPaymentMethods();
+                    }
                   },
                   child: Container(
                     width: 48,
@@ -341,7 +338,6 @@ class PaymentMethodScreen extends HookConsumerWidget {
             const SizedBox(height: 16),
           ],
 
-          // Main FAB acts just like a close/add button based on state
           FloatingActionButton(
             backgroundColor: isFabExpanded.value ? Colors.white : Colors.black,
             onPressed: () {
@@ -354,6 +350,137 @@ class PaymentMethodScreen extends HookConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+
+  List<PaymentMethodModel> _filterMethods(
+    List<PaymentMethodModel> methods,
+    String query,
+  ) {
+    final lowerQuery = query.trim().toLowerCase();
+    if (lowerQuery.isEmpty) return methods;
+
+    return methods
+        .where((item) =>
+            item.methodName.toLowerCase().contains(lowerQuery) ||
+            item.id.toString().contains(lowerQuery))
+        .toList();
+  }
+
+  Future<void> _showEditDialog(
+    BuildContext context,
+    WidgetRef ref,
+    int methodId,
+  ) async {
+    try {
+      final method =
+          await ref.read(paymentMethodsProvider.notifier).getPaymentMethod(methodId);
+      if (!context.mounted) return;
+
+      final controller = TextEditingController(text: method.methodName);
+      final saved = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) {
+          return AlertDialog(
+            title: const Text('Edit Payment Method'),
+            content: TextField(
+              controller: controller,
+              decoration: const InputDecoration(
+                hintText: 'Payment method name',
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext, false),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext, true),
+                child: const Text('Save'),
+              ),
+            ],
+          );
+        },
+      );
+
+      if (saved != true || !context.mounted) return;
+
+      final value = controller.text.trim();
+      if (value.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Payment method name is required')),
+        );
+        return;
+      }
+
+      final error = await ref
+          .read(paymentMethodsProvider.notifier)
+          .updatePaymentMethod(methodId, {'method_name': value});
+
+      if (!context.mounted) return;
+      if (error != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(error), backgroundColor: AppTheme.errorColor),
+        );
+        return;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Payment method updated successfully')),
+      );
+    } catch (error) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(error.toString().replaceFirst('Exception: ', '')),
+          backgroundColor: AppTheme.errorColor,
+        ),
+      );
+    }
+  }
+
+  Future<void> _showDeleteConfirmation(
+    BuildContext context,
+    WidgetRef ref,
+    PaymentMethodModel method,
+  ) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('Delete Payment Method'),
+          content: Text(
+            'Are you sure you want to delete "${method.methodName.isEmpty ? 'N/A' : method.methodName}"?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, true),
+              child: const Text('Delete'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed != true || !context.mounted) return;
+
+    final error =
+        await ref.read(paymentMethodsProvider.notifier).deletePaymentMethod(method.id);
+    if (!context.mounted) return;
+
+    if (error != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(error), backgroundColor: AppTheme.errorColor),
+      );
+      return;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Payment method deleted successfully')),
     );
   }
 }

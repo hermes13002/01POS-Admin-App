@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:onepos_admin_app/core/theme/app_theme.dart';
+import 'package:onepos_admin_app/features/payment_method/presentation/providers/payment_method_provider.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_app_bar.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_button.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_text_field.dart';
 import 'package:onepos_admin_app/core/utils/validators.dart';
 
-/// Screen for adding a new standard payment method
 class AddPaymentMethodScreen extends HookConsumerWidget {
   const AddPaymentMethodScreen({super.key});
 
@@ -15,6 +15,7 @@ class AddPaymentMethodScreen extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final formKey = useMemoized(() => GlobalKey<FormState>());
     final nameController = useTextEditingController();
+    final isSubmitting = useState(false);
 
     return Scaffold(
       appBar: CustomAppBar(
@@ -44,10 +45,35 @@ class AddPaymentMethodScreen extends HookConsumerWidget {
 
                 CustomButton(
                   text: 'Add Method',
-                  onPressed: () {
-                    if (formKey.currentState!.validate()) {
-                      Navigator.pop(context);
+                  isLoading: isSubmitting.value,
+                  onPressed: () async {
+                    if (!formKey.currentState!.validate() || isSubmitting.value) {
+                      return;
                     }
+
+                    isSubmitting.value = true;
+
+                    final error = await ref
+                        .read(paymentMethodsProvider.notifier)
+                        .addPaymentMethod({
+                      'method_name': nameController.text.trim(),
+                    });
+
+                    isSubmitting.value = false;
+
+                    if (!context.mounted) return;
+
+                    if (error != null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(error),
+                          backgroundColor: AppTheme.errorColor,
+                        ),
+                      );
+                      return;
+                    }
+
+                    Navigator.pop(context, true);
                   },
                   backgroundColor: Colors.black,
                   textColor: Colors.white,

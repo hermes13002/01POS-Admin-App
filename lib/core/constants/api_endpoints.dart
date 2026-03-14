@@ -68,6 +68,11 @@ class ApiEndpoints {
 
   // Payment Methods
   static const String paymentMethods = '/payment-methods';
+  static const String allPaymentMethods = '/admin/payment-methods';
+  static const String showPaymentMethod = '/admin/payment-methods/show';
+  static const String storePaymentMethod = '/admin/payment-methods/store';
+  static const String updatePaymentMethod = '/admin/payment-methods/update';
+  static const String deletePaymentMethod = '/admin/payment-methods/delete';
 
   // Store Settings
   static const String storeSettings = '/store/settings';
