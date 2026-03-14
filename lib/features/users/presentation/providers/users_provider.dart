@@ -32,6 +32,27 @@ class AllUsers extends _$AllUsers {
     );
   }
 
+  /// creates a user and prepends it to the local list
+  /// returns null on success, or an error message on failure
+  Future<String?> createUser(Map<String, dynamic> body) async {
+    final result = await _repo.createUser(body);
+
+    if (result.isLeft()) {
+      return result.fold((f) => f.message, (_) => '');
+    }
+
+    final createdUser = result.getOrElse(
+      () => throw Exception('Failed to parse created user'),
+    );
+
+    final current = state.valueOrNull;
+    if (current != null) {
+      state = AsyncData(current.copyWith(users: [createdUser, ...current.users]));
+    }
+
+    return null;
+  }
+
   /// loads the next page and appends users to the existing list
   Future<void> fetchNextPage() async {
     final current = state.valueOrNull;

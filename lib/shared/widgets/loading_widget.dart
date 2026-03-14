@@ -58,13 +58,25 @@ class _LoadingWidgetState extends State<LoadingWidget>
                 child: child,
               );
             },
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(12),
+            child: Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: const Color.fromARGB(255, 246, 246, 246),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Color.fromRGBO(0, 0, 0, 0.18),
+                    blurRadius: 14,
+                    spreadRadius: 1,
+                    offset: Offset(0, 6),
+                  ),
+                ],
+              ),
+              padding: const EdgeInsets.all(12),
               child: Image.asset(
                 'assets/images/logo/logo-single.png',
                 width: widget.size,
                 height: widget.size,
-                fit: BoxFit.cover,
+                fit: BoxFit.contain,
                 errorBuilder: (context, error, stackTrace) {
                   return Icon(
                     Icons.store,

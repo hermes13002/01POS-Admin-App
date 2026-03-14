@@ -22,6 +22,7 @@ class ApiEndpoints {
   // Sales
   static const String sales = '/sales';
   static const String saleById = '/sales/{id}';
+  static const String allSales = '/admin/dashboard/all-sales';
 
   // Orders
   static const String orders = '/orders';
@@ -30,6 +31,11 @@ class ApiEndpoints {
   // Customers
   static const String customers = '/customers';
   static const String customerById = '/customers/{id}';
+  static const String allCustomers = '/admin/customers';
+  static const String showCustomer = '/admin/customers/show';
+  static const String storeCustomer = '/admin/customers/store';
+  static const String updateCustomer = '/admin/customers/update';
+  static const String deleteCustomer = '/admin/customers/delete';
 
   // Invoices
   static const String invoices = '/invoices';
@@ -57,6 +63,7 @@ class ApiEndpoints {
   static const String showUser = '/admin/users/show';
   static const String activateUser = '/admin/users/activate';
   static const String deactivateUser = '/admin/users/deactivate';
+  static const String storeUser = '/admin/users/store';
   static const String deleteUser = '/admin/users/delete';
 
   // Payment Methods

@@ -6,7 +6,6 @@ import 'package:onepos_admin_app/shared/widgets/custom_app_bar2.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_button.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_text_field.dart';
 import 'package:onepos_admin_app/core/utils/validators.dart';
-import '../../data/models/customer_model.dart';
 import '../providers/customers_provider.dart';
 
 /// add new customer screen
@@ -17,8 +16,8 @@ class AddCustomerScreen extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final formKey = useMemoized(() => GlobalKey<FormState>());
     final nameController = useTextEditingController();
-    final emailController = useTextEditingController();
     final commentController = useTextEditingController();
+    final preferenceController = useTextEditingController();
     final isLoading = useState(false);
 
     return Scaffold(
@@ -37,25 +36,27 @@ class AddCustomerScreen extends HookConsumerWidget {
               CustomTextField(
                 controller: nameController,
                 hint: 'Customer name',
+                textCapitalization: TextCapitalization.words,
                 validator: (val) =>
                     Validators.validateRequired(val, 'Customer name'),
               ),
               const SizedBox(height: AppTheme.spacingMedium),
 
-              // email address field
+              // comment field
               CustomTextField(
-                controller: emailController,
-                hint: 'Email address',
-                keyboardType: TextInputType.emailAddress,
-                validator: Validators.validateEmail,
+                controller: commentController,
+                hint: 'Comment',
+                validator: (val) =>
+                    Validators.validateRequired(val, 'Comment'),
               ),
               const SizedBox(height: AppTheme.spacingMedium),
 
-              // additional comment field
+              // preference field
               CustomTextField(
-                controller: commentController,
-                hint: 'Additional comment',
-                maxLines: 4,
+                controller: preferenceController,
+                hint: 'Preference',
+                validator: (val) =>
+                    Validators.validateRequired(val, 'Preference'),
               ),
 
               const Spacer(),
@@ -67,22 +68,34 @@ class AddCustomerScreen extends HookConsumerWidget {
                 onPressed: () async {
                   if (formKey.currentState!.validate()) {
                     isLoading.value = true;
-                    await ref
+                    final error = await ref
                         .read(customersProvider.notifier)
                         .addCustomer(
-                          CustomerModel(
-                            id: DateTime.now().millisecondsSinceEpoch
-                                .toString(),
-                            name: nameController.text.trim(),
-                            email: emailController.text.trim(),
-                            comment: commentController.text.trim().isEmpty
-                                ? null
-                                : commentController.text.trim(),
-                          ),
+                          {
+                            'name': nameController.text.trim(),
+                            'comment': commentController.text.trim(),
+                            'preference': preferenceController.text.trim(),
+                          },
                         );
                     isLoading.value = false;
+
+                    if (!context.mounted) return;
+
+                    if (error != null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(error),
+                          backgroundColor: AppTheme.errorColor,
+                        ),
+                      );
+                      return;
+                    }
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Customer created successfully')),
+                    );
                     if (context.mounted) {
-                      Navigator.pop(context);
+                      Navigator.pop(context, true);
                     }
                   }
                 },

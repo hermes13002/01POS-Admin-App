@@ -7,6 +7,7 @@ import 'package:onepos_admin_app/shared/widgets/custom_app_bar.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_button.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_text_field.dart';
 import 'package:onepos_admin_app/core/utils/validators.dart';
+import 'package:onepos_admin_app/features/users/presentation/providers/users_provider.dart';
 
 /// Screen for adding a new user
 class AddUserScreen extends HookConsumerWidget {
@@ -26,6 +27,14 @@ class AddUserScreen extends HookConsumerWidget {
     final selectedRole = useState<String?>('Cashier');
     final isPasswordVisible = useState<bool>(false);
     final isConfirmPasswordVisible = useState<bool>(false);
+    final isSubmitting = useState<bool>(false);
+
+    final roleIdByName = {
+      'Cashier': 2,
+      'Manager': 3,
+      'Supervisor': 4,
+      'Lender': 5,
+    };
 
     return Scaffold(
       appBar: CustomAppBar(
@@ -152,11 +161,49 @@ class AddUserScreen extends HookConsumerWidget {
 
                 CustomButton(
                   text: 'Add User',
-                  onPressed: () {
-                    if (formKey.currentState!.validate()) {
-                      // handle save logic
-                      Navigator.pop(context);
+                  isLoading: isSubmitting.value,
+                  onPressed: () async {
+                    if (!formKey.currentState!.validate()) {
+                      return;
                     }
+
+                    final selectedRoleName = selectedRole.value;
+                    final roleId = roleIdByName[selectedRoleName] ?? 2;
+
+                    isSubmitting.value = true;
+
+                    final body = <String, dynamic>{
+                      'role_id': roleId,
+                      'firstname': firstNameController.text.trim(),
+                      'lastname': lastNameController.text.trim(),
+                      'email': emailController.text.trim(),
+                      'address': addressController.text.trim(),
+                      'phoneno': phoneController.text.trim(),
+                      'password': passwordController.text,
+                      'confirmPassword': confirmPasswordController.text,
+                    };
+
+                    final error =
+                        await ref.read(allUsersProvider.notifier).createUser(body);
+
+                    isSubmitting.value = false;
+
+                    if (!context.mounted) return;
+
+                    if (error != null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(error),
+                          backgroundColor: AppTheme.errorColor,
+                        ),
+                      );
+                      return;
+                    }
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('User created successfully')),
+                    );
+                    Navigator.pop(context, true);
                   },
                   backgroundColor: Colors.black,
                   textColor: Colors.white,

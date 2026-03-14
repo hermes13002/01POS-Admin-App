@@ -169,8 +169,11 @@ class UsersScreen extends HookConsumerWidget {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.pushNamed(context, AppRoutes.addUser);
+        onPressed: () async {
+          final created = await Navigator.pushNamed(context, AppRoutes.addUser);
+          if (created == true) {
+            await ref.read(allUsersProvider.notifier).refresh();
+          }
         },
         backgroundColor: Colors.black,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
@@ -220,7 +223,7 @@ class _UserCard extends HookConsumerWidget {
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.04),
+              color: Colors.black.withValues(alpha: 0.04),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -322,7 +325,7 @@ class _UserCard extends HookConsumerWidget {
                           height: 24,
                           child: Switch(
                             value: user.isActive,
-                            activeColor: const Color(0xFF4CAF50),
+                            activeThumbColor: const Color(0xFF4CAF50),
                             onChanged: (value) async {
                               isToggling.value = true;
                               final error = await ref

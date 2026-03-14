@@ -11,6 +11,9 @@ abstract class UsersRemoteDatasource {
   /// fetches users from the api for a given page
   Future<PaginatedUsersResponse> getUsers({int page = 1});
 
+  /// creates a user
+  Future<UserModel> createUser(Map<String, dynamic> body);
+
   /// activates a user by id
   Future<UserModel> activateUser(int userId);
 
@@ -32,8 +35,10 @@ class UsersRemoteDatasourceImpl implements UsersRemoteDatasource {
   @override
   Future<PaginatedUsersResponse> getUsers({int page = 1}) async {
     final url = '${AppConstants.baseUrl}${ApiEndpoints.allUsers}?page=$page';
+    final body = {'page': page};
 
     log('get_users url: $url', name: 'API');
+    log('get_users body: ${jsonEncode(body)}', name: 'API');
 
     final response = await _client.post(
       ApiEndpoints.allUsers,
@@ -55,11 +60,34 @@ class UsersRemoteDatasourceImpl implements UsersRemoteDatasource {
   }
 
   @override
+  Future<UserModel> createUser(Map<String, dynamic> body) async {
+    final url = '${AppConstants.baseUrl}${ApiEndpoints.storeUser}';
+
+    log('create_user url: $url', name: 'API');
+    log('create_user body: ${jsonEncode(body)}', name: 'API');
+
+    final response = await _client.post(ApiEndpoints.storeUser, data: body);
+    final responseBody = response.data as Map<String, dynamic>;
+
+    log('create_user response: ${jsonEncode(responseBody)}', name: 'API');
+
+    if (responseBody['error'] == true) {
+      throw ServerException(
+        message: responseBody['message'] ?? 'Failed to create user',
+      );
+    }
+
+    return UserModel.fromJson(responseBody['data'] as Map<String, dynamic>);
+  }
+
+  @override
   Future<UserModel> activateUser(int userId) async {
     final url =
         '${AppConstants.baseUrl}${ApiEndpoints.activateUser}/$userId';
+    final body = <String, dynamic>{};
 
     log('activate_user url: $url', name: 'API');
+    log('activate_user body: ${jsonEncode(body)}', name: 'API');
 
     final response =
         await _client.get('${ApiEndpoints.activateUser}/$userId');
@@ -80,8 +108,10 @@ class UsersRemoteDatasourceImpl implements UsersRemoteDatasource {
   Future<UserModel> deactivateUser(int userId) async {
     final url =
         '${AppConstants.baseUrl}${ApiEndpoints.deactivateUser}/$userId';
+    final body = <String, dynamic>{};
 
     log('deactivate_user url: $url', name: 'API');
+    log('deactivate_user body: ${jsonEncode(body)}', name: 'API');
 
     final response =
         await _client.get('${ApiEndpoints.deactivateUser}/$userId');
@@ -101,8 +131,10 @@ class UsersRemoteDatasourceImpl implements UsersRemoteDatasource {
   @override
   Future<UserModel> getUser(int userId) async {
     final url = '${AppConstants.baseUrl}${ApiEndpoints.showUser}/$userId';
+    final body = <String, dynamic>{};
 
     log('get_user url: $url', name: 'API');
+    log('get_user body: ${jsonEncode(body)}', name: 'API');
 
     final response = await _client.get('${ApiEndpoints.showUser}/$userId');
     final responseBody = response.data as Map<String, dynamic>;
@@ -121,8 +153,10 @@ class UsersRemoteDatasourceImpl implements UsersRemoteDatasource {
   @override
   Future<void> deleteUser(int userId) async {
     final url = '${AppConstants.baseUrl}${ApiEndpoints.deleteUser}/$userId';
+    final body = <String, dynamic>{};
 
     log('delete_user url: $url', name: 'API');
+    log('delete_user body: ${jsonEncode(body)}', name: 'API');
 
     final response =
         await _client.delete('${ApiEndpoints.deleteUser}/$userId');

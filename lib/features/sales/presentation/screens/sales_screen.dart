@@ -21,8 +21,17 @@ class SalesScreen extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final searchController = useTextEditingController();
     final searchQuery = useState('');
+    final activeFilter = useState(SalesFilter.empty);
     final expandedSaleId = useState<String?>(null);
+    final scrollController = useScrollController();
     final salesAsync = ref.watch(salesProvider);
+
+    useEffect(() {
+      Future.microtask(() {
+        ref.read(salesProvider.notifier).refreshSales();
+      });
+      return null;
+    }, const []);
 
     // listen for search changes
     useEffect(() {
@@ -33,6 +42,18 @@ class SalesScreen extends HookConsumerWidget {
       searchController.addListener(listener);
       return () => searchController.removeListener(listener);
     }, [searchController]);
+
+    useEffect(() {
+      void onScroll() {
+        if (scrollController.position.pixels >=
+            scrollController.position.maxScrollExtent - 200) {
+          ref.read(salesProvider.notifier).fetchNextPage();
+        }
+      }
+
+      scrollController.addListener(onScroll);
+      return () => scrollController.removeListener(onScroll);
+    }, [scrollController]);
 
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
@@ -102,7 +123,18 @@ class SalesScreen extends HookConsumerWidget {
 
                 // filter button
                 GestureDetector(
-                  onTap: () => _showFilterDialog(context),
+                  onTap: () async {
+                    final currentSales =
+                        salesAsync.valueOrNull?.sales ?? const <SaleModel>[];
+                    final nextFilter = await _showFilterDialog(
+                      context,
+                      currentFilter: activeFilter.value,
+                      sales: currentSales,
+                    );
+                    if (nextFilter != null) {
+                      activeFilter.value = nextFilter;
+                    }
+                  },
                   child: Container(
                     width: 48,
                     height: 48,
@@ -126,20 +158,12 @@ class SalesScreen extends HookConsumerWidget {
           // sales list
           Expanded(
             child: salesAsync.when(
-              data: (sales) {
-                final filtered = searchQuery.value.isEmpty
-                    ? sales
-                    : sales
-                        .where((s) =>
-                            s.customerName
-                                .toLowerCase()
-                                .contains(
-                                    searchQuery.value.toLowerCase()) ||
-                            s.orderNumber
-                                .toLowerCase()
-                                .contains(
-                                    searchQuery.value.toLowerCase()))
-                        .toList();
+              data: (salesState) {
+                final filtered = _applySearchAndFilter(
+                  salesState.sales,
+                  searchQuery.value,
+                  activeFilter.value,
+                );
 
                 if (filtered.isEmpty) {
                   return Center(
@@ -154,14 +178,22 @@ class SalesScreen extends HookConsumerWidget {
                 }
 
                 return ListView.separated(
+                  controller: scrollController,
                   padding: const EdgeInsets.symmetric(
                     horizontal: AppTheme.spacingMedium,
                     vertical: AppTheme.spacingSmall,
                   ),
-                  itemCount: filtered.length,
+                  itemCount: filtered.length + (salesState.hasMorePages ? 1 : 0),
                   separatorBuilder: (_, __) =>
                       const SizedBox(height: AppTheme.spacingSmall),
                   itemBuilder: (context, index) {
+                    if (index >= filtered.length) {
+                      return const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 16),
+                        child: LoadingWidget(size: 32),
+                      );
+                    }
+
                     final sale = filtered[index];
                     final isExpanded = expandedSaleId.value == sale.id;
 
@@ -193,7 +225,7 @@ class SalesScreen extends HookConsumerWidget {
                     ),
                     const SizedBox(height: AppTheme.spacingMedium),
                     ElevatedButton(
-                      onPressed: () => ref.invalidate(salesProvider),
+                      onPressed: () => ref.read(salesProvider.notifier).refreshSales(),
                       child: const Text('Retry'),
                     ),
                   ],
@@ -207,10 +239,45 @@ class SalesScreen extends HookConsumerWidget {
   }
 
   /// show filter bottom sheet dialog
-  void _showFilterDialog(BuildContext context) {
-    showDialog(
+  Future<SalesFilter?> _showFilterDialog(
+    BuildContext context, {
+    required SalesFilter currentFilter,
+    required List<SaleModel> sales,
+  }) {
+    final cashierOptions = sales
+        .map((s) => s.cashierName)
+        .where((s) => s.isNotEmpty)
+        .toSet()
+        .toList()
+      ..sort();
+    final customerOptions = sales
+        .map((s) => s.customerName)
+        .where((s) => s.isNotEmpty)
+        .toSet()
+        .toList()
+      ..sort();
+    final paymentOptions = sales
+        .map((s) => s.paymentMethod ?? 'N/A')
+        .where((s) => s.isNotEmpty)
+        .toSet()
+        .toList()
+      ..sort();
+    final statusOptions = sales
+        .map((s) => s.status)
+        .where((s) => s.isNotEmpty)
+        .toSet()
+        .toList()
+      ..sort();
+
+    return showDialog<SalesFilter>(
       context: context,
-      builder: (context) => const _SalesFilterDialog(),
+      builder: (context) => _SalesFilterDialog(
+        initialFilter: currentFilter,
+        cashierOptions: cashierOptions,
+        customerOptions: customerOptions,
+        paymentOptions: paymentOptions,
+        statusOptions: statusOptions,
+      ),
     );
   }
 
@@ -220,6 +287,57 @@ class SalesScreen extends HookConsumerWidget {
       context: context,
       builder: (context) => _SaleDetailsDialog(sale: sale),
     );
+  }
+
+  List<SaleModel> _applySearchAndFilter(
+    List<SaleModel> sales,
+    String query,
+    SalesFilter filter,
+  ) {
+    final lowerQuery = query.trim().toLowerCase();
+
+    return sales.where((sale) {
+      final matchesSearch = lowerQuery.isEmpty ||
+          sale.customerName.toLowerCase().contains(lowerQuery) ||
+          sale.orderNumber.toLowerCase().contains(lowerQuery) ||
+          sale.cashierName.toLowerCase().contains(lowerQuery) ||
+          sale.status.toLowerCase().contains(lowerQuery);
+
+      final saleTotal = sale.totalPrice ?? sale.totalAmount;
+      final matchesMinPrice = filter.minPrice == null || saleTotal >= filter.minPrice!;
+      final matchesMaxPrice = filter.maxPrice == null || saleTotal <= filter.maxPrice!;
+      final matchesCashier =
+          filter.cashier == null || sale.cashierName == filter.cashier;
+      final matchesCustomer =
+          filter.customer == null || sale.customerName == filter.customer;
+      final matchesPayment = filter.paymentMethod == null ||
+          (sale.paymentMethod ?? 'N/A') == filter.paymentMethod;
+      final matchesStatus =
+          filter.status == null || sale.status == filter.status;
+
+      final matchesStartDate =
+          filter.startDate == null || !sale.date.isBefore(_startOfDay(filter.startDate!));
+      final matchesEndDate =
+          filter.endDate == null || !sale.date.isAfter(_endOfDay(filter.endDate!));
+
+      return matchesSearch &&
+          matchesMinPrice &&
+          matchesMaxPrice &&
+          matchesCashier &&
+          matchesCustomer &&
+          matchesPayment &&
+          matchesStatus &&
+          matchesStartDate &&
+          matchesEndDate;
+    }).toList();
+  }
+
+  DateTime _startOfDay(DateTime value) {
+    return DateTime(value.year, value.month, value.day);
+  }
+
+  DateTime _endOfDay(DateTime value) {
+    return DateTime(value.year, value.month, value.day, 23, 59, 59, 999);
   }
 }
 
@@ -381,15 +499,21 @@ class _SaleTile extends StatelessWidget {
             ),
 
             // view button
-            CustomButtonWithIcon(
-              text: 'View', 
-              icon: Icons.visibility_outlined,
-              onPressed: (){
-                onView();
-              },
-              backgroundColor: AppTheme.white,
-              textColor: AppTheme.primaryColor,
-              isOutlined: true
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppTheme.spacingMedium,
+                vertical: AppTheme.spacingSmall,
+              ),
+              child: CustomButtonWithIcon(
+                text: 'View', 
+                icon: Icons.visibility_outlined,
+                onPressed: (){
+                  onView();
+                },
+                backgroundColor: AppTheme.white,
+                textColor: AppTheme.primaryColor,
+                isOutlined: true
+              ),
             )
           ],
         ],
@@ -452,19 +576,37 @@ class _DetailRow extends StatelessWidget {
 
 /// filter dialog for sales
 class _SalesFilterDialog extends HookWidget {
-  const _SalesFilterDialog();
+  final SalesFilter initialFilter;
+  final List<String> cashierOptions;
+  final List<String> customerOptions;
+  final List<String> paymentOptions;
+  final List<String> statusOptions;
+
+  const _SalesFilterDialog({
+    required this.initialFilter,
+    required this.cashierOptions,
+    required this.customerOptions,
+    required this.paymentOptions,
+    required this.statusOptions,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final selectedCashier = useState<String?>(null);
-    final selectedCustomer = useState<String?>(null);
+    final selectedCashier = useState<String?>(initialFilter.cashier);
+    final selectedCustomer = useState<String?>(initialFilter.customer);
     final selectedDiscount = useState<String?>(null);
-    final selectedPaymentMethod = useState<String?>(null);
-    final startDate = useState<DateTime?>(null);
-    final endDate = useState<DateTime?>(null);
+    final selectedPaymentMethod = useState<String?>(initialFilter.paymentMethod);
+    final selectedStatus = useState<String?>(initialFilter.status);
+    final startDate = useState<DateTime?>(initialFilter.startDate);
+    final endDate = useState<DateTime?>(initialFilter.endDate);
 
     // price range
-    final rangeValues = useState(const RangeValues(1000, 500000));
+    final rangeValues = useState(
+      RangeValues(
+        initialFilter.minPrice ?? 0,
+        initialFilter.maxPrice ?? 1000000,
+      ),
+    );
 
     return Dialog(
       shape: RoundedRectangleBorder(
@@ -525,7 +667,7 @@ class _SalesFilterDialog extends HookWidget {
                   activeTrackColor: Colors.black,
                   inactiveTrackColor: AppTheme.grey300,
                   thumbColor: Colors.black,
-                  overlayColor: Colors.black.withOpacity(0.1),
+                  overlayColor: Colors.black.withValues(alpha: 0.1),
                   trackHeight: 3,
                   thumbShape:
                       const RoundSliderThumbShape(enabledThumbRadius: 8),
@@ -545,7 +687,7 @@ class _SalesFilterDialog extends HookWidget {
               AppDropdown<String>(
                 hint: 'Select cashier',
                 value: selectedCashier.value,
-                items: const ['John Doe', 'Jane Smith', 'Mike Johnson']
+                items: cashierOptions
                     .map((e) => DropdownMenuItem(value: e, child: Text(e)))
                     .toList(),
                 onChanged: (value) => selectedCashier.value = value,
@@ -556,7 +698,7 @@ class _SalesFilterDialog extends HookWidget {
               AppDropdown<String>(
                 hint: 'Select customer',
                 value: selectedCustomer.value,
-                items: const ['John Doe', 'Jane Doe', 'Bob Smith']
+                items: customerOptions
                     .map((e) => DropdownMenuItem(value: e, child: Text(e)))
                     .toList(),
                 onChanged: (value) => selectedCustomer.value = value,
@@ -578,11 +720,21 @@ class _SalesFilterDialog extends HookWidget {
               AppDropdown<String>(
                 hint: 'Select payment method',
                 value: selectedPaymentMethod.value,
-                items: const ['Cash', 'Card', 'Transfer', 'Mobile Money']
+                items: paymentOptions
                     .map((e) => DropdownMenuItem(value: e, child: Text(e)))
                     .toList(),
                 onChanged: (value) =>
                     selectedPaymentMethod.value = value,
+              ),
+              const SizedBox(height: AppTheme.spacingMedium),
+
+              AppDropdown<String>(
+                hint: 'Select status',
+                value: selectedStatus.value,
+                items: statusOptions
+                    .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                    .toList(),
+                onChanged: (value) => selectedStatus.value = value,
               ),
               const SizedBox(height: AppTheme.spacingMedium),
 
@@ -635,7 +787,7 @@ class _SalesFilterDialog extends HookWidget {
                   Expanded(
                     child: CustomButton(
                       text: 'Cancel',
-                      onPressed: () => Navigator.pop(context),
+                      onPressed: () => Navigator.pop(context, SalesFilter.empty),
                       isOutlined: true,
                       height: 50,
                     ),
@@ -647,8 +799,18 @@ class _SalesFilterDialog extends HookWidget {
                     child: CustomButton(
                       text: 'Search',
                       onPressed: () {
-                        // TODO: apply filters and close
-                        Navigator.pop(context);
+                        final nextFilter = SalesFilter(
+                          minPrice: rangeValues.value.start,
+                          maxPrice: rangeValues.value.end,
+                          cashier: selectedCashier.value,
+                          customer: selectedCustomer.value,
+                          discount: selectedDiscount.value,
+                          paymentMethod: selectedPaymentMethod.value,
+                          status: selectedStatus.value,
+                          startDate: startDate.value,
+                          endDate: endDate.value,
+                        );
+                        Navigator.pop(context, nextFilter);
                       },
                       backgroundColor: AppTheme.blue,
                       height: 50,
@@ -789,7 +951,7 @@ class _SaleDetailsDialog extends StatelessWidget {
                               ),
                               decoration: BoxDecoration(
                                 color: AppTheme.successColor
-                                    .withOpacity(0.1),
+                                  .withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(
                                     AppTheme.borderRadiusSmall),
                               ),
@@ -848,7 +1010,7 @@ class _SaleDetailsDialog extends StatelessWidget {
               const SizedBox(height: AppTheme.spacingSmall),
               _InfoRow(
                 label: 'Customer name:',
-                value: 'Cashier ${sale.customerName}',
+                value: sale.customerName,
               ),
               const SizedBox(height: 6),
               _InfoRow(
@@ -1017,7 +1179,7 @@ class _SaleDetailsDialog extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     Text(
-                      'Total:',
+                      'Total: ${AmountFormatter.formatCurrency(sale.totalPrice ?? sale.totalAmount, showDecimals: false)}',
                       style: GoogleFonts.poppins(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
@@ -1033,10 +1195,15 @@ class _SaleDetailsDialog extends StatelessWidget {
               _SectionHeader(title: 'Payment Method'),
               const SizedBox(height: AppTheme.spacingSmall),
               _InfoRow(
-                label: 'Loyalrty applied:',
+                label: 'Loyalty applied:',
                 value: sale.loyaltyApplied != null
                     ? AmountFormatter.formatCurrency(sale.loyaltyApplied)
                     : 'N/A',
+              ),
+              const SizedBox(height: 6),
+              _InfoRow(
+                label: 'Payment type:',
+                value: sale.paymentMethod ?? 'N/A',
               ),
               const SizedBox(height: 6),
               _InfoRow(

@@ -1,78 +1,143 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import '../../data/models/customer_model.dart';
+import 'package:onepos_admin_app/core/network/dio_client.dart';
+import 'package:onepos_admin_app/features/customers/data/datasources/customers_remote_datasource.dart';
+import 'package:onepos_admin_app/features/customers/data/models/customer_model.dart';
+import 'package:onepos_admin_app/features/customers/data/repositories/customers_repository_impl.dart';
 
 part 'customers_provider.g.dart';
 
 /// customers provider
-@riverpod
+@Riverpod(keepAlive: true)
 class Customers extends _$Customers {
+  CustomersRepositoryImpl get _repo =>
+      CustomersRepositoryImpl(CustomersRemoteDatasourceImpl(DioClient()));
+
   @override
-  Future<List<CustomerModel>> build() async {
-    // TODO: replace with actual api call
-    return _getMockCustomers();
+  Future<CustomersState> build() async {
+    return _fetchPage(1);
   }
 
-  /// add a new customer
-  Future<void> addCustomer(CustomerModel customer) async {
-    final current = state.valueOrNull ?? [];
-    state = AsyncData([...current, customer]);
-  }
-
-  /// update an existing customer
-  Future<void> updateCustomer(CustomerModel customer) async {
-    final current = state.valueOrNull ?? [];
-    state = AsyncData(
-      current.map((c) => c.id == customer.id ? customer : c).toList(),
+  /// fetches a specific page and returns fresh state
+  Future<CustomersState> _fetchPage(int page) async {
+    final result = await _repo.getCustomers(page: page);
+    return result.fold(
+      (failure) => throw Exception(failure.message),
+      (response) => CustomersState(
+        customers: response.customers,
+        currentPage: response.currentPage,
+        lastPage: response.lastPage,
+        hasMorePages: response.hasMorePages,
+      ),
     );
   }
 
+  /// fetch next page of customers
+  Future<void> fetchNextPage() async {
+    final current = state.valueOrNull;
+    if (current == null || !current.hasMorePages || current.isLoadingMore) {
+      return;
+    }
+
+    state = AsyncData(current.copyWith(isLoadingMore: true));
+
+    final nextPage = current.currentPage + 1;
+    final result = await _repo.getCustomers(page: nextPage);
+
+    result.fold(
+      (_) {
+        state = AsyncData(current.copyWith(isLoadingMore: false));
+      },
+      (response) {
+        state = AsyncData(
+          current.copyWith(
+            customers: [...current.customers, ...response.customers],
+            currentPage: response.currentPage,
+            lastPage: response.lastPage,
+            hasMorePages: response.hasMorePages,
+            isLoadingMore: false,
+          ),
+        );
+      },
+    );
+  }
+
+  /// add a new customer
+  Future<String?> addCustomer(Map<String, dynamic> body) async {
+    final result = await _repo.createCustomer(body);
+
+    if (result.isLeft()) {
+      return result.fold((f) => f.message, (_) => '');
+    }
+
+    final createdCustomer =
+        result.getOrElse(() => throw Exception('failed to create customer'));
+    final current = state.valueOrNull;
+    if (current != null) {
+      state = AsyncData(
+        current.copyWith(
+          customers: [createdCustomer, ...current.customers],
+        ),
+      );
+    }
+    return null;
+  }
+
+  /// update an existing customer
+  Future<String?> updateCustomer(
+    int customerId,
+    Map<String, dynamic> body,
+  ) async {
+    final current = state.valueOrNull;
+    if (current == null) return 'customers not loaded';
+
+    final result = await _repo.updateCustomer(customerId, body);
+    if (result.isLeft()) {
+      return result.fold((f) => f.message, (_) => '');
+    }
+
+    final updatedCustomer =
+        result.getOrElse(() => throw Exception('failed to update customer'));
+
+    state = AsyncData(
+      current.copyWith(
+        customers: current.customers
+            .map((c) => c.id == customerId ? updatedCustomer : c)
+            .toList(),
+      ),
+    );
+    return null;
+  }
+
   /// delete a customer by id
-  Future<void> deleteCustomer(String customerId) async {
-    final current = state.valueOrNull ?? [];
-    state = AsyncData(current.where((c) => c.id != customerId).toList());
+  Future<String?> deleteCustomer(int customerId) async {
+    final current = state.valueOrNull;
+    if (current == null) return 'customers not loaded';
+
+    final result = await _repo.deleteCustomer(customerId);
+    if (result.isLeft()) {
+      return result.fold((f) => f.message, (_) => '');
+    }
+
+    state = AsyncData(
+      current.copyWith(
+        customers: current.customers.where((c) => c.id != customerId).toList(),
+      ),
+    );
+    return null;
+  }
+
+  /// fetch single customer by id
+  Future<CustomerModel> getCustomer(int customerId) async {
+    final result = await _repo.getCustomer(customerId);
+    return result.fold(
+      (failure) => throw Exception(failure.message),
+      (customer) => customer,
+    );
   }
 
   /// refresh customers list
   Future<void> refreshCustomers() async {
     state = const AsyncLoading();
-    state = await AsyncValue.guard(() async {
-      return _getMockCustomers();
-    });
-  }
-
-  /// mock data for development
-  List<CustomerModel> _getMockCustomers() {
-    return const [
-      CustomerModel(
-        id: '1',
-        name: 'John Doe',
-        email: 'Johndoe123@gmail.com',
-      ),
-      CustomerModel(
-        id: '2',
-        name: 'John Doe',
-        email: 'Johndoe123@gmail.com',
-      ),
-      CustomerModel(
-        id: '3',
-        name: 'John Doe',
-        email: 'Johndoe123@gmail.com',
-      ),
-      CustomerModel(
-        id: '4',
-        name: 'John Doe',
-        email: 'Johndoe123@gmail.com',
-      ),
-      CustomerModel(
-        id: '5',
-        name: 'John Doe',
-        email: 'Johndoe123@gmail.com',
-      ),
-      CustomerModel(
-        id: '6',
-        name: 'John Doe',
-        email: 'Johndoe123@gmail.com',
-      ),
-    ];
+    state = await AsyncValue.guard(() => _fetchPage(1));
   }
 }

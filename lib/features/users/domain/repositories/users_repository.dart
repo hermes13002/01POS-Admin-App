@@ -6,6 +6,9 @@ abstract class UsersRepository {
   /// fetches users for a given page
   Future<Either<Failure, PaginatedUsersResponse>> getUsers({int page = 1});
 
+  /// creates a user
+  Future<Either<Failure, UserModel>> createUser(Map<String, dynamic> body);
+
   /// activates a user by id
   Future<Either<Failure, UserModel>> activateUser(int userId);
 
