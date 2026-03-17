@@ -110,4 +110,15 @@ class ApiEndpoints {
   static const String activateCategory = '/admin/categories/activate/'; // {id}
   static const String deactivateCategory =
       '/admin/categories/deactivate/'; // {id}
+  static const String subCategories = '/admin/sub_categories';
+  static const String storeSubCategory = '/admin/sub_categories/store';
+  static const String updateSubCategory =
+      '/admin/sub_categories/update/'; // {id}
+  static const String showSubCategory = '/admin/sub_categories/show/'; // {id}
+  static const String deleteSubCategory =
+      '/admin/sub_categories/delete/'; // {id}
+  static const String activateSubCategory =
+      '/admin/sub_categories/activate/'; // {id}
+  static const String deactivateSubCategory =
+      '/admin/sub_categories/deactivate/'; // {id}
 }

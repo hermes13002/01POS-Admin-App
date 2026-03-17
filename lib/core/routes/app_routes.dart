@@ -8,6 +8,7 @@ import 'package:onepos_admin_app/features/products/presentation/screens/products
 import 'package:onepos_admin_app/features/reports/presentation/screens/reports_screen.dart';
 import 'package:onepos_admin_app/features/store/presentation/screens/add_category_screen.dart';
 import 'package:onepos_admin_app/features/store/presentation/screens/add_sub_category_screen.dart';
+import 'package:onepos_admin_app/features/store/data/models/category_model.dart';
 import 'package:onepos_admin_app/features/store/presentation/screens/my_store_screen.dart';
 import 'package:onepos_admin_app/features/customers/presentation/screens/customers_screen.dart';
 import 'package:onepos_admin_app/features/customers/presentation/screens/add_customer_screen.dart';
@@ -33,6 +34,7 @@ import 'package:onepos_admin_app/features/online_store/presentation/screens/upda
 import 'package:onepos_admin_app/features/online_store/presentation/screens/currency_settings_screen.dart';
 import 'package:onepos_admin_app/features/notifications/presentation/screens/notifications_screen.dart';
 import 'package:onepos_admin_app/features/notifications/presentation/screens/notification_detail_screen.dart';
+import 'package:onepos_admin_app/features/store/presentation/screens/sub_categories_screen.dart';
 
 /// centralized route configuration
 class AppRoutes {
@@ -74,6 +76,7 @@ class AppRoutes {
   static const String updateReceiptTemplate = '/update-receipt-template';
   static const String notifications = '/notifications';
   static const String notificationDetail = '/notification-detail';
+  static const String subCategories = '/sub-categories';
 
   // route map
   static Map<String, WidgetBuilder> get routes => {
@@ -84,7 +87,11 @@ class AppRoutes {
     addProduct: (context) => const AddProductScreen(),
     myStore: (context) => const MyStoreScreen(),
     addCategory: (context) => const AddCategoryScreen(),
-    addSubCategory: (context) => const AddSubCategoryScreen(),
+    addSubCategory: (context) {
+      final args =
+          ModalRoute.of(context)!.settings.arguments as SubCategoryModel?;
+      return AddSubCategoryScreen(subCategory: args);
+    },
     lowStock: (context) => const LowStockScreen(),
     sales: (context) => const SalesScreen(),
     customers: (context) => const CustomersScreen(),
@@ -110,6 +117,7 @@ class AppRoutes {
     receiptTemplateSettings: (context) => const ReceiptTemplateScreen(),
     updateReceiptTemplate: (context) => const UpdateReceiptTemplateScreen(),
     notifications: (context) => const NotificationsScreen(),
+    subCategories: (context) => const SubCategoriesScreen(),
     notificationDetail: (context) {
       final args = ModalRoute.of(context)!.settings.arguments as int;
       return NotificationDetailScreen(notificationId: args);

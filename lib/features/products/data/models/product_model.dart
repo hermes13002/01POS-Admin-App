@@ -76,7 +76,7 @@ class ProductModel {
     parsedSubCatId ??= int.tryParse(json['sub_cat_id']?.toString() ?? '');
 
     return ProductModel(
-      id: json['id'] as int,
+      id: int.tryParse(json['id']?.toString() ?? '') ?? 0,
       name: json['product_name']?.toString() ?? '',
       price: double.tryParse(json['price']?.toString() ?? '0') ?? 0.0,
       category: catName,

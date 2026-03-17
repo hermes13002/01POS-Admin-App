@@ -7,7 +7,7 @@
         android:maxSdkVersion="32" />
 
     <application
-        android:label="onepos_admin_app"
+        android:label="01POS Admin"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

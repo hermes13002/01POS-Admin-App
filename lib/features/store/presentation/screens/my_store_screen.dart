@@ -41,10 +41,21 @@ class MyStoreScreen extends HookConsumerWidget {
         title: 'My Store',
         backgroundColor: AppTheme.backgroundColor,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh, color: Colors.black),
-            onPressed: () =>
-                ref.read(storeCategoriesProvider.notifier).refresh(),
+          // IconButton(
+          //   icon: const Icon(Icons.refresh, color: Colors.black),
+          //   onPressed: () =>
+          //       ref.read(storeCategoriesProvider.notifier).refresh(),
+          // ),
+          TextButton(
+            onPressed: () => Navigator.pushNamed(context, '/sub-categories'),
+            child: Text(
+              'Sub-category',
+              style: GoogleFonts.poppins(
+                color: Colors.black,
+                fontWeight: FontWeight.w600,
+                fontSize: 14,
+              ),
+            ),
           ),
         ],
       ),

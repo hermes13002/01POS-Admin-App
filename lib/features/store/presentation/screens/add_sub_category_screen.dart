@@ -12,22 +12,35 @@ import 'package:onepos_admin_app/core/utils/validators.dart';
 import '../../data/models/category_model.dart';
 import '../providers/store_provider.dart';
 
-/// add new sub-category screen
+/// add/edit sub-category screen
 class AddSubCategoryScreen extends HookConsumerWidget {
-  const AddSubCategoryScreen({super.key});
+  final SubCategoryModel? subCategory;
+
+  const AddSubCategoryScreen({super.key, this.subCategory});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final isEditing = subCategory != null;
     final formKey = useMemoized(() => GlobalKey<FormState>());
-    final nameController = useTextEditingController();
+    final nameController = useTextEditingController(
+      text: subCategory?.name ?? '',
+    );
+    final categoriesAsync = ref.watch(storeCategoriesProvider);
     final selectedCategory = useState<CategoryModel?>(null);
     final isLoading = useState(false);
-    final categoriesAsync = ref.watch(storeCategoriesProvider);
+
+    // set initial category if editing
+    useEffect(() {
+      if (isEditing && subCategory!.category != null) {
+        selectedCategory.value = subCategory!.category;
+      }
+      return null;
+    }, [isEditing]);
 
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
-      appBar: const CustomAppBar2(
-        title: 'Add New Sub-Category',
+      appBar: CustomAppBar2(
+        title: isEditing ? 'Edit Sub-Category' : 'Add New Sub-Category',
         backgroundColor: AppTheme.backgroundColor,
       ),
       body: Padding(
@@ -61,7 +74,7 @@ class AddSubCategoryScreen extends HookConsumerWidget {
                       Validators.validateRequired(val?.toString(), 'Category'),
                 ),
                 loading: () => const LinearProgressIndicator(),
-                error: (_, __) => Text(
+                error: (error, _) => Text(
                   'Failed to load categories',
                   style: GoogleFonts.poppins(
                     color: AppTheme.errorColor,
@@ -81,24 +94,54 @@ class AddSubCategoryScreen extends HookConsumerWidget {
 
               const Spacer(),
 
-              // add sub-category button
+              // action button
               CustomButton(
-                text: 'Add Sub-category',
+                text: isEditing ? 'Update Sub-category' : 'Add Sub-category',
                 isLoading: isLoading.value,
                 onPressed: () async {
-                  if (formKey.currentState!.validate()) {
+                  if (formKey.currentState!.validate() &&
+                      selectedCategory.value != null) {
                     isLoading.value = true;
-                    // API for this requested yet, just mock local for now if possible
-                    // However, notifier doesn't have addSubCategory anymore.
-                    // I will pop for now.
+
+                    final notifier = ref.read(
+                      storeSubCategoriesProvider.notifier,
+                    );
+                    final success = isEditing
+                        ? await notifier.updateSubCategory(
+                            subCategory!.id,
+                            categoryId: selectedCategory.value!.id,
+                            name: nameController.text.trim(),
+                          )
+                        : await notifier.addSubCategory(
+                            categoryId: selectedCategory.value!.id,
+                            name: nameController.text.trim(),
+                          );
+
                     isLoading.value = false;
+
                     if (context.mounted) {
-                      Navigator.pop(context);
-                      AppSnackbar.showSuccess(
-                        context,
-                        'Sub-category added locally',
-                      );
+                      if (success) {
+                        Navigator.pop(context);
+                        AppSnackbar.showSuccess(
+                          context,
+                          isEditing
+                              ? 'Sub-category updated successfully'
+                              : 'Sub-category added successfully',
+                        );
+                      } else {
+                        AppSnackbar.showError(
+                          context,
+                          isEditing
+                              ? 'Failed to update sub-category'
+                              : 'Failed to add sub-category',
+                        );
+                      }
                     }
+                  } else if (selectedCategory.value == null) {
+                    AppSnackbar.showWarning(
+                      context,
+                      'Please select a category',
+                    );
                   }
                 },
               ),
