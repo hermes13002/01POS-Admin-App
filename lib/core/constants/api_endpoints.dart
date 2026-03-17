@@ -43,8 +43,9 @@ class ApiEndpoints {
   static const String generateInvoice = '/invoices/generate';
 
   // Expenses
-  static const String expenses = '/expenses';
-  static const String expenseById = '/expenses/{id}';
+  static const String expenses = '/admin/expenses';
+  static const String expenseById = '/admin/expenses/{id}';
+  static const String expenseMetadata = '/admin/expenses/metadata';
 
   // Inventory
   static const String inventory = '/inventory';
@@ -81,7 +82,8 @@ class ApiEndpoints {
   static const String currencySettings = '/admin/currency-settings';
   static const String currencySettingsCurrencies =
       '/admin/currency-settings/currencies';
-  static const String currencySettingsUpdate = '/admin/currency-settings/update';
+  static const String currencySettingsUpdate =
+      '/admin/currency-settings/update';
 
   // Discounts
   static const String discounts = '/discounts';
@@ -91,4 +93,12 @@ class ApiEndpoints {
 
   // Cashier
   static const String registerCashier = '/cashier/register';
+
+  // Notifications
+  static const String notifications = '/admin/notifications';
+  static const String viewNotification = '/admin/notifications/view/';
+  static const String readNotification = '/admin/notifications/read/';
+  static const String deleteNotification = '/admin/notifications/delete/';
+  static const String deleteAllReadNotifications =
+      '/admin/notifications/allread/delete';
 }

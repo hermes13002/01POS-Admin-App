@@ -10,6 +10,7 @@ import 'package:onepos_admin_app/data/models/tool_model.dart';
 import 'package:onepos_admin_app/features/dashboard/presentation/screens/_quick_action_card.dart';
 import 'package:onepos_admin_app/features/online_store/presentation/providers/profile_provider.dart';
 import 'package:onepos_admin_app/presentation/providers/quick_actions_provider.dart';
+import 'package:onepos_admin_app/features/notifications/presentation/providers/notifications_provider.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 
 const List<String> _backgroundImages = [
@@ -87,42 +88,60 @@ class HomeScreen extends HookConsumerWidget {
                       ),
                       onPressed: () {},
                     ),
-                    Stack(
-                      children: [
-                        IconButton(
-                          icon: Image.asset(
-                            'assets/icons/notification.png',
-                            width: 24,
-                            height: 24,
-                            errorBuilder: (_, __, ___) => const Icon(
-                              Icons.notifications_outlined,
-                              size: 24,
-                            ),
-                          ),
-                          onPressed: () {},
-                        ),
-                        Positioned(
-                          right: 8,
-                          top: 8,
-                          child: Container(
-                            width: 16,
-                            height: 16,
-                            decoration: const BoxDecoration(
-                              color: Colors.red,
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Center(
-                              child: Text(
-                                '1',
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  color: Colors.white,
-                                ),
+                    const SizedBox(width: 4),
+                    GestureDetector(
+                      onTap: () =>
+                          Navigator.pushNamed(context, AppRoutes.notifications),
+                      child: Stack(
+                        children: [
+                          IconButton(
+                            icon: Image.asset(
+                              'assets/icons/notification.png',
+                              width: 24,
+                              height: 24,
+                              errorBuilder: (_, __, ___) => const Icon(
+                                Icons.notifications_outlined,
+                                size: 24,
                               ),
                             ),
+                            onPressed: () => Navigator.pushNamed(
+                              context,
+                              AppRoutes.notifications,
+                            ),
                           ),
-                        ),
-                      ],
+                          Consumer(
+                            builder: (context, ref, _) {
+                              final unreadCount = ref.watch(
+                                unreadNotificationsCountProvider,
+                              );
+                              if (unreadCount == 0) return const SizedBox();
+
+                              return Positioned(
+                                right: 8,
+                                top: 8,
+                                child: Container(
+                                  width: 16,
+                                  height: 16,
+                                  decoration: const BoxDecoration(
+                                    color: Colors.red,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      unreadCount > 9 ? '9+' : '$unreadCount',
+                                      style: const TextStyle(
+                                        fontSize: 9,
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
                     ),
                     const SizedBox(width: 4),
                     GestureDetector(

@@ -27,6 +27,16 @@ class RoleModel {
           : int.tryParse(json['level'].toString()) ?? 0,
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'slug': slug,
+      'description': description,
+      'level': level,
+    };
+  }
 }
 
 /// model for a user item
@@ -132,13 +142,16 @@ class UserModel {
       gender: json['gender']?.toString(),
       image: json['image']?.toString(),
       loginPin: json['login_pin']?.toString(),
-      canLogin: json['can_login'] == true ||
+      canLogin:
+          json['can_login'] == true ||
           json['can_login'] == 1 ||
           json['can_login'] == '1',
-      isVerified: json['is_verified'] == true ||
+      isVerified:
+          json['is_verified'] == true ||
           json['is_verified'] == 1 ||
           json['is_verified'] == '1',
-      isActive: json['is_active'] == true ||
+      isActive:
+          json['is_active'] == true ||
           json['is_active'] == 1 ||
           json['is_active'] == '1',
       emailVerifiedAt: json['email_verified_at']?.toString(),
@@ -148,6 +161,28 @@ class UserModel {
           .map((r) => RoleModel.fromJson(r as Map<String, dynamic>))
           .toList(),
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'company_id': companyId,
+      'firstname': firstname,
+      'lastname': lastname,
+      'phoneno': phoneno,
+      'address': address,
+      'email': email,
+      'gender': gender,
+      'image': image,
+      'login_pin': loginPin,
+      'can_login': canLogin,
+      'is_verified': isVerified,
+      'is_active': isActive,
+      'email_verified_at': emailVerifiedAt,
+      'created_at': createdAt,
+      'updated_at': updatedAt,
+      'roles': roles.map((e) => e.toJson()).toList(),
+    };
   }
 }
 

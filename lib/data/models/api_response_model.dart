@@ -2,45 +2,72 @@ import 'package:onepos_admin_app/data/models/base_model.dart';
 
 /// Generic API response model
 class ApiResponse<T> extends BaseModel {
+  final bool? error;
   final bool success;
   final String? message;
   final T? data;
   final Map<String, dynamic>? errors;
-  final PaginationMeta? meta;
+
+  // flattened meta for convenience
+  final int? currentPage;
+  final int? lastPage;
+  final int? perPage;
+  final int? total;
 
   ApiResponse({
+    this.error,
     required this.success,
     this.message,
     this.data,
     this.errors,
-    this.meta,
+    this.currentPage,
+    this.lastPage,
+    this.perPage,
+    this.total,
   });
+
+  /// compatibility getter for pagination meta
+  PaginationMeta? get meta => (currentPage != null || lastPage != null)
+      ? PaginationMeta(
+          currentPage: currentPage ?? 1,
+          totalPages: lastPage ?? 1,
+          totalItems: total ?? 0,
+          itemsPerPage: perPage ?? 20,
+        )
+      : null;
 
   factory ApiResponse.fromJson(
     Map<String, dynamic> json,
     T Function(dynamic)? fromJsonT,
   ) {
+    final bool isError = json['error'] ?? false;
     return ApiResponse<T>(
-      success: json['success'] ?? true,
+      error: isError,
+      success: json['success'] ?? !isError,
       message: json['message'],
       data: fromJsonT != null && json['data'] != null
           ? fromJsonT(json['data'])
           : json['data'],
       errors: json['errors'],
-      meta: json['meta'] != null
-          ? PaginationMeta.fromJson(json['meta'])
-          : null,
+      currentPage: json['current_page'],
+      lastPage: json['last_page'],
+      perPage: json['per_page'],
+      total: json['total'],
     );
   }
 
   @override
   Map<String, dynamic> toJson() {
     return {
+      'error': error,
       'success': success,
       'message': message,
       'data': data,
       'errors': errors,
-      'meta': meta?.toJson(),
+      'current_page': currentPage,
+      'last_page': lastPage,
+      'per_page': perPage,
+      'total': total,
     };
   }
 }
