@@ -37,7 +37,7 @@ class AddExpenseScreen extends HookConsumerWidget {
         "name": nameController.text.trim(),
         "category": selectedCategory.value,
         "type": selectedType.value,
-        "amount": double.tryParse(amountController.text) ?? 0,
+        "amount": double.tryParse(amountController.text.trim()) ?? 0,
         "description": descController.text.trim(),
         "expense_date": DateFormat('yyyy-MM-dd').format(DateTime.now()),
       };

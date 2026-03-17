@@ -188,8 +188,8 @@ class UsersScreen extends HookConsumerWidget {
 
   /// filters users by name, email, or role
   List<UserModel> _filterUsers(List<UserModel> users, String query) {
-    if (query.isEmpty) return users;
-    final lowerQuery = query.toLowerCase();
+    final lowerQuery = query.trim().toLowerCase();
+    if (lowerQuery.isEmpty) return users;
     return users.where((user) {
       return user.fullName.toLowerCase().contains(lowerQuery) ||
           user.email.toLowerCase().contains(lowerQuery) ||

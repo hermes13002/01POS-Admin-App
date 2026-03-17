@@ -450,8 +450,8 @@ class MyStoreScreen extends HookConsumerWidget {
                             .read(storeCategoriesProvider.notifier)
                             .updateCategory(
                               category.id,
-                              name: nameController.text,
-                              description: descController.text,
+                              name: nameController.text.trim(),
+                              description: descController.text.trim(),
                             );
 
                         if (context.mounted) {
@@ -533,7 +533,6 @@ class MyStoreScreen extends HookConsumerWidget {
   }
 }
 
-
 /// expandable category card widget
 class _CategoryCard extends StatelessWidget {
   final CategoryModel category;
@@ -604,7 +603,9 @@ class _CategoryCard extends StatelessWidget {
                       activeThumbColor: AppTheme.primaryColor,
                       activeTrackColor: AppTheme.primaryColor.withOpacity(0.2),
                       inactiveThumbColor: AppTheme.primaryColor,
-                      inactiveTrackColor: AppTheme.primaryColor.withOpacity(0.2),
+                      inactiveTrackColor: AppTheme.primaryColor.withOpacity(
+                        0.2,
+                      ),
                     ),
                   ),
                   Icon(

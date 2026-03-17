@@ -180,8 +180,8 @@ class AddUserScreen extends HookConsumerWidget {
                       'email': emailController.text.trim(),
                       'address': addressController.text.trim(),
                       'phoneno': phoneController.text.trim(),
-                      'password': passwordController.text,
-                      'confirmPassword': confirmPasswordController.text,
+                      'password': passwordController.text.trim(),
+                      'confirmPassword': confirmPasswordController.text.trim(),
                     };
 
                     final error = await ref
