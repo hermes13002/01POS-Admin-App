@@ -7,6 +7,7 @@ import 'package:onepos_admin_app/core/theme/app_theme.dart';
 import 'package:onepos_admin_app/features/online_store/data/models/receipt_template_model.dart';
 import 'package:onepos_admin_app/features/online_store/presentation/providers/receipt_template_provider.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_app_bar.dart';
+import 'package:onepos_admin_app/shared/widgets/app_snackbar.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_button.dart';
 import 'package:onepos_admin_app/shared/widgets/loading_widget.dart';
 
@@ -44,8 +45,9 @@ class UpdateReceiptTemplateScreen extends HookConsumerWidget {
                 ),
                 const SizedBox(height: AppTheme.spacingMedium),
                 ElevatedButton(
-                  onPressed: () =>
-                      ref.read(receiptTemplateProvider.notifier).refreshTemplate(),
+                  onPressed: () => ref
+                      .read(receiptTemplateProvider.notifier)
+                      .refreshTemplate(),
                   child: const Text('Retry'),
                 ),
               ],
@@ -72,14 +74,26 @@ class _UpdateReceiptContent extends HookConsumerWidget {
     final isUpdating = useState(false);
 
     // header controllers
-    final headerOneCtrl = useTextEditingController(text: template.headerLineOne);
-    final headerTwoCtrl = useTextEditingController(text: template.headerLineTwo);
-    final headerThreeCtrl = useTextEditingController(text: template.headerLineThree);
+    final headerOneCtrl = useTextEditingController(
+      text: template.headerLineOne,
+    );
+    final headerTwoCtrl = useTextEditingController(
+      text: template.headerLineTwo,
+    );
+    final headerThreeCtrl = useTextEditingController(
+      text: template.headerLineThree,
+    );
 
     // footer controllers
-    final footerOneCtrl = useTextEditingController(text: template.footerLineOne);
-    final footerTwoCtrl = useTextEditingController(text: template.footerLineTwo);
-    final footerThreeCtrl = useTextEditingController(text: template.footerLineThree);
+    final footerOneCtrl = useTextEditingController(
+      text: template.footerLineOne,
+    );
+    final footerTwoCtrl = useTextEditingController(
+      text: template.footerLineTwo,
+    );
+    final footerThreeCtrl = useTextEditingController(
+      text: template.footerLineThree,
+    );
 
     final nowText = DateFormat('M/d/yyyy h:mm:ss a').format(DateTime.now());
 
@@ -262,19 +276,13 @@ class _UpdateReceiptContent extends HookConsumerWidget {
               if (!context.mounted) return;
 
               if (error != null) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(error),
-                    backgroundColor: AppTheme.errorColor,
-                  ),
-                );
+                AppSnackbar.showError(context, error);
                 return;
               }
 
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Receipt template updated successfully'),
-                ),
+              AppSnackbar.showSuccess(
+                context,
+                'Receipt template updated successfully',
               );
               Navigator.pop(context);
             },
@@ -325,10 +333,7 @@ class _CenteredTextField extends StatelessWidget {
         child: TextFormField(
           controller: controller,
           textAlign: TextAlign.center,
-          style: GoogleFonts.poppins(
-            fontSize: 13,
-            color: AppTheme.textPrimary,
-          ),
+          style: GoogleFonts.poppins(fontSize: 13, color: AppTheme.textPrimary),
           decoration: InputDecoration(
             hintText: hint,
             hintStyle: GoogleFonts.poppins(

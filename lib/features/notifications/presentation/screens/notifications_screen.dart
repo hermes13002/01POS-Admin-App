@@ -9,6 +9,7 @@ import 'package:onepos_admin_app/shared/widgets/custom_app_bar.dart';
 import 'package:onepos_admin_app/shared/widgets/loading_widget.dart';
 import 'package:onepos_admin_app/shared/widgets/error_widget.dart';
 import 'package:onepos_admin_app/shared/widgets/empty_state_widget.dart';
+import 'package:onepos_admin_app/shared/widgets/app_snackbar.dart';
 import '../providers/notifications_provider.dart';
 
 class NotificationsScreen extends HookConsumerWidget {
@@ -80,10 +81,20 @@ class NotificationsScreen extends HookConsumerWidget {
                   direction: DismissDirection.endToStart,
                   confirmDismiss: (direction) =>
                       _confirmDeleteSingle(context, item),
-                  onDismissed: (_) {
-                    ref
+                  onDismissed: (_) async {
+                    final error = await ref
                         .read(notificationsProvider.notifier)
                         .deleteNotification(item.id);
+                    if (context.mounted) {
+                      if (error != null) {
+                        AppSnackbar.showError(context, error);
+                      } else {
+                        AppSnackbar.showSuccess(
+                          context,
+                          'Notification deleted successfully',
+                        );
+                      }
+                    }
                   },
                   background: Container(
                     alignment: Alignment.centerRight,
@@ -161,7 +172,16 @@ class NotificationsScreen extends HookConsumerWidget {
     );
 
     if (confirmed == true) {
-      ref.read(notificationsProvider.notifier).deleteAllReadNotifications();
+      final error = await ref
+          .read(notificationsProvider.notifier)
+          .deleteAllReadNotifications();
+      if (context.mounted) {
+        if (error != null) {
+          AppSnackbar.showError(context, error);
+        } else {
+          AppSnackbar.showSuccess(context, 'All read notifications deleted');
+        }
+      }
     }
   }
 

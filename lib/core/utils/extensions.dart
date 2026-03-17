@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:onepos_admin_app/shared/widgets/app_snackbar.dart';
 
 /// String extensions
 extension StringExtension on String {
@@ -11,8 +12,9 @@ extension StringExtension on String {
 
   /// Check if string is email
   bool isEmail() {
-    return RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
-        .hasMatch(this);
+    return RegExp(
+      r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
+    ).hasMatch(this);
   }
 
   /// Check if string is phone number
@@ -67,18 +69,15 @@ extension DateTimeExtension on DateTime {
 extension DoubleExtension on double {
   /// Format as currency
   String toCurrency({String symbol = '₦'}) {
-    return '$symbol${toStringAsFixed(2).replaceAllMapped(
-          RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-          (Match m) => '${m[1]},',
-        )}';
+    return '$symbol${toStringAsFixed(2).replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}';
   }
 
   /// Format with commas
   String toFormattedString({int decimals = 2}) {
     return toStringAsFixed(decimals).replaceAllMapped(
-          RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-          (Match m) => '${m[1]},',
-        );
+      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+      (Match m) => '${m[1]},',
+    );
   }
 }
 
@@ -91,9 +90,9 @@ extension IntExtension on int {
   /// Format with commas
   String toFormattedString() {
     return toString().replaceAllMapped(
-          RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-          (Match m) => '${m[1]},',
-        );
+      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+      (Match m) => '${m[1]},',
+    );
   }
 }
 
@@ -119,12 +118,11 @@ extension BuildContextExtension on BuildContext {
 
   /// Show snackbar
   void showSnackBar(String message, {bool isError = false}) {
-    ScaffoldMessenger.of(this).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: isError ? Colors.red : null,
-      ),
-    );
+    if (isError) {
+      AppSnackbar.showError(this, message);
+    } else {
+      AppSnackbar.showSuccess(this, message);
+    }
   }
 
   /// Hide keyboard

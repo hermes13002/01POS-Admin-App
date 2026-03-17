@@ -6,6 +6,7 @@ import 'package:onepos_admin_app/core/theme/app_theme.dart';
 import 'package:onepos_admin_app/features/online_store/data/models/currency_model.dart';
 import 'package:onepos_admin_app/features/online_store/presentation/providers/currency_settings_provider.dart';
 import 'package:onepos_admin_app/shared/widgets/app_dropdown.dart';
+import 'package:onepos_admin_app/shared/widgets/app_snackbar.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_app_bar.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_button.dart';
 import 'package:onepos_admin_app/shared/widgets/loading_widget.dart';
@@ -44,8 +45,9 @@ class CurrencySettingsScreen extends HookConsumerWidget {
                 ),
                 const SizedBox(height: AppTheme.spacingMedium),
                 ElevatedButton(
-                  onPressed: () =>
-                      ref.read(currencySettingsProvider.notifier).refreshSettings(),
+                  onPressed: () => ref
+                      .read(currencySettingsProvider.notifier)
+                      .refreshSettings(),
                   child: const Text('Retry'),
                 ),
               ],
@@ -173,7 +175,9 @@ class _UpdateCurrencyDialog extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final selectedCurrencyId = useState<String?>(state.companyCurrency.currencyId);
+    final selectedCurrencyId = useState<String?>(
+      state.companyCurrency.currencyId,
+    );
     final isUpdating = useState(false);
 
     return AlertDialog(
@@ -221,8 +225,9 @@ class _UpdateCurrencyDialog extends HookConsumerWidget {
               : () async {
                   final picked = selectedCurrencyId.value;
                   if (picked == null || picked.isEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Please select a currency')),
+                    AppSnackbar.showWarning(
+                      context,
+                      'Please select a currency',
                     );
                     return;
                   }
@@ -236,18 +241,14 @@ class _UpdateCurrencyDialog extends HookConsumerWidget {
                   if (!context.mounted) return;
 
                   if (error != null) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(error),
-                        backgroundColor: AppTheme.errorColor,
-                      ),
-                    );
+                    AppSnackbar.showError(context, error);
                     return;
                   }
 
                   Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Currency updated successfully')),
+                  AppSnackbar.showSuccess(
+                    context,
+                    'Currency updated successfully',
                   );
                 },
           style: ElevatedButton.styleFrom(
@@ -263,10 +264,7 @@ class _UpdateCurrencyDialog extends HookConsumerWidget {
                     valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                   ),
                 )
-              : Text(
-                  'Update Currency',
-                  style: GoogleFonts.poppins(),
-                ),
+              : Text('Update Currency', style: GoogleFonts.poppins()),
         ),
       ],
     );

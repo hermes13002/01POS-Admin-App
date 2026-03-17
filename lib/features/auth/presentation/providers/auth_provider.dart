@@ -62,4 +62,9 @@ class Auth extends _$Auth {
 
     state = const AsyncData(null);
   }
+
+  Future<String?> resetPassword(String email) async {
+    final result = await _repo.resetPassword(email);
+    return result.fold((failure) => failure.message, (_) => null);
+  }
 }

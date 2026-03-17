@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:onepos_admin_app/core/storage/secure_storage_service.dart';
-import 'package:onepos_admin_app/core/storage/shared_prefs_service.dart';
+// import 'package:onepos_admin_app/core/storage/secure_storage_service.dart';
+// import 'package:onepos_admin_app/core/storage/shared_prefs_service.dart';
+import 'package:onepos_admin_app/core/routes/app_routes.dart';
 import 'package:onepos_admin_app/core/theme/app_theme.dart';
 import 'package:onepos_admin_app/core/utils/validators.dart';
 import 'package:onepos_admin_app/presentation/screens/main_navigation_screen.dart';
@@ -20,10 +21,12 @@ const List<String> _backgroundImages = [
   'https://images.unsplash.com/photo-1501594907352-04cda38ebc29?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80',
 ];
 
+/*
 // secure storage keys for remembered credentials
 const _keyRememberMe = 'remember_me';
 const _keyRememberedEmail = 'remembered_email';
 const _keyRememberedPassword = 'remembered_password';
+*/
 
 class LoginScreen extends HookConsumerWidget {
   const LoginScreen({super.key});
@@ -32,7 +35,7 @@ class LoginScreen extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final bgIndex = useState(0);
     final isLoading = useState(false);
-    final rememberMe = useState(false);
+    // final rememberMe = useState(false);
 
     // cycle background images every 5 seconds
     useEffect(() {
@@ -47,6 +50,7 @@ class LoginScreen extends HookConsumerWidget {
     final passwordCtrl = useTextEditingController();
     final obscure = useState(true);
 
+    /*
     // load saved credentials on mount
     useEffect(() {
       Future<void> load() async {
@@ -66,6 +70,7 @@ class LoginScreen extends HookConsumerWidget {
       load();
       return null;
     }, []);
+    */
 
     Future<void> submit() async {
       if (!formKey.currentState!.validate()) return;
@@ -79,6 +84,7 @@ class LoginScreen extends HookConsumerWidget {
       if (error != null) {
         AppSnackbar.showError(context, error);
       } else {
+        /*
         // persist or clear credentials based on checkbox
         final prefs = SharedPrefsService();
         final secure = SecureStorageService();
@@ -91,6 +97,7 @@ class LoginScreen extends HookConsumerWidget {
           await secure.delete(_keyRememberedEmail);
           await secure.delete(_keyRememberedPassword);
         }
+        */
 
         // pre-fetch user profile so home & store screens have data immediately
         ref.invalidate(userProfileProvider);
@@ -223,6 +230,7 @@ class LoginScreen extends HookConsumerWidget {
                             // remember me + forgot password row
                             Row(
                               children: [
+                                /*
                                 SizedBox(
                                   width: 20,
                                   height: 20,
@@ -254,9 +262,13 @@ class LoginScreen extends HookConsumerWidget {
                                     ),
                                   ),
                                 ),
+                                */
                                 const Spacer(),
                                 TextButton(
-                                  onPressed: () {},
+                                  onPressed: () => Navigator.pushNamed(
+                                    context,
+                                    AppRoutes.resetPassword,
+                                  ),
                                   style: TextButton.styleFrom(
                                     padding: EdgeInsets.zero,
                                     tapTargetSize:

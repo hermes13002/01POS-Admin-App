@@ -7,6 +7,7 @@ import 'package:onepos_admin_app/features/expenses/presentation/providers/expens
 import 'package:onepos_admin_app/features/expenses/presentation/providers/expense_metadata_provider.dart';
 import 'package:onepos_admin_app/shared/widgets/app_dropdown.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_app_bar.dart';
+import 'package:onepos_admin_app/shared/widgets/app_snackbar.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_button.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_text_field.dart';
 import 'package:onepos_admin_app/core/utils/validators.dart';
@@ -48,17 +49,10 @@ class AddExpenseScreen extends HookConsumerWidget {
 
       if (context.mounted) {
         if (error == null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Expense created successfully')),
-          );
+          AppSnackbar.showSuccess(context, 'Expense created successfully');
           Navigator.pop(context);
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(error),
-              backgroundColor: AppTheme.errorColor,
-            ),
-          );
+          AppSnackbar.showError(context, error);
         }
       }
     }

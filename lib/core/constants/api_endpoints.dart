@@ -7,6 +7,7 @@ class ApiEndpoints {
   static const String logout = '/auth/logout';
   static const String refreshToken = '/auth/refresh';
   static const String register = '/auth/register';
+  static const String resetPassword = '/auth/rest-password';
 
   // Dashboard
   static const String dashboard = '/dashboard';
@@ -96,9 +97,17 @@ class ApiEndpoints {
 
   // Notifications
   static const String notifications = '/admin/notifications';
+  static const String categories = '/admin/categories';
+  static const String storeCategory = '/admin/categories/store';
+  static const String updateCategory = '/admin/categories/update/'; // {id}
+  static const String showCategory = '/admin/categories/show/'; // {id}
   static const String viewNotification = '/admin/notifications/view/';
   static const String readNotification = '/admin/notifications/read/';
   static const String deleteNotification = '/admin/notifications/delete/';
   static const String deleteAllReadNotifications =
       '/admin/notifications/allread/delete';
+  static const String deleteCategory = '/admin/categories/delete/'; // {id}
+  static const String activateCategory = '/admin/categories/activate/'; // {id}
+  static const String deactivateCategory =
+      '/admin/categories/deactivate/'; // {id}
 }

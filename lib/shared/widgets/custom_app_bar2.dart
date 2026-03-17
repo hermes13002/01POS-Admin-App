@@ -33,13 +33,11 @@ class CustomAppBar2 extends StatelessWidget implements PreferredSizeWidget {
       centerTitle: false,
       backgroundColor: backgroundColor ?? Colors.white,
       elevation: 0,
+      scrolledUnderElevation: 0,
       actions: actions,
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(1),
-        child: Container(
-          color: Colors.grey.shade200,
-          height: 1,
-        ),
+        child: Container(color: Colors.grey.shade200, height: 1),
       ),
     );
   }

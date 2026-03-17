@@ -5,7 +5,9 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:onepos_admin_app/core/theme/app_theme.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_app_bar2.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_search_bar.dart';
-import '../../../products/data/models/product_model.dart';
+import 'package:onepos_admin_app/shared/widgets/custom_text_field.dart';
+import 'package:onepos_admin_app/shared/widgets/app_snackbar.dart';
+import '../../data/models/category_model.dart';
 import '../providers/store_provider.dart';
 
 /// my store screen - manage store categories
@@ -18,16 +20,20 @@ class MyStoreScreen extends HookConsumerWidget {
     final searchQuery = useState('');
     final expandedIndex = useState<int?>(0);
     final categoriesAsync = ref.watch(storeCategoriesProvider);
+    final scrollController = useScrollController();
 
-    // listen for search changes
+    // infinite scroll listener
     useEffect(() {
       void listener() {
-        searchQuery.value = searchController.text;
+        if (scrollController.position.pixels >=
+            scrollController.position.maxScrollExtent - 200) {
+          ref.read(storeCategoriesProvider.notifier).loadMore();
+        }
       }
 
-      searchController.addListener(listener);
-      return () => searchController.removeListener(listener);
-    }, [searchController]);
+      scrollController.addListener(listener);
+      return () => scrollController.removeListener(listener);
+    }, [scrollController]);
 
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
@@ -36,10 +42,9 @@ class MyStoreScreen extends HookConsumerWidget {
         backgroundColor: AppTheme.backgroundColor,
         actions: [
           IconButton(
-            icon: const Icon(Icons.more_horiz, color: Colors.black),
-            onPressed: () {
-              // TODO: implement more options menu
-            },
+            icon: const Icon(Icons.refresh, color: Colors.black),
+            onPressed: () =>
+                ref.read(storeCategoriesProvider.notifier).refresh(),
           ),
         ],
       ),
@@ -55,11 +60,11 @@ class MyStoreScreen extends HookConsumerWidget {
           // categories list
           Expanded(
             child: categoriesAsync.when(
-              data: (categories) {
+              data: (state) {
                 // filter by search
                 final filtered = searchQuery.value.isEmpty
-                    ? categories
-                    : categories
+                    ? state.categories
+                    : state.categories
                           .where(
                             (c) => c.name.toLowerCase().contains(
                               searchQuery.value.toLowerCase(),
@@ -80,14 +85,24 @@ class MyStoreScreen extends HookConsumerWidget {
                 }
 
                 return ListView.separated(
+                  controller: scrollController,
                   padding: const EdgeInsets.symmetric(
                     horizontal: AppTheme.spacingMedium,
                     vertical: AppTheme.spacingSmall,
                   ),
-                  itemCount: filtered.length,
+                  itemCount: filtered.length + (state.isLoadingMore ? 1 : 0),
                   separatorBuilder: (_, __) =>
                       const SizedBox(height: AppTheme.spacingSmall),
                   itemBuilder: (context, index) {
+                    if (index == filtered.length) {
+                      return const Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(AppTheme.spacingSmall),
+                          child: CircularProgressIndicator(),
+                        ),
+                      );
+                    }
+
                     final category = filtered[index];
                     final isExpanded = expandedIndex.value == index;
 
@@ -98,13 +113,32 @@ class MyStoreScreen extends HookConsumerWidget {
                         expandedIndex.value = isExpanded ? null : index;
                       },
                       onView: () {
-                        // TODO: navigate to category detail
+                        _showCategoryDetailsDialog(context, ref, category);
                       },
                       onEdit: () {
                         _showEditCategoryDialog(context, ref, category);
                       },
                       onDelete: () {
                         _showDeleteConfirmation(context, ref, category);
+                      },
+                      onStatusToggle: (value) async {
+                        final success = await ref
+                            .read(storeCategoriesProvider.notifier)
+                            .toggleCategoryStatus(category.id, value);
+
+                        if (context.mounted) {
+                          if (success) {
+                            AppSnackbar.showSuccess(
+                              context,
+                              'Category ${value ? "activated" : "deactivated"} successfully',
+                            );
+                          } else {
+                            AppSnackbar.showError(
+                              context,
+                              'Failed to ${value ? "activate" : "deactivate"} category',
+                            );
+                          }
+                        }
                       },
                     );
                   },
@@ -124,7 +158,8 @@ class MyStoreScreen extends HookConsumerWidget {
                     ),
                     const SizedBox(height: AppTheme.spacingMedium),
                     ElevatedButton(
-                      onPressed: () => ref.invalidate(storeCategoriesProvider),
+                      onPressed: () =>
+                          ref.read(storeCategoriesProvider.notifier).refresh(),
                       child: const Text('Retry'),
                     ),
                   ],
@@ -135,7 +170,7 @@ class MyStoreScreen extends HookConsumerWidget {
         ],
       ),
 
-      // fab with speed dial (same pattern as products screen)
+      // fab with speed dial
       floatingActionButton: _AddCategoryFab(
         onAddCategory: () {
           Navigator.pushNamed(context, '/add-category');
@@ -147,120 +182,367 @@ class MyStoreScreen extends HookConsumerWidget {
     );
   }
 
+  /// show a long dialog with category and product details
+  void _showCategoryDetailsDialog(
+    BuildContext context,
+    WidgetRef ref,
+    CategoryModel summary,
+  ) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          insetPadding: const EdgeInsets.symmetric(
+            horizontal: 20,
+            vertical: 40,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppTheme.borderRadiusLarge),
+          ),
+          child: FutureBuilder<CategoryModel?>(
+            future: ref
+                .read(storeCategoriesProvider.notifier)
+                .getCategoryDetails(summary.id),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const SizedBox(
+                  height: 300,
+                  child: Center(child: CircularProgressIndicator()),
+                );
+              }
+
+              if (snapshot.hasError ||
+                  !snapshot.hasData ||
+                  snapshot.data == null) {
+                return SizedBox(
+                  height: 200,
+                  child: Center(
+                    child: Text(
+                      'Failed to load details',
+                      style: GoogleFonts.poppins(color: AppTheme.errorColor),
+                    ),
+                  ),
+                );
+              }
+
+              final category = snapshot.data!;
+
+              return Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(AppTheme.spacingMedium),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // header
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Category Details',
+                          style: GoogleFonts.poppins(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () => Navigator.pop(context),
+                          icon: const Icon(Icons.close),
+                        ),
+                      ],
+                    ),
+                    const Divider(),
+
+                    // scrollable content
+                    Flexible(
+                      child: SingleChildScrollView(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _DetailRow(label: 'Name', value: category.name),
+                            _DetailRow(
+                              label: 'Description',
+                              value: (category.shortDescription ?? '').isEmpty
+                                  ? 'N/A'
+                                  : category.shortDescription!,
+                            ),
+                            _DetailRow(
+                              label: 'Status',
+                              value: category.isActive == 1
+                                  ? 'Active'
+                                  : 'Inactive',
+                              valueColor: category.isActive == 1
+                                  ? AppTheme.successColor
+                                  : AppTheme.errorColor,
+                            ),
+                            const SizedBox(height: AppTheme.spacingMedium),
+
+                            // products list
+                            Text(
+                              'Products (${category.products.length})',
+                              style: GoogleFonts.poppins(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(height: AppTheme.spacingSmall),
+                            if (category.products.isEmpty)
+                              Text(
+                                'No products in this category',
+                                style: GoogleFonts.poppins(
+                                  fontSize: 14,
+                                  color: AppTheme.textSecondary,
+                                  fontStyle: FontStyle.italic,
+                                ),
+                              )
+                            else
+                              ListView.separated(
+                                shrinkWrap: true,
+                                physics: const NeverScrollableScrollPhysics(),
+                                itemCount: category.products.length,
+                                separatorBuilder: (_, __) => const Padding(
+                                  padding: EdgeInsets.symmetric(vertical: 4),
+                                  child: Divider(height: 1, thickness: 0.5),
+                                ),
+                                itemBuilder: (context, index) {
+                                  final product = category.products[index];
+                                  return Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 8,
+                                    ),
+                                    child: Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        // product image or placeholder
+                                        ClipRRect(
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
+                                          child: Container(
+                                            width: 50,
+                                            height: 50,
+                                            color: AppTheme.grey200,
+                                            child:
+                                                product.imageUrl != null &&
+                                                    product.imageUrl!.isNotEmpty
+                                                ? Image.network(
+                                                    product.imageUrl!,
+                                                    fit: BoxFit.cover,
+                                                    errorBuilder:
+                                                        (_, __, ___) =>
+                                                            const Icon(
+                                                              Icons.image,
+                                                            ),
+                                                  )
+                                                : const Icon(Icons.image),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                product.name,
+                                                style: GoogleFonts.poppins(
+                                                  fontWeight: FontWeight.w500,
+                                                  fontSize: 14,
+                                                ),
+                                              ),
+                                              Text(
+                                                'SKU: ${product.sku} | Price: ₦${product.price}',
+                                                style: GoogleFonts.poppins(
+                                                  fontSize: 12,
+                                                  color: AppTheme.textSecondary,
+                                                ),
+                                              ),
+                                              Text(
+                                                'Stock: ${product.stock}',
+                                                style: GoogleFonts.poppins(
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.w600,
+                                                  color: product.stock > 0
+                                                      ? AppTheme.successColor
+                                                      : AppTheme.errorColor,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+
   /// show dialog to edit a category name
   void _showEditCategoryDialog(
     BuildContext context,
     WidgetRef ref,
-    ProductCategory category,
+    CategoryModel category,
   ) {
     final nameController = TextEditingController(text: category.name);
+    final descController = TextEditingController(
+      text: category.shortDescription,
+    );
+    final isUpdating = ValueNotifier<bool>(false);
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
-        ),
-        title: Text(
-          'Edit Category',
-          style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
-        ),
-        content: TextField(
-          controller: nameController,
-          decoration: InputDecoration(
-            hintText: 'Category name',
-            border: OutlineInputBorder(
+      builder: (context) => ValueListenableBuilder<bool>(
+        valueListenable: isUpdating,
+        builder: (context, loading, _) {
+          return AlertDialog(
+            shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
             ),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              'Cancel',
-              style: GoogleFonts.poppins(color: AppTheme.textSecondary),
-            ),
-          ),
-          TextButton(
-            onPressed: () {
-              if (nameController.text.trim().isNotEmpty) {
-                ref
-                    .read(storeCategoriesProvider.notifier)
-                    .updateCategory(
-                      ProductCategory(
-                        id: category.id,
-                        name: nameController.text.trim(),
-                        subCategories: category.subCategories,
-                      ),
-                    );
-                Navigator.pop(context);
-              }
-            },
-            child: Text(
-              'Save',
+            title: Text(
+              'Edit Category',
               style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
             ),
-          ),
-        ],
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CustomTextField(
+                  controller: nameController,
+                  label: 'Category Name',
+                  hint: 'Enter name',
+                ),
+                const SizedBox(height: AppTheme.spacingMedium),
+                CustomTextField(
+                  controller: descController,
+                  label: 'Description',
+                  hint: 'Enter description',
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: loading ? null : () => Navigator.pop(context),
+                child: Text(
+                  'Cancel',
+                  style: GoogleFonts.poppins(color: AppTheme.textSecondary),
+                ),
+              ),
+              TextButton(
+                onPressed: loading
+                    ? null
+                    : () async {
+                        if (nameController.text.isEmpty) return;
+                        isUpdating.value = true;
+
+                        await ref
+                            .read(storeCategoriesProvider.notifier)
+                            .updateCategory(
+                              category.id,
+                              name: nameController.text,
+                              description: descController.text,
+                            );
+
+                        if (context.mounted) {
+                          Navigator.pop(context);
+                          AppSnackbar.showSuccess(context, 'Category updated');
+                        }
+                      },
+                child: loading
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : Text(
+                        'Save',
+                        style: GoogleFonts.poppins(color: AppTheme.blue),
+                      ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
 
-  /// show delete confirmation dialog
+  /// show dialog to confirm deletion
   void _showDeleteConfirmation(
     BuildContext context,
     WidgetRef ref,
-    ProductCategory category,
+    CategoryModel category,
   ) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
-        ),
-        title: Text(
-          'Delete Category',
-          style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
-        ),
-        content: Text(
-          'Are you sure you want to delete "${category.name}"?',
-          style: GoogleFonts.poppins(fontSize: 14),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              'Cancel',
-              style: GoogleFonts.poppins(color: AppTheme.textSecondary),
-            ),
+      builder: (context) {
+        return AlertDialog(
+          title: Text(
+            'Delete Category',
+            style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
           ),
-          TextButton(
-            onPressed: () {
-              ref
-                  .read(storeCategoriesProvider.notifier)
-                  .deleteCategory(category.id);
-              Navigator.pop(context);
-            },
-            child: Text(
-              'Delete',
-              style: GoogleFonts.poppins(color: AppTheme.errorColor),
-            ),
+          content: Text(
+            'Are you sure you want to delete "${category.name}"? This action cannot be undone.',
+            style: GoogleFonts.poppins(),
           ),
-        ],
-      ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(
+                'Cancel',
+                style: GoogleFonts.poppins(color: AppTheme.textSecondary),
+              ),
+            ),
+            TextButton(
+              onPressed: () async {
+                final success = await ref
+                    .read(storeCategoriesProvider.notifier)
+                    .deleteCategory(category.id);
+
+                if (context.mounted) {
+                  Navigator.pop(context);
+                  if (success) {
+                    AppSnackbar.showSuccess(
+                      context,
+                      '${category.name} deleted',
+                    );
+                  } else {
+                    AppSnackbar.showError(context, 'Failed to delete category');
+                  }
+                }
+              },
+              child: Text(
+                'Delete',
+                style: GoogleFonts.poppins(color: AppTheme.errorColor),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }
 
+
 /// expandable category card widget
 class _CategoryCard extends StatelessWidget {
-  final ProductCategory category;
+  final CategoryModel category;
   final bool isExpanded;
   final VoidCallback onToggle;
   final VoidCallback onView;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
+  final ValueChanged<bool> onStatusToggle;
 
   const _CategoryCard({
     required this.category,
@@ -269,6 +551,7 @@ class _CategoryCard extends StatelessWidget {
     required this.onView,
     required this.onEdit,
     required this.onDelete,
+    required this.onStatusToggle,
   });
 
   @override
@@ -290,13 +573,38 @@ class _CategoryCard extends StatelessWidget {
               child: Row(
                 children: [
                   Expanded(
-                    child: Text(
-                      category.name,
-                      style: GoogleFonts.poppins(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w500,
-                        color: AppTheme.textPrimary,
-                      ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          category.name,
+                          style: GoogleFonts.poppins(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                            color: AppTheme.textPrimary,
+                          ),
+                        ),
+                        Text(
+                          category.isActive == 1 ? 'Active' : 'Inactive',
+                          style: GoogleFonts.poppins(
+                            fontSize: 11,
+                            color: category.isActive == 1
+                                ? AppTheme.primaryColor
+                                : AppTheme.errorColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Transform.scale(
+                    scale: 0.7,
+                    child: Switch(
+                      value: category.isActive == 1,
+                      onChanged: onStatusToggle,
+                      activeThumbColor: AppTheme.primaryColor,
+                      activeTrackColor: AppTheme.primaryColor.withOpacity(0.2),
+                      inactiveThumbColor: AppTheme.primaryColor,
+                      inactiveTrackColor: AppTheme.primaryColor.withOpacity(0.2),
                     ),
                   ),
                   Icon(
@@ -330,13 +638,22 @@ class _CategoryCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // sub-category labels
-                  if (category.subCategories.isNotEmpty)
+                  if (category.subCategories.isNotEmpty) ...[
+                    Text(
+                      'Sub-categories',
+                      style: GoogleFonts.poppins(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: AppTheme.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
                     Wrap(
                       spacing: 16,
                       runSpacing: 8,
-                      children: category.subCategories.map((sub) {
+                      children: category.subCategories.take(3).map((sub) {
                         return Text(
-                          sub,
+                          sub.name,
                           style: GoogleFonts.poppins(
                             fontSize: 13,
                             color: AppTheme.textSecondary,
@@ -344,51 +661,66 @@ class _CategoryCard extends StatelessWidget {
                         );
                       }).toList(),
                     ),
+                  ],
+
+                  // product labels
+                  if (category.products.isNotEmpty) ...[
+                    const SizedBox(height: 12),
+                    Text(
+                      'Products',
+                      style: GoogleFonts.poppins(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: AppTheme.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Wrap(
+                      spacing: 16,
+                      runSpacing: 8,
+                      children: category.products.take(3).map((prod) {
+                        return Text(
+                          prod.name,
+                          style: GoogleFonts.poppins(
+                            fontSize: 13,
+                            color: AppTheme.textSecondary,
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ],
+                  if (category.subCategories.isEmpty &&
+                      category.products.isEmpty)
+                    Text(
+                      'No sub-categories or products',
+                      style: GoogleFonts.poppins(
+                        fontSize: 13,
+                        color: AppTheme.textSecondary,
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
                 ],
               ),
             ),
 
-            // divider before actions
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppTheme.spacingMedium,
-                vertical: AppTheme.spacingSmall + 4,
-              ),
-              child: Divider(color: AppTheme.grey200, height: 1),
-            ),
-
             // action buttons row
             Padding(
-              padding: const EdgeInsets.fromLTRB(
-                AppTheme.spacingMedium,
-                0,
-                AppTheme.spacingMedium,
-                AppTheme.spacingMedium,
-              ),
+              padding: const EdgeInsets.all(AppTheme.spacingMedium),
               child: Row(
                 children: [
                   // view button
                   Expanded(
                     child: OutlinedButton.icon(
                       onPressed: onView,
-                      icon: Icon(
-                        Icons.visibility_outlined,
-                        size: 18,
-                        color: AppTheme.textSecondary,
-                      ),
-                      label: Text(
-                        'View',
-                        style: GoogleFonts.poppins(
-                          fontSize: 14,
-                          color: AppTheme.textSecondary,
-                        ),
-                      ),
+                      icon: const Icon(Icons.visibility_outlined, size: 18),
+                      label: const Text('View'),
                       style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        side: const BorderSide(color: AppTheme.grey300),
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        foregroundColor: AppTheme.primaryColor,
+                        side: const BorderSide(color: AppTheme.primaryColor),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(
-                            AppTheme.borderRadiusMedium,
+                            AppTheme.borderRadiusSmall,
                           ),
                         ),
                       ),
@@ -400,24 +732,15 @@ class _CategoryCard extends StatelessWidget {
                   Expanded(
                     child: OutlinedButton.icon(
                       onPressed: onEdit,
-                      icon: const Icon(
-                        Icons.edit_outlined,
-                        size: 18,
-                        color: AppTheme.blue,
-                      ),
-                      label: Text(
-                        'Edit',
-                        style: GoogleFonts.poppins(
-                          fontSize: 14,
-                          color: AppTheme.blue,
-                        ),
-                      ),
+                      icon: const Icon(Icons.edit_outlined, size: 18),
+                      label: const Text('Edit'),
                       style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        foregroundColor: AppTheme.blue,
                         side: const BorderSide(color: AppTheme.blue),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(
-                            AppTheme.borderRadiusMedium,
+                            AppTheme.borderRadiusSmall,
                           ),
                         ),
                       ),
@@ -429,24 +752,15 @@ class _CategoryCard extends StatelessWidget {
                   Expanded(
                     child: OutlinedButton.icon(
                       onPressed: onDelete,
-                      icon: const Icon(
-                        Icons.delete_outline,
-                        size: 18,
-                        color: AppTheme.errorColor,
-                      ),
-                      label: Text(
-                        'Delete',
-                        style: GoogleFonts.poppins(
-                          fontSize: 14,
-                          color: AppTheme.errorColor,
-                        ),
-                      ),
+                      icon: const Icon(Icons.delete_outline, size: 18),
+                      label: const Text('Delete'),
                       style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        side: const BorderSide(color: Color(0xFFFFCDD2)),
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        foregroundColor: AppTheme.errorColor,
+                        side: const BorderSide(color: AppTheme.errorColor),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(
-                            AppTheme.borderRadiusMedium,
+                            AppTheme.borderRadiusSmall,
                           ),
                         ),
                       ),
@@ -462,80 +776,45 @@ class _CategoryCard extends StatelessWidget {
   }
 }
 
-/// fab with speed dial for adding category/sub-category
-class _AddCategoryFab extends HookWidget {
-  final VoidCallback onAddCategory;
-  final VoidCallback onAddSubCategory;
+/// detail row for the dialog
+class _DetailRow extends StatelessWidget {
+  final String label;
+  final String value;
+  final Color? valueColor;
 
-  const _AddCategoryFab({
-    required this.onAddCategory,
-    required this.onAddSubCategory,
-  });
+  const _DetailRow({required this.label, required this.value, this.valueColor});
 
   @override
   Widget build(BuildContext context) {
-    final isExpanded = useState(false);
-
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        // expanded options
-        if (isExpanded.value) ...[
-          // add sub-category option
-          _FabOption(
-            label: 'Generate Store',
-            color: const Color(0xFF4CAF50), // green
-            icon: Icons.store_mall_directory_outlined,
-            onTap: () {
-              isExpanded.value = false;
-              // TODO: implement generate store
-            },
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '$label: ',
+            style: GoogleFonts.poppins(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: AppTheme.textSecondary,
+            ),
           ),
-          const SizedBox(height: AppTheme.spacingSmall + 4),
-
-          // add sub-category option
-          _FabOption(
-            label: 'Add Sub-category',
-            color: const Color(0xFFC2185B),
-            icon: Icons.description_outlined,
-            onTap: () {
-              isExpanded.value = false;
-              onAddSubCategory();
-            },
+          Expanded(
+            child: Text(
+              value,
+              style: GoogleFonts.poppins(
+                fontSize: 14,
+                color: valueColor ?? AppTheme.textPrimary,
+              ),
+            ),
           ),
-          const SizedBox(height: AppTheme.spacingSmall + 4),
-
-          // add category option
-          _FabOption(
-            label: 'Add Category',
-            color: const Color(0xFF1E88E5),
-            icon: Icons.description_outlined,
-            onTap: () {
-              isExpanded.value = false;
-              onAddCategory();
-            },
-          ),
-          const SizedBox(height: AppTheme.spacingSmall + 4),
         ],
-
-        // main fab
-        FloatingActionButton(
-          onPressed: () => isExpanded.value = !isExpanded.value,
-          backgroundColor: Colors.black,
-          shape: const CircleBorder(),
-          child: AnimatedRotation(
-            turns: isExpanded.value ? 0.125 : 0,
-            duration: const Duration(milliseconds: 200),
-            child: const Icon(Icons.add, color: Colors.white, size: 28),
-          ),
-        ),
-      ],
+      ),
     );
   }
 }
 
-/// individual fab option button
+/// fab speed dial option
 class _FabOption extends StatelessWidget {
   final String label;
   final Color color;
@@ -554,16 +833,15 @@ class _FabOption extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        // label
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(AppTheme.borderRadiusSmall),
+            borderRadius: BorderRadius.circular(8),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.08),
-                blurRadius: 8,
+                color: Colors.black.withValues(alpha: 0.1),
+                blurRadius: 4,
                 offset: const Offset(0, 2),
               ),
             ],
@@ -571,25 +849,72 @@ class _FabOption extends StatelessWidget {
           child: Text(
             label,
             style: GoogleFonts.poppins(
-              fontSize: 13,
+              fontSize: 12,
               fontWeight: FontWeight.w500,
               color: AppTheme.textPrimary,
             ),
           ),
         ),
-        const SizedBox(width: AppTheme.spacingSmall + 4),
+        const SizedBox(width: 12),
+        FloatingActionButton.small(
+          heroTag: label,
+          onPressed: onTap,
+          backgroundColor: color,
+          child: Icon(icon, color: Colors.white, size: 20),
+        ),
+      ],
+    );
+  }
+}
 
-        // icon button
-        SizedBox(
-          width: 48,
-          height: 48,
-          child: FloatingActionButton(
-            heroTag: label,
-            onPressed: onTap,
-            backgroundColor: color,
-            elevation: 2,
-            shape: const CircleBorder(),
-            child: Icon(icon, color: Colors.white, size: 22),
+/// add category fab
+class _AddCategoryFab extends HookWidget {
+  final VoidCallback onAddCategory;
+  final VoidCallback onAddSubCategory;
+
+  const _AddCategoryFab({
+    required this.onAddCategory,
+    required this.onAddSubCategory,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isExpanded = useState(false);
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        if (isExpanded.value) ...[
+          _FabOption(
+            label: 'Add Sub-category',
+            color: const Color(0xFFC2185B),
+            icon: Icons.description_outlined,
+            onTap: () {
+              isExpanded.value = false;
+              onAddSubCategory();
+            },
+          ),
+          const SizedBox(height: 12),
+          _FabOption(
+            label: 'Add Category',
+            color: const Color(0xFF1E88E5),
+            icon: Icons.description_outlined,
+            onTap: () {
+              isExpanded.value = false;
+              onAddCategory();
+            },
+          ),
+          const SizedBox(height: 12),
+        ],
+        FloatingActionButton(
+          heroTag: 'main_fab',
+          onPressed: () => isExpanded.value = !isExpanded.value,
+          backgroundColor: Colors.black,
+          child: AnimatedRotation(
+            turns: isExpanded.value ? 0.125 : 0,
+            duration: const Duration(milliseconds: 200),
+            child: const Icon(Icons.add, color: Colors.white, size: 28),
           ),
         ),
       ],

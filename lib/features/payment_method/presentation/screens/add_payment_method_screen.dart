@@ -6,6 +6,7 @@ import 'package:onepos_admin_app/features/payment_method/presentation/providers/
 import 'package:onepos_admin_app/shared/widgets/custom_app_bar.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_button.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_text_field.dart';
+import 'package:onepos_admin_app/shared/widgets/app_snackbar.dart';
 import 'package:onepos_admin_app/core/utils/validators.dart';
 
 class AddPaymentMethodScreen extends HookConsumerWidget {
@@ -47,7 +48,8 @@ class AddPaymentMethodScreen extends HookConsumerWidget {
                   text: 'Add Method',
                   isLoading: isSubmitting.value,
                   onPressed: () async {
-                    if (!formKey.currentState!.validate() || isSubmitting.value) {
+                    if (!formKey.currentState!.validate() ||
+                        isSubmitting.value) {
                       return;
                     }
 
@@ -56,22 +58,22 @@ class AddPaymentMethodScreen extends HookConsumerWidget {
                     final error = await ref
                         .read(paymentMethodsProvider.notifier)
                         .addPaymentMethod({
-                      'method_name': nameController.text.trim(),
-                    });
+                          'method_name': nameController.text.trim(),
+                        });
 
                     isSubmitting.value = false;
 
                     if (!context.mounted) return;
 
                     if (error != null) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(error),
-                          backgroundColor: AppTheme.errorColor,
-                        ),
-                      );
+                      AppSnackbar.showError(context, error);
                       return;
                     }
+
+                    AppSnackbar.showSuccess(
+                      context,
+                      'Payment method added successfully',
+                    );
 
                     Navigator.pop(context, true);
                   },

@@ -11,6 +11,7 @@ import 'package:onepos_admin_app/shared/widgets/custom_app_bar.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_button_with_icon.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_search_bar.dart';
 import 'package:onepos_admin_app/shared/widgets/loading_widget.dart';
+import 'package:onepos_admin_app/shared/widgets/app_snackbar.dart';
 
 class PaymentMethodScreen extends HookConsumerWidget {
   const PaymentMethodScreen({super.key});
@@ -61,7 +62,10 @@ class PaymentMethodScreen extends HookConsumerWidget {
                 Expanded(
                   child: methodsAsync.when(
                     data: (state) {
-                      final filtered = _filterMethods(state.methods, searchQuery.value);
+                      final filtered = _filterMethods(
+                        state.methods,
+                        searchQuery.value,
+                      );
 
                       if (filtered.isEmpty) {
                         return Center(
@@ -84,15 +88,20 @@ class PaymentMethodScreen extends HookConsumerWidget {
                             const SizedBox(height: AppTheme.spacingMedium),
                         itemBuilder: (context, index) {
                           final method = filtered[index];
-                          final isExpanded = expandedMethodId.value == method.id;
+                          final isExpanded =
+                              expandedMethodId.value == method.id;
 
                           return GestureDetector(
                             onTap: () {
-                              expandedMethodId.value = isExpanded ? null : method.id;
+                              expandedMethodId.value = isExpanded
+                                  ? null
+                                  : method.id;
                             },
                             child: AnimatedContainer(
                               duration: const Duration(milliseconds: 250),
-                              padding: const EdgeInsets.all(AppTheme.spacingMedium),
+                              padding: const EdgeInsets.all(
+                                AppTheme.spacingMedium,
+                              ),
                               decoration: BoxDecoration(
                                 color: Colors.white,
                                 borderRadius: BorderRadius.circular(
@@ -166,11 +175,12 @@ class PaymentMethodScreen extends HookConsumerWidget {
                                           child: CustomButtonWithIcon(
                                             text: 'Delete',
                                             icon: Icons.delete_outline,
-                                            onPressed: () => _showDeleteConfirmation(
-                                              context,
-                                              ref,
-                                              method,
-                                            ),
+                                            onPressed: () =>
+                                                _showDeleteConfirmation(
+                                                  context,
+                                                  ref,
+                                                  method,
+                                                ),
                                             isOutlined: true,
                                             textColor: AppTheme.errorColor,
                                             iconColor: AppTheme.errorColor,
@@ -256,24 +266,29 @@ class PaymentMethodScreen extends HookConsumerWidget {
                       pageBuilder: (_, __, ___) =>
                           const ConnectBankAccountDialog(),
                       transitionBuilder:
-                          (dialogContext, animation, secondaryAnimation, child) {
-                        final curvedAnimation = CurvedAnimation(
-                          parent: animation,
-                          curve: Curves.easeOutCubic,
-                          reverseCurve: Curves.easeInCubic,
-                        );
+                          (
+                            dialogContext,
+                            animation,
+                            secondaryAnimation,
+                            child,
+                          ) {
+                            final curvedAnimation = CurvedAnimation(
+                              parent: animation,
+                              curve: Curves.easeOutCubic,
+                              reverseCurve: Curves.easeInCubic,
+                            );
 
-                        return FadeTransition(
-                          opacity: curvedAnimation,
-                          child: ScaleTransition(
-                            scale: Tween<double>(
-                              begin: 0.94,
-                              end: 1,
-                            ).animate(curvedAnimation),
-                            child: child,
-                          ),
-                        );
-                      },
+                            return FadeTransition(
+                              opacity: curvedAnimation,
+                              child: ScaleTransition(
+                                scale: Tween<double>(
+                                  begin: 0.94,
+                                  end: 1,
+                                ).animate(curvedAnimation),
+                                child: child,
+                              ),
+                            );
+                          },
                     );
                   },
                   child: Container(
@@ -361,9 +376,11 @@ class PaymentMethodScreen extends HookConsumerWidget {
     if (lowerQuery.isEmpty) return methods;
 
     return methods
-        .where((item) =>
-            item.methodName.toLowerCase().contains(lowerQuery) ||
-            item.id.toString().contains(lowerQuery))
+        .where(
+          (item) =>
+              item.methodName.toLowerCase().contains(lowerQuery) ||
+              item.id.toString().contains(lowerQuery),
+        )
         .toList();
   }
 
@@ -373,8 +390,9 @@ class PaymentMethodScreen extends HookConsumerWidget {
     int methodId,
   ) async {
     try {
-      final method =
-          await ref.read(paymentMethodsProvider.notifier).getPaymentMethod(methodId);
+      final method = await ref
+          .read(paymentMethodsProvider.notifier)
+          .getPaymentMethod(methodId);
       if (!context.mounted) return;
 
       final controller = TextEditingController(text: method.methodName);
@@ -407,9 +425,7 @@ class PaymentMethodScreen extends HookConsumerWidget {
 
       final value = controller.text.trim();
       if (value.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Payment method name is required')),
-        );
+        AppSnackbar.showWarning(context, 'Payment method name is required');
         return;
       }
 
@@ -419,22 +435,16 @@ class PaymentMethodScreen extends HookConsumerWidget {
 
       if (!context.mounted) return;
       if (error != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(error), backgroundColor: AppTheme.errorColor),
-        );
+        AppSnackbar.showError(context, error);
         return;
       }
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Payment method updated successfully')),
-      );
+      AppSnackbar.showSuccess(context, 'Payment method updated successfully');
     } catch (error) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(error.toString().replaceFirst('Exception: ', '')),
-          backgroundColor: AppTheme.errorColor,
-        ),
+      AppSnackbar.showError(
+        context,
+        error.toString().replaceFirst('Exception: ', ''),
       );
     }
   }
@@ -468,19 +478,16 @@ class PaymentMethodScreen extends HookConsumerWidget {
 
     if (confirmed != true || !context.mounted) return;
 
-    final error =
-        await ref.read(paymentMethodsProvider.notifier).deletePaymentMethod(method.id);
+    final error = await ref
+        .read(paymentMethodsProvider.notifier)
+        .deletePaymentMethod(method.id);
     if (!context.mounted) return;
 
     if (error != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error), backgroundColor: AppTheme.errorColor),
-      );
+      AppSnackbar.showError(context, error);
       return;
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Payment method deleted successfully')),
-    );
+    AppSnackbar.showSuccess(context, 'Payment method deleted successfully');
   }
 }

@@ -140,37 +140,33 @@ class Notifications extends _$Notifications {
   }
 
   /// deletes a single notification and updates local state
-  Future<void> deleteNotification(int id) async {
+  Future<String?> deleteNotification(int id) async {
     final result = await _repo.deleteNotification(id);
-    result.fold(
-      (failure) => null, // silently fail or handle error
-      (_) {
-        final current = state.valueOrNull;
-        if (current != null) {
-          final updatedList = current.notifications
-              .where((n) => n.id != id)
-              .toList();
-          state = AsyncData(current.copyWith(notifications: updatedList));
-        }
-      },
-    );
+    return result.fold((failure) => failure.message, (_) {
+      final current = state.valueOrNull;
+      if (current != null) {
+        final updatedList = current.notifications
+            .where((n) => n.id != id)
+            .toList();
+        state = AsyncData(current.copyWith(notifications: updatedList));
+      }
+      return null;
+    });
   }
 
   /// deletes all read notifications and updates local state
-  Future<void> deleteAllReadNotifications() async {
+  Future<String?> deleteAllReadNotifications() async {
     final result = await _repo.deleteAllReadNotifications();
-    result.fold(
-      (failure) => null, // silently fail or handle error
-      (_) {
-        final current = state.valueOrNull;
-        if (current != null) {
-          final updatedList = current.notifications
-              .where((n) => n.read == 0)
-              .toList();
-          state = AsyncData(current.copyWith(notifications: updatedList));
-        }
-      },
-    );
+    return result.fold((failure) => failure.message, (_) {
+      final current = state.valueOrNull;
+      if (current != null) {
+        final updatedList = current.notifications
+            .where((n) => n.read == 0)
+            .toList();
+        state = AsyncData(current.copyWith(notifications: updatedList));
+      }
+      return null;
+    });
   }
 }
 

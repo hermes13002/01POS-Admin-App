@@ -10,6 +10,7 @@ import 'package:onepos_admin_app/features/products/presentation/widgets/edit_pro
 import 'package:onepos_admin_app/shared/widgets/custom_app_bar2.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_search_bar.dart';
 import 'package:onepos_admin_app/shared/widgets/loading_widget.dart';
+import 'package:onepos_admin_app/shared/widgets/app_snackbar.dart';
 
 /// products screen with expandable product tiles
 class ProductsScreen extends HookConsumerWidget {
@@ -219,9 +220,24 @@ class ProductsScreen extends HookConsumerWidget {
             ),
           ),
           TextButton(
-            onPressed: () {
-              ref.read(productsProvider.notifier).deleteProductItem(product.id);
-              Navigator.pop(context);
+            onPressed: () async {
+              final response = await ref
+                  .read(productsProvider.notifier)
+                  .deleteProductItem(product.id);
+              if (context.mounted) {
+                if (response.success) {
+                  AppSnackbar.showSuccess(
+                    context,
+                    response.message ?? 'Product deleted successfully',
+                  );
+                } else {
+                  AppSnackbar.showError(
+                    context,
+                    response.message ?? 'Failed to delete product',
+                  );
+                }
+                Navigator.pop(context);
+              }
             },
             child: Text(
               'Delete',

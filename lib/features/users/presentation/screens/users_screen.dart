@@ -10,6 +10,7 @@ import 'package:onepos_admin_app/shared/widgets/custom_app_bar.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_button_with_icon.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_search_bar.dart';
 import 'package:onepos_admin_app/shared/widgets/loading_widget.dart';
+import 'package:onepos_admin_app/shared/widgets/app_snackbar.dart';
 
 /// Screen for viewing and managing users
 class UsersScreen extends HookConsumerWidget {
@@ -108,8 +109,10 @@ class UsersScreen extends HookConsumerWidget {
                   ),
                 ),
                 data: (usersState) {
-                  final filteredUsers =
-                      _filterUsers(usersState.users, searchQuery.value);
+                  final filteredUsers = _filterUsers(
+                    usersState.users,
+                    searchQuery.value,
+                  );
 
                   if (filteredUsers.isEmpty) {
                     return Center(
@@ -133,7 +136,8 @@ class UsersScreen extends HookConsumerWidget {
                         AppTheme.spacingMedium,
                       ).copyWith(bottom: 80),
                       itemCount:
-                          filteredUsers.length + (usersState.hasMorePages ? 1 : 0),
+                          filteredUsers.length +
+                          (usersState.hasMorePages ? 1 : 0),
                       separatorBuilder: (context, index) =>
                           const SizedBox(height: AppTheme.spacingMedium),
                       itemBuilder: (context, index) {
@@ -218,9 +222,7 @@ class _UserCard extends HookConsumerWidget {
         padding: const EdgeInsets.all(AppTheme.spacingMedium),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(
-            AppTheme.borderRadiusMedium,
-          ),
+          borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.04),
@@ -316,9 +318,7 @@ class _UserCard extends HookConsumerWidget {
                         const SizedBox(
                           width: 20,
                           height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                          ),
+                          child: CircularProgressIndicator(strokeWidth: 2),
                         )
                       else
                         SizedBox(
@@ -330,18 +330,10 @@ class _UserCard extends HookConsumerWidget {
                               isToggling.value = true;
                               final error = await ref
                                   .read(allUsersProvider.notifier)
-                                  .toggleUserStatus(
-                                    user.id,
-                                    activate: value,
-                                  );
+                                  .toggleUserStatus(user.id, activate: value);
                               isToggling.value = false;
                               if (error != null && context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(error),
-                                    backgroundColor: const Color(0xFFD32F2F),
-                                  ),
-                                );
+                                AppSnackbar.showError(context, error);
                               }
                             },
                           ),
@@ -435,12 +427,7 @@ class _UserCard extends HookConsumerWidget {
                   .deleteUser(user.id);
               isDeleting.value = false;
               if (error != null && context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(error),
-                    backgroundColor: const Color(0xFFD32F2F),
-                  ),
-                );
+                AppSnackbar.showError(context, error);
               }
             },
             child: Text(

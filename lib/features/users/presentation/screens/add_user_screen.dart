@@ -8,6 +8,7 @@ import 'package:onepos_admin_app/shared/widgets/custom_button.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_text_field.dart';
 import 'package:onepos_admin_app/core/utils/validators.dart';
 import 'package:onepos_admin_app/features/users/presentation/providers/users_provider.dart';
+import 'package:onepos_admin_app/shared/widgets/app_snackbar.dart';
 
 /// Screen for adding a new user
 class AddUserScreen extends HookConsumerWidget {
@@ -183,25 +184,22 @@ class AddUserScreen extends HookConsumerWidget {
                       'confirmPassword': confirmPasswordController.text,
                     };
 
-                    final error =
-                        await ref.read(allUsersProvider.notifier).createUser(body);
+                    final error = await ref
+                        .read(allUsersProvider.notifier)
+                        .createUser(body);
 
                     isSubmitting.value = false;
 
                     if (!context.mounted) return;
 
                     if (error != null) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(error),
-                          backgroundColor: AppTheme.errorColor,
-                        ),
-                      );
+                      AppSnackbar.showError(context, error);
                       return;
                     }
 
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('User created successfully')),
+                    AppSnackbar.showSuccess(
+                      context,
+                      'User created successfully',
                     );
                     Navigator.pop(context, true);
                   },

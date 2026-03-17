@@ -1,109 +1,191 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import '../../../products/data/models/product_model.dart';
+import 'package:onepos_admin_app/core/network/dio_client.dart';
+import '../../data/datasources/category_remote_datasource.dart';
+import '../../data/repositories/category_repository.dart';
+import '../../data/models/category_model.dart';
 
 part 'store_provider.g.dart';
 
-/// store categories provider for my store screen
+class StoreCategoriesState {
+  final List<CategoryModel> categories;
+  final int currentPage;
+  final int total;
+  final bool hasMore;
+  final bool isLoadingMore;
+
+  StoreCategoriesState({
+    this.categories = const [],
+    this.currentPage = 1,
+    this.total = 0,
+    this.hasMore = true,
+    this.isLoadingMore = false,
+  });
+
+  StoreCategoriesState copyWith({
+    List<CategoryModel>? categories,
+    int? currentPage,
+    int? total,
+    bool? hasMore,
+    bool? isLoadingMore,
+  }) {
+    return StoreCategoriesState(
+      categories: categories ?? this.categories,
+      currentPage: currentPage ?? this.currentPage,
+      total: total ?? this.total,
+      hasMore: hasMore ?? this.hasMore,
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+    );
+  }
+}
+
 @riverpod
 class StoreCategories extends _$StoreCategories {
+  CategoryRepository get _repo =>
+      CategoryRepositoryImpl(CategoryRemoteDatasourceImpl(DioClient()));
+
   @override
-  Future<List<ProductCategory>> build() async {
-    // TODO: replace with actual api call
-    return _getMockCategories();
+  Future<StoreCategoriesState> build() async {
+    final result = await _repo.getCategories(page: 1);
+    return result.fold(
+      (failure) => throw failure,
+      (response) => StoreCategoriesState(
+        categories: response.categories,
+        currentPage: response.currentPage,
+        total: response.total,
+        hasMore: response.currentPage < response.lastPage,
+      ),
+    );
+  }
+
+  Future<void> loadMore() async {
+    final current = state.valueOrNull;
+    if (current == null || !current.hasMore || current.isLoadingMore) return;
+
+    state = AsyncData(current.copyWith(isLoadingMore: true));
+
+    final result = await _repo.getCategories(page: current.currentPage + 1);
+
+    result.fold(
+      (failure) => state = AsyncData(current.copyWith(isLoadingMore: false)),
+      (response) {
+        state = AsyncData(
+          current.copyWith(
+            categories: [...current.categories, ...response.categories],
+            currentPage: response.currentPage,
+            total: response.total,
+            hasMore: response.currentPage < response.lastPage,
+            isLoadingMore: false,
+          ),
+        );
+      },
+    );
   }
 
   /// add a new category
-  Future<void> addCategory(ProductCategory category) async {
-    final current = state.valueOrNull ?? [];
-    state = AsyncData([...current, category]);
+  Future<void> addCategory({
+    required String name,
+    required String description,
+  }) async {
+    final result = await _repo.createCategory(
+      name: name,
+      description: description,
+    );
+
+    result.fold(
+      (failure) => null, // handle failure in UI
+      (newCategory) {
+        final current = state.valueOrNull;
+        if (current != null) {
+          state = AsyncData(
+            current.copyWith(
+              categories: [newCategory, ...current.categories],
+              total: (current.total) + 1,
+            ),
+          );
+        }
+      },
+    );
   }
 
   /// update an existing category
-  Future<void> updateCategory(ProductCategory category) async {
-    final current = state.valueOrNull ?? [];
-    state = AsyncData(
-      current.map((c) => c.id == category.id ? category : c).toList(),
+  Future<void> updateCategory(
+    int id, {
+    required String name,
+    required String description,
+  }) async {
+    final result = await _repo.updateCategory(
+      id,
+      name: name,
+      description: description,
+    );
+
+    result.fold(
+      (failure) => null, // handle failure in UI or locally
+      (updatedCategory) {
+        final current = state.valueOrNull;
+        if (current != null) {
+          state = AsyncData(
+            current.copyWith(
+              categories: current.categories
+                  .map((c) => c.id == updatedCategory.id ? updatedCategory : c)
+                  .toList(),
+            ),
+          );
+        }
+      },
     );
   }
 
   /// delete a category by id
-  Future<void> deleteCategory(String categoryId) async {
-    final current = state.valueOrNull ?? [];
-    state = AsyncData(current.where((c) => c.id != categoryId).toList());
-  }
+  Future<bool> deleteCategory(int categoryId) async {
+    final result = await _repo.deleteCategory(categoryId);
 
-  /// add a sub-category to an existing category
-  Future<void> addSubCategory(String categoryId, String subCategory) async {
-    final current = state.valueOrNull ?? [];
-    state = AsyncData(
-      current.map((c) {
-        if (c.id == categoryId) {
-          return ProductCategory(
-            id: c.id,
-            name: c.name,
-            subCategories: [...c.subCategories, subCategory],
-          );
-        }
-        return c;
-      }).toList(),
-    );
-  }
-
-  /// remove a sub-category from a category
-  Future<void> removeSubCategory(
-      String categoryId, String subCategory) async {
-    final current = state.valueOrNull ?? [];
-    state = AsyncData(
-      current.map((c) {
-        if (c.id == categoryId) {
-          return ProductCategory(
-            id: c.id,
-            name: c.name,
-            subCategories:
-                c.subCategories.where((s) => s != subCategory).toList(),
-          );
-        }
-        return c;
-      }).toList(),
-    );
-  }
-
-  /// refresh categories
-  Future<void> refreshCategories() async {
-    state = const AsyncLoading();
-    state = await AsyncValue.guard(() async {
-      return _getMockCategories();
+    return result.fold((failure) => false, (_) {
+      final current = state.valueOrNull;
+      if (current != null) {
+        state = AsyncData(
+          current.copyWith(
+            categories: current.categories
+                .where((c) => c.id != categoryId)
+                .toList(),
+            total: current.total > 0 ? current.total - 1 : 0,
+          ),
+        );
+      }
+      return true;
     });
   }
 
-  /// mock data for development
-  List<ProductCategory> _getMockCategories() {
-    return const [
-      ProductCategory(
-        id: '1',
-        name: 'Furniture',
-        subCategories: ['Living Room', 'Bedroom', 'Office Furniture'],
-      ),
-      ProductCategory(
-        id: '2',
-        name: 'Pharmaceuticals',
-        subCategories: ['Over-the-counter', 'Prescription', 'Supplements'],
-      ),
-      ProductCategory(
-        id: '3',
-        name: 'Groceries',
-        subCategories: ['Dairy', 'Beverages', 'Snacks'],
-      ),
-      ProductCategory(
-        id: '4',
-        name: 'Electronics',
-        subCategories: ['Laptops', 'Phones', 'Accessories'],
-      ),
-      ProductCategory(
-        id: '5',
-        name: 'Stationery',
-        subCategories: ['Pens', 'Notebooks', 'Art Supplies'],
-      ),
-    ];
+  /// fetch single category details
+  Future<CategoryModel?> getCategoryDetails(int id) async {
+    final result = await _repo.getCategoryDetails(id);
+    return result.fold((failure) => null, (category) => category);
+  }
+
+  /// toggle category active status
+  Future<bool> toggleCategoryStatus(int id, bool activate) async {
+    final result = activate
+        ? await _repo.activateCategory(id)
+        : await _repo.deactivateCategory(id);
+
+    return result.fold((failure) => false, (updatedCategory) {
+      final current = state.valueOrNull;
+      if (current != null) {
+        state = AsyncData(
+          current.copyWith(
+            categories: current.categories
+                .map((c) => c.id == id ? updatedCategory : c)
+                .toList(),
+          ),
+        );
+      }
+      return true;
+    });
+  }
+
+  /// refresh categories
+  Future<void> refresh() async {
+    state = const AsyncLoading();
+    ref.invalidateSelf();
   }
 }

@@ -7,6 +7,7 @@ import 'package:onepos_admin_app/shared/widgets/app_dropdown.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_button.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_text_field.dart';
 import 'package:onepos_admin_app/core/utils/validators.dart';
+import 'package:onepos_admin_app/shared/widgets/app_snackbar.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class ConnectBankAccountScreen extends HookConsumerWidget {
@@ -52,7 +53,11 @@ class ConnectBankAccountDialog extends HookConsumerWidget {
     ];
 
     final filteredBanks = allBanks
-        .where((bank) => bank.toLowerCase().contains(searchQuery.value.trim().toLowerCase()))
+        .where(
+          (bank) => bank.toLowerCase().contains(
+            searchQuery.value.trim().toLowerCase(),
+          ),
+        )
         .toList();
 
     if (selectedBank.value != null &&
@@ -151,8 +156,10 @@ class ConnectBankAccountDialog extends HookConsumerWidget {
                   maxLength: 10,
                   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                   validator: (val) {
-                    final requiredValidation =
-                        Validators.validateRequired(val, 'Account number');
+                    final requiredValidation = Validators.validateRequired(
+                      val,
+                      'Account number',
+                    );
                     if (requiredValidation != null) return requiredValidation;
 
                     if ((val ?? '').trim().length != 10) {
@@ -194,7 +201,8 @@ class ConnectBankAccountDialog extends HookConsumerWidget {
                       )
                       .toList(),
                   onChanged: (value) => selectedBank.value = value,
-                  validator: (value) => Validators.validateRequired(value, 'Bank'),
+                  validator: (value) =>
+                      Validators.validateRequired(value, 'Bank'),
                 ),
 
                 if (selectedBank.value != null ||
@@ -204,7 +212,9 @@ class ConnectBankAccountDialog extends HookConsumerWidget {
                     padding: const EdgeInsets.all(AppTheme.spacingMedium),
                     decoration: BoxDecoration(
                       color: AppTheme.blue.withValues(alpha: 0.07),
-                      borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
+                      borderRadius: BorderRadius.circular(
+                        AppTheme.borderRadiusMedium,
+                      ),
                       border: Border.all(
                         color: AppTheme.blue.withValues(alpha: 0.2),
                       ),
@@ -264,12 +274,9 @@ class ConnectBankAccountDialog extends HookConsumerWidget {
 
                           if (!context.mounted) return;
 
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                'Validation UI ready. Endpoint integration is pending.',
-                              ),
-                            ),
+                          AppSnackbar.showInfo(
+                            context,
+                            'Validation UI ready. Endpoint integration is pending.',
                           );
                         },
                         backgroundColor: AppTheme.blue,

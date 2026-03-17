@@ -9,4 +9,5 @@ abstract class AuthRepository {
   );
   Future<Either<Failure, LoginResponseModel>> loginWithPin(String pin);
   Future<Either<Failure, void>> logout();
+  Future<Either<Failure, void>> resetPassword(String email);
 }

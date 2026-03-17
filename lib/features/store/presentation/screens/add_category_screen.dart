@@ -6,7 +6,7 @@ import 'package:onepos_admin_app/shared/widgets/custom_app_bar2.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_button.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_text_field.dart';
 import 'package:onepos_admin_app/core/utils/validators.dart';
-import '../../../products/data/models/product_model.dart';
+import 'package:onepos_admin_app/shared/widgets/app_snackbar.dart';
 import '../providers/store_provider.dart';
 
 /// add new category screen
@@ -60,16 +60,16 @@ class AddCategoryScreen extends HookConsumerWidget {
                     await ref
                         .read(storeCategoriesProvider.notifier)
                         .addCategory(
-                          ProductCategory(
-                            id: DateTime.now().millisecondsSinceEpoch
-                                .toString(),
-                            name: nameController.text.trim(),
-                            subCategories: const [],
-                          ),
+                          name: nameController.text.trim(),
+                          description: descriptionController.text.trim(),
                         );
                     isLoading.value = false;
                     if (context.mounted) {
                       Navigator.pop(context);
+                      AppSnackbar.showSuccess(
+                        context,
+                        'Category added successfully',
+                      );
                     }
                   }
                 },

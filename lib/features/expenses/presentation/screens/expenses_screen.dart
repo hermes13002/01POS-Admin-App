@@ -12,6 +12,7 @@ import 'package:onepos_admin_app/shared/widgets/custom_search_bar.dart';
 import 'package:onepos_admin_app/features/expenses/data/models/expense_model.dart';
 import 'package:onepos_admin_app/features/expenses/presentation/providers/expense_metadata_provider.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_text_field.dart';
+import 'package:onepos_admin_app/shared/widgets/app_snackbar.dart';
 import 'package:onepos_admin_app/shared/widgets/app_dropdown.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_button.dart';
 import 'package:onepos_admin_app/core/utils/validators.dart';
@@ -271,28 +272,14 @@ class ExpensesScreen extends HookConsumerWidget {
 
                                                       if (context.mounted) {
                                                         if (error != null) {
-                                                          ScaffoldMessenger.of(
+                                                          AppSnackbar.showError(
                                                             context,
-                                                          ).showSnackBar(
-                                                            SnackBar(
-                                                              content: Text(
-                                                                error,
-                                                              ),
-                                                              backgroundColor:
-                                                                  Colors.red,
-                                                            ),
+                                                            error,
                                                           );
                                                         } else {
-                                                          ScaffoldMessenger.of(
+                                                          AppSnackbar.showSuccess(
                                                             context,
-                                                          ).showSnackBar(
-                                                            const SnackBar(
-                                                              content: Text(
-                                                                'Expense deleted successfully',
-                                                              ),
-                                                              backgroundColor:
-                                                                  Colors.green,
-                                                            ),
+                                                            'Expense deleted successfully',
                                                           );
                                                         }
                                                       }
@@ -472,13 +459,9 @@ class _EditExpenseDialog extends HookConsumerWidget {
       if (!formKey.currentState!.validate()) return;
 
       if (selectedCategory.value == 'Others') {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'The "Others" category is currently unavailable for updates. Please select a different category.',
-            ),
-            backgroundColor: AppTheme.errorColor,
-          ),
+        AppSnackbar.showWarning(
+          context,
+          'The "Others" category is currently unavailable for updates. Please select a different category.',
         );
         return;
       }
@@ -500,17 +483,10 @@ class _EditExpenseDialog extends HookConsumerWidget {
 
       if (context.mounted) {
         if (error == null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Expense updated successfully')),
-          );
+          AppSnackbar.showSuccess(context, 'Expense updated successfully');
           Navigator.pop(context);
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(error),
-              backgroundColor: AppTheme.errorColor,
-            ),
-          );
+          AppSnackbar.showError(context, error);
         }
       }
     }

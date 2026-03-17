@@ -10,6 +10,7 @@ import 'package:onepos_admin_app/shared/widgets/custom_button.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_app_bar2.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_search_bar.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_text_field.dart';
+import 'package:onepos_admin_app/shared/widgets/app_snackbar.dart';
 import 'package:onepos_admin_app/shared/widgets/loading_widget.dart';
 
 /// customers screen with expandable customer tiles
@@ -68,99 +69,98 @@ class CustomersScreen extends HookConsumerWidget {
         // ],
       ),
       body: Column(
-          children: [
-            // search bar
-            CustomSearchBar(
-              controller: searchController,
-              onChanged: (value) => searchQuery.value = value,
-              onClear: () => searchQuery.value = '',
-            ),
+        children: [
+          // search bar
+          CustomSearchBar(
+            controller: searchController,
+            onChanged: (value) => searchQuery.value = value,
+            onClear: () => searchQuery.value = '',
+          ),
 
-            // customers list
-            Expanded(
-              child: customersAsync.when(
-                data: (customersState) {
-                  final filtered = _filterCustomers(
-                    customersState.customers,
-                    searchQuery.value,
-                  );
+          // customers list
+          Expanded(
+            child: customersAsync.when(
+              data: (customersState) {
+                final filtered = _filterCustomers(
+                  customersState.customers,
+                  searchQuery.value,
+                );
 
-                  if (filtered.isEmpty) {
-                    return Center(
-                      child: Text(
-                        'No customers found',
-                        style: GoogleFonts.poppins(
-                          fontSize: 14,
-                          color: AppTheme.textSecondary,
-                        ),
+                if (filtered.isEmpty) {
+                  return Center(
+                    child: Text(
+                      'No customers found',
+                      style: GoogleFonts.poppins(
+                        fontSize: 14,
+                        color: AppTheme.textSecondary,
                       ),
-                    );
-                  }
-
-                  return ListView.separated(
-                    controller: scrollController,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppTheme.spacingMedium,
-                      vertical: AppTheme.spacingSmall,
                     ),
-                    itemCount:
-                        filtered.length + (customersState.hasMorePages ? 1 : 0),
-                    separatorBuilder: (_, __) =>
-                        const SizedBox(height: AppTheme.spacingSmall),
-                    itemBuilder: (context, index) {
-                      if (index >= filtered.length) {
-                        return const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 16),
-                          child: LoadingWidget(size: 32),
-                        );
-                      }
-
-                      final customer = filtered[index];
-                      final isExpanded = expandedCustomerId.value == customer.id;
-
-                      return _CustomerTile(
-                        customer: customer,
-                        isExpanded: isExpanded,
-                        onToggle: () {
-                          expandedCustomerId.value =
-                              isExpanded ? null : customer.id;
-                        },
-                        onView: () =>
-                            _showViewDialog(context, ref, customer.id),
-                        onEdit: () =>
-                            _showEditDialog(context, ref, customer.id),
-                        onDelete: () =>
-                            _showDeleteConfirmation(context, ref, customer),
-                      );
-                    },
                   );
-                },
-                loading: () => const Center(child: LoadingWidget()),
-                error: (error, stack) => Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Failed to load customers',
-                        style: GoogleFonts.poppins(
-                          fontSize: 16,
-                          color: AppTheme.textSecondary,
-                        ),
-                      ),
-                      const SizedBox(height: AppTheme.spacingMedium),
-                      ElevatedButton(
-                        onPressed: () => ref
-                            .read(customersProvider.notifier)
-                            .refreshCustomers(),
-                        child: const Text('Retry'),
-                      ),
-                    ],
+                }
+
+                return ListView.separated(
+                  controller: scrollController,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppTheme.spacingMedium,
+                    vertical: AppTheme.spacingSmall,
                   ),
+                  itemCount:
+                      filtered.length + (customersState.hasMorePages ? 1 : 0),
+                  separatorBuilder: (_, __) =>
+                      const SizedBox(height: AppTheme.spacingSmall),
+                  itemBuilder: (context, index) {
+                    if (index >= filtered.length) {
+                      return const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 16),
+                        child: LoadingWidget(size: 32),
+                      );
+                    }
+
+                    final customer = filtered[index];
+                    final isExpanded = expandedCustomerId.value == customer.id;
+
+                    return _CustomerTile(
+                      customer: customer,
+                      isExpanded: isExpanded,
+                      onToggle: () {
+                        expandedCustomerId.value = isExpanded
+                            ? null
+                            : customer.id;
+                      },
+                      onView: () => _showViewDialog(context, ref, customer.id),
+                      onEdit: () => _showEditDialog(context, ref, customer.id),
+                      onDelete: () =>
+                          _showDeleteConfirmation(context, ref, customer),
+                    );
+                  },
+                );
+              },
+              loading: () => const Center(child: LoadingWidget()),
+              error: (error, stack) => Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Failed to load customers',
+                      style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        color: AppTheme.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: AppTheme.spacingMedium),
+                    ElevatedButton(
+                      onPressed: () => ref
+                          .read(customersProvider.notifier)
+                          .refreshCustomers(),
+                      child: const Text('Retry'),
+                    ),
+                  ],
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
+      ),
 
       // fab with add customer option
       floatingActionButton: _AddCustomerFab(
@@ -178,7 +178,10 @@ class CustomersScreen extends HookConsumerWidget {
   }
 
   /// filters customers by name, comment and preference
-  List<CustomerModel> _filterCustomers(List<CustomerModel> customers, String query) {
+  List<CustomerModel> _filterCustomers(
+    List<CustomerModel> customers,
+    String query,
+  ) {
     final lowerQuery = query.trim().toLowerCase();
     if (lowerQuery.isEmpty) return customers;
 
@@ -197,7 +200,9 @@ class CustomersScreen extends HookConsumerWidget {
     int customerId,
   ) async {
     try {
-      final customer = await ref.read(customersProvider.notifier).getCustomer(customerId);
+      final customer = await ref
+          .read(customersProvider.notifier)
+          .getCustomer(customerId);
       if (!context.mounted) return;
       await showDialog(
         context: context,
@@ -205,11 +210,9 @@ class CustomersScreen extends HookConsumerWidget {
       );
     } catch (error) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(error.toString().replaceFirst('Exception: ', '')),
-          backgroundColor: AppTheme.errorColor,
-        ),
+      AppSnackbar.showError(
+        context,
+        error.toString().replaceFirst('Exception: ', ''),
       );
     }
   }
@@ -221,7 +224,9 @@ class CustomersScreen extends HookConsumerWidget {
     int customerId,
   ) async {
     try {
-      final customer = await ref.read(customersProvider.notifier).getCustomer(customerId);
+      final customer = await ref
+          .read(customersProvider.notifier)
+          .getCustomer(customerId);
       if (!context.mounted) return;
 
       await showDialog(
@@ -230,11 +235,9 @@ class CustomersScreen extends HookConsumerWidget {
       );
     } catch (error) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(error.toString().replaceFirst('Exception: ', '')),
-          backgroundColor: AppTheme.errorColor,
-        ),
+      AppSnackbar.showError(
+        context,
+        error.toString().replaceFirst('Exception: ', ''),
       );
     }
   }
@@ -252,22 +255,17 @@ class CustomersScreen extends HookConsumerWidget {
 
     if (confirmed != true || !context.mounted) return;
 
-    final error = await ref.read(customersProvider.notifier).deleteCustomer(customer.id);
+    final error = await ref
+        .read(customersProvider.notifier)
+        .deleteCustomer(customer.id);
     if (!context.mounted) return;
 
     if (error != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(error),
-          backgroundColor: AppTheme.errorColor,
-        ),
-      );
+      AppSnackbar.showError(context, error);
       return;
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Customer deleted successfully')),
-    );
+    AppSnackbar.showSuccess(context, 'Customer deleted successfully');
   }
 }
 
@@ -349,7 +347,8 @@ class _CustomerTile extends StatelessWidget {
           if (isExpanded) ...[
             Padding(
               padding: const EdgeInsets.symmetric(
-                  horizontal: AppTheme.spacingMedium),
+                horizontal: AppTheme.spacingMedium,
+              ),
               child: Divider(color: AppTheme.grey200, height: 1),
             ),
 
@@ -384,7 +383,8 @@ class _CustomerTile extends StatelessWidget {
                         side: const BorderSide(color: AppTheme.grey300),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(
-                              AppTheme.borderRadiusMedium),
+                            AppTheme.borderRadiusMedium,
+                          ),
                         ),
                       ),
                     ),
@@ -412,7 +412,8 @@ class _CustomerTile extends StatelessWidget {
                         side: const BorderSide(color: AppTheme.blue),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(
-                              AppTheme.borderRadiusMedium),
+                            AppTheme.borderRadiusMedium,
+                          ),
                         ),
                       ),
                     ),
@@ -440,7 +441,8 @@ class _CustomerTile extends StatelessWidget {
                         side: const BorderSide(color: Color(0xFFFFCDD2)),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(
-                              AppTheme.borderRadiusMedium),
+                            AppTheme.borderRadiusMedium,
+                          ),
                         ),
                       ),
                     ),
@@ -459,9 +461,7 @@ class _CustomerTile extends StatelessWidget {
 class _AddCustomerFab extends HookWidget {
   final VoidCallback onAddCustomer;
 
-  const _AddCustomerFab({
-    required this.onAddCustomer,
-  });
+  const _AddCustomerFab({required this.onAddCustomer});
 
   @override
   Widget build(BuildContext context) {
@@ -621,7 +621,10 @@ class _ViewCustomerDialog extends HookWidget {
               ),
               const SizedBox(height: AppTheme.spacingMedium),
               _DialogInfoRow(label: 'Name', value: customer.name),
-              _DialogInfoRow(label: 'Comment', value: customer.comment ?? 'N/A'),
+              _DialogInfoRow(
+                label: 'Comment',
+                value: customer.comment ?? 'N/A',
+              ),
               _DialogInfoRow(
                 label: 'Preference',
                 value: customer.preference ?? 'N/A',
@@ -661,9 +664,12 @@ class _EditCustomerDialog extends HookConsumerWidget {
     );
     final formKey = useMemoized(() => GlobalKey<FormState>());
     final nameController = useTextEditingController(text: customer.name);
-    final commentController = useTextEditingController(text: customer.comment ?? '');
-    final preferenceController =
-        useTextEditingController(text: customer.preference ?? '');
+    final commentController = useTextEditingController(
+      text: customer.comment ?? '',
+    );
+    final preferenceController = useTextEditingController(
+      text: customer.preference ?? '',
+    );
     final isSaving = useState(false);
 
     useEffect(() {
@@ -725,10 +731,7 @@ class _EditCustomerDialog extends HookConsumerWidget {
                   },
                 ),
                 const SizedBox(height: AppTheme.spacingMedium),
-                CustomTextField(
-                  controller: commentController,
-                  hint: 'Comment',
-                ),
+                CustomTextField(controller: commentController, hint: 'Comment'),
                 const SizedBox(height: AppTheme.spacingMedium),
                 CustomTextField(
                   controller: preferenceController,
@@ -744,30 +747,25 @@ class _EditCustomerDialog extends HookConsumerWidget {
                     }
 
                     isSaving.value = true;
-                    final error = await ref.read(customersProvider.notifier).updateCustomer(
-                      customer.id,
-                      {
-                        'name': nameController.text.trim(),
-                        'comment': commentController.text.trim(),
-                        'preference': preferenceController.text.trim(),
-                      },
-                    );
+                    final error = await ref
+                        .read(customersProvider.notifier)
+                        .updateCustomer(customer.id, {
+                          'name': nameController.text.trim(),
+                          'comment': commentController.text.trim(),
+                          'preference': preferenceController.text.trim(),
+                        });
                     isSaving.value = false;
 
                     if (!context.mounted) return;
 
                     if (error != null) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(error),
-                          backgroundColor: AppTheme.errorColor,
-                        ),
-                      );
+                      AppSnackbar.showError(context, error);
                       return;
                     }
 
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Customer updated successfully')),
+                    AppSnackbar.showSuccess(
+                      context,
+                      'Customer updated successfully',
                     );
                     await closeDialog();
                   },
@@ -869,10 +867,7 @@ class _DialogInfoRow extends StatelessWidget {
   final String label;
   final String value;
 
-  const _DialogInfoRow({
-    required this.label,
-    required this.value,
-  });
+  const _DialogInfoRow({required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {

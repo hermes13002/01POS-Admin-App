@@ -35,6 +35,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       actions: actions,
       backgroundColor: backgroundColor ?? Theme.of(context).scaffoldBackgroundColor,
       elevation: elevation,
+      scrolledUnderElevation: 0,
       bottom: bottom,
     );
   }
