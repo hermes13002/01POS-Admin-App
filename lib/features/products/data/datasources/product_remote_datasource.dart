@@ -92,4 +92,71 @@ class ProductRemoteDatasource {
       rethrow;
     }
   }
+
+  /// add new product
+  Future<Response> addProduct(FormData data) async {
+    const url = '/admin/products/store';
+    try {
+      log('add_product url: $url', name: 'API');
+      // log form data keys
+      log('add_product body: ${data.fields}', name: 'API');
+
+      final response = await _dioClient.post(url, data: data);
+
+      log('add_product response: ${jsonEncode(response.data)}', name: 'API');
+      return response;
+    } catch (e) {
+      log(
+        'add_product response: {"error": true, "message": "$e"}',
+        name: 'API',
+      );
+      rethrow;
+    }
+  }
+
+  /// set low stock limit
+  Future<Response> setLowStockLimit(int companyId, int limit) async {
+    final url = '/admin/products/low-stock-limit/$companyId';
+    try {
+      log('set_low_stock_limit url: $url', name: 'API');
+      final data = {'low_stock_limit': limit.toString()};
+      log('set_low_stock_limit body: $data', name: 'API');
+
+      final response = await _dioClient.put(url, data: data);
+
+      log(
+        'set_low_stock_limit response: ${jsonEncode(response.data)}',
+        name: 'API',
+      );
+      return response;
+    } catch (e) {
+      log(
+        'set_low_stock_limit response: {"error": true, "message": "$e"}',
+        name: 'API',
+      );
+      rethrow;
+    }
+  }
+
+  /// fetch low stock products
+  Future<Response> fetchLowStockProducts({int page = 1}) async {
+    final url = '/admin/products/low_stock?page=$page';
+    try {
+      log('fetch_low_stock_products url: $url', name: 'API');
+
+      final response = await _dioClient.post(url);
+
+      log(
+        'fetch_low_stock_products response: ${jsonEncode(response.data)}',
+        name: 'API',
+      );
+      return response;
+    } catch (e) {
+      log(
+        'fetch_low_stock_products response: {"error": true, "message": "$e"}',
+        name: 'API',
+      );
+      rethrow;
+    }
+  }
 }

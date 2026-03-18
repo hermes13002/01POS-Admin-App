@@ -92,4 +92,105 @@ class ProductRepositoryImpl implements ProductRepository {
       return ApiResponse<ProductModel>(success: false, message: e.toString());
     }
   }
+
+  @override
+  Future<ApiResponse<ProductModel>> addProduct(
+    Map<String, dynamic> data,
+  ) async {
+    try {
+      final formDataMap = <String, dynamic>{...data};
+
+      // Handle image if present
+      if (data['product_image'] != null &&
+          data['product_image'] is String &&
+          data['product_image'].toString().isNotEmpty) {
+        final imagePath = data['product_image'] as String;
+        formDataMap['product_image'] = await MultipartFile.fromFile(
+          imagePath,
+          filename: imagePath.split('/').last,
+        );
+      } else {
+        formDataMap.remove('product_image');
+      }
+
+      final response = await _remoteDatasource.addProduct(
+        FormData.fromMap(formDataMap),
+      );
+
+      return ApiResponse<ProductModel>.fromJson(
+        response.data,
+        (data) => ProductModel.fromJson(data),
+      );
+    } on DioException catch (e) {
+      return ApiResponse<ProductModel>(
+        success: false,
+        message:
+            e.response?.data?['message'] ?? e.message ?? 'An error occurred',
+      );
+    } catch (e) {
+      return ApiResponse<ProductModel>(success: false, message: e.toString());
+    }
+  }
+
+  @override
+  Future<ApiResponse<void>> setLowStockLimit(int companyId, int limit) async {
+    try {
+      final response = await _remoteDatasource.setLowStockLimit(
+        companyId,
+        limit,
+      );
+      return ApiResponse<void>(
+        success: response.data['error'] == false,
+        message: response.data['message'],
+      );
+    } on DioException catch (e) {
+      return ApiResponse<void>(
+        success: false,
+        message:
+            e.response?.data?['message'] ?? e.message ?? 'An error occurred',
+      );
+    } catch (e) {
+      return ApiResponse<void>(success: false, message: e.toString());
+    }
+  }
+
+  @override
+  Future<ApiResponse<List<ProductModel>>> fetchLowStockProducts({
+    int page = 1,
+  }) async {
+    try {
+      final response = await _remoteDatasource.fetchLowStockProducts(
+        page: page,
+      );
+      final rawData = response.data['data'];
+
+      List<dynamic> list;
+      if (rawData is Map<String, dynamic>) {
+        list = rawData['data'] as List<dynamic>? ?? [];
+      } else {
+        list = rawData as List<dynamic>? ?? [];
+      }
+
+      final products = list
+          .map((e) => ProductModel.fromJson(e as Map<String, dynamic>))
+          .toList();
+
+      return ApiResponse<List<ProductModel>>(
+        success: response.data['error'] == false,
+        message: response.data['message'],
+        data: products,
+      );
+    } on DioException catch (e) {
+      return ApiResponse<List<ProductModel>>(
+        success: false,
+        message:
+            e.response?.data?['message'] ?? e.message ?? 'An error occurred',
+      );
+    } catch (e) {
+      return ApiResponse<List<ProductModel>>(
+        success: false,
+        message: e.toString(),
+      );
+    }
+  }
 }

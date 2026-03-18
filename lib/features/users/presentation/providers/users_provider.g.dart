@@ -6,7 +6,25 @@ part of 'users_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$allUsersHash() => r'2894bed995136d887b34026119ac5f9a11a9643e';
+String _$usersRepositoryHash() => r'bc9803f25366562149243da7e812287c58a83af6';
+
+/// See also [usersRepository].
+@ProviderFor(usersRepository)
+final usersRepositoryProvider =
+    AutoDisposeProvider<UsersRepositoryImpl>.internal(
+      usersRepository,
+      name: r'usersRepositoryProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$usersRepositoryHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef UsersRepositoryRef = AutoDisposeProviderRef<UsersRepositoryImpl>;
+String _$allUsersHash() => r'905ff46e8bcc9776334e68a7156ae3210e72714b';
 
 /// manages paginated users state
 ///

@@ -1,3 +1,5 @@
+import 'package:dartz/dartz.dart';
+import 'package:onepos_admin_app/core/errors/failures.dart';
 import 'package:onepos_admin_app/core/network/dio_client.dart';
 import 'package:onepos_admin_app/features/users/data/datasources/users_remote_datasource.dart';
 import 'package:onepos_admin_app/features/users/data/models/user_model.dart';
@@ -6,12 +8,16 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'users_provider.g.dart';
 
+@riverpod
+UsersRepositoryImpl usersRepository(UsersRepositoryRef ref) {
+  return UsersRepositoryImpl(UsersRemoteDatasourceImpl(DioClient()));
+}
+
 /// manages paginated users state
 @Riverpod(keepAlive: true)
 class AllUsers extends _$AllUsers {
-  UsersRepositoryImpl get _repo => UsersRepositoryImpl(
-        UsersRemoteDatasourceImpl(DioClient()),
-      );
+  UsersRepositoryImpl get _repo =>
+      UsersRepositoryImpl(UsersRemoteDatasourceImpl(DioClient()));
 
   @override
   Future<UsersState> build() async {
@@ -41,14 +47,31 @@ class AllUsers extends _$AllUsers {
       return result.fold((f) => f.message, (_) => '');
     }
 
-    final createdUser = result.getOrElse(
+    await result.getOrElse(
       () => throw Exception('Failed to parse created user'),
     );
 
-    final current = state.valueOrNull;
-    if (current != null) {
-      state = AsyncData(current.copyWith(users: [createdUser, ...current.users]));
+    // refresh the list to stay in sync with server
+    await refresh();
+
+    return null;
+  }
+
+  /// updates a user and updates the user in the local list
+  /// returns null on success, or an error message on failure
+  Future<String?> updateUser(int userId, Map<String, dynamic> body) async {
+    final result = await _repo.updateUser(userId, body);
+
+    if (result.isLeft()) {
+      return result.fold((f) => f.message, (_) => '');
     }
+
+    await result.getOrElse(
+      () => throw Exception('Failed to parse updated user'),
+    );
+
+    // refresh the list to stay in sync with server
+    await refresh();
 
     return null;
   }
@@ -83,6 +106,11 @@ class AllUsers extends _$AllUsers {
     );
   }
 
+  /// fetches a single user by id
+  Future<Either<Failure, UserModel>> getUser(int userId) async {
+    return _repo.getUser(userId);
+  }
+
   /// toggles user active status and updates the user in the list
   /// returns null on success, or an error message on failure
   Future<String?> toggleUserStatus(int userId, {required bool activate}) async {
@@ -100,15 +128,16 @@ class AllUsers extends _$AllUsers {
 
     // fetch fresh user data from show endpoint
     final userResult = await _repo.getUser(userId);
-    userResult.fold(
-      (_) {},
-      (updatedUser) {
+    userResult.fold((_) {}, (updatedUser) {
+      final current = state.valueOrNull;
+      if (current != null) {
         final updatedList = current.users.map((u) {
           return u.id == userId ? updatedUser : u;
         }).toList();
         state = AsyncData(current.copyWith(users: updatedList));
-      },
-    );
+      }
+    });
+
     return null;
   }
 
@@ -124,9 +153,8 @@ class AllUsers extends _$AllUsers {
       return result.fold((f) => f.message, (_) => '');
     }
 
-    // remove user from local list
-    final updatedList = current.users.where((u) => u.id != userId).toList();
-    state = AsyncData(current.copyWith(users: updatedList));
+    // refresh the list after deletion
+    await refresh();
     return null;
   }
 

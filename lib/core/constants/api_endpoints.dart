@@ -66,6 +66,8 @@ class ApiEndpoints {
   static const String activateUser = '/admin/users/activate';
   static const String deactivateUser = '/admin/users/deactivate';
   static const String storeUser = '/admin/users/store';
+  static const String updateUser = '/admin/users/update';
+  static const String getRoles = '/admin/roles';
   static const String deleteUser = '/admin/users/delete';
 
   // Payment Methods

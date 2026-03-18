@@ -6,7 +6,7 @@ part of 'low_stock_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$lowStockProductsHash() => r'8a310930668fcf98e20da75b5e26ef6a82813ca7';
+String _$lowStockProductsHash() => r'fba34f5b2a360f026633835acee1fc76966e8fbf';
 
 /// low stock products provider
 ///

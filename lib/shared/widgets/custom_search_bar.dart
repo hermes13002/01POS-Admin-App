@@ -28,7 +28,8 @@ class CustomSearchBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: padding ?? const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding:
+          padding ?? const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: TextField(
         controller: controller,
         onChanged: onChanged,
@@ -36,7 +37,8 @@ class CustomSearchBar extends StatelessWidget {
         readOnly: readOnly,
         decoration: InputDecoration(
           hintText: hintText,
-          prefixIcon: leading ?? const Icon(Icons.search),
+          prefixIcon:
+              leading ?? Image.asset('assets/icons/search.png', scale: 3),
           suffixIcon: controller?.text.isNotEmpty ?? false
               ? IconButton(
                   icon: const Icon(Icons.clear),
@@ -46,20 +48,23 @@ class CustomSearchBar extends StatelessWidget {
                   },
                 )
               : trailing?.isNotEmpty ?? false
-                  ? Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: trailing!,
-                    )
-                  : null,
+              ? Row(mainAxisSize: MainAxisSize.min, children: trailing!)
+              : null,
           filled: true,
-          fillColor: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.3),
+          fillColor: Theme.of(
+            context,
+          ).colorScheme.surfaceContainerHighest.withOpacity(0.3),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Theme.of(context).colorScheme.primary.withOpacity(0.15),),
+            borderSide: BorderSide(
+              color: Theme.of(context).colorScheme.primary.withOpacity(0.15),
+            ),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Theme.of(context).colorScheme.primary.withOpacity(0.15),),
+            borderSide: BorderSide(
+              color: Theme.of(context).colorScheme.primary.withOpacity(0.15),
+            ),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
@@ -68,7 +73,10 @@ class CustomSearchBar extends StatelessWidget {
               width: 1,
             ),
           ),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 12,
+          ),
         ),
       ),
     );

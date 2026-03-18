@@ -6,7 +6,25 @@ part of 'products_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$singleProductHash() => r'7641a824065ced667edcfd5af92ecc467689dff5';
+String _$productRepositoryHash() => r'2c93231218b83a32f74762cc26bd1f73e38b9efa';
+
+/// See also [productRepository].
+@ProviderFor(productRepository)
+final productRepositoryProvider =
+    AutoDisposeProvider<ProductRepositoryImpl>.internal(
+      productRepository,
+      name: r'productRepositoryProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$productRepositoryHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef ProductRepositoryRef = AutoDisposeProviderRef<ProductRepositoryImpl>;
+String _$singleProductHash() => r'3bf38d54d4cd046b6e1bd3c9879f80adf4a47dd5';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -163,7 +181,7 @@ class _SingleProductProviderElement
   int get id => (origin as SingleProductProvider).id;
 }
 
-String _$productsHash() => r'26fb7b524389fac623eaf9f29a90aec55766a944';
+String _$productsHash() => r'28dfdb3eb32c0dc28a7d1c714b45afdda4a14904';
 
 /// products paginated data provider
 ///

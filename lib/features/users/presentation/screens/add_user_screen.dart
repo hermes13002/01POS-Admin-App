@@ -7,6 +7,7 @@ import 'package:onepos_admin_app/shared/widgets/custom_app_bar.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_button.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_text_field.dart';
 import 'package:onepos_admin_app/core/utils/validators.dart';
+import 'package:onepos_admin_app/features/users/presentation/providers/roles_provider.dart';
 import 'package:onepos_admin_app/features/users/presentation/providers/users_provider.dart';
 import 'package:onepos_admin_app/shared/widgets/app_snackbar.dart';
 
@@ -25,17 +26,12 @@ class AddUserScreen extends HookConsumerWidget {
     final passwordController = useTextEditingController();
     final confirmPasswordController = useTextEditingController();
 
-    final selectedRole = useState<String?>('Cashier');
+    final rolesAsync = ref.watch(rolesProvider);
+
+    final selectedRoleId = useState<int?>(null);
     final isPasswordVisible = useState<bool>(false);
     final isConfirmPasswordVisible = useState<bool>(false);
     final isSubmitting = useState<bool>(false);
-
-    final roleIdByName = {
-      'Cashier': 2,
-      'Manager': 3,
-      'Supervisor': 4,
-      'Lender': 5,
-    };
 
     return Scaffold(
       appBar: CustomAppBar(
@@ -78,22 +74,34 @@ class AddUserScreen extends HookConsumerWidget {
                 ),
                 const SizedBox(height: AppTheme.spacingMedium),
 
-                AppDropdown<String>(
-                  hint: 'Role',
-                  value: selectedRole.value,
-                  items: const [
-                    DropdownMenuItem(value: 'Cashier', child: Text('Cashier')),
-                    DropdownMenuItem(value: 'Manager', child: Text('Manager')),
-                    DropdownMenuItem(
-                      value: 'Supervisor',
-                      child: Text('Supervisor'),
-                    ),
-                    DropdownMenuItem(value: 'Lender', child: Text('Lender')),
-                  ],
-                  onChanged: (val) {
-                    if (val != null) selectedRole.value = val;
-                  },
-                  validator: (val) => Validators.validateRequired(val, 'Role'),
+                rolesAsync.when(
+                  data: (roles) => AppDropdown<int>(
+                    hint: 'Role',
+                    value: selectedRoleId.value,
+                    items: roles.map((role) {
+                      return DropdownMenuItem<int>(
+                        value: role.id,
+                        child: Text(role.name),
+                      );
+                    }).toList(),
+                    onChanged: (val) {
+                      if (val != null) selectedRoleId.value = val;
+                    },
+                    validator: (val) {
+                      if (val == null) return 'Role is required';
+                      return null;
+                    },
+                  ),
+                  loading: () => const AppDropdown<int>(
+                    hint: 'Loading roles...',
+                    items: [],
+                    onChanged: null,
+                  ),
+                  error: (_, __) => const AppDropdown<int>(
+                    hint: 'Error loading roles',
+                    items: [],
+                    onChanged: null,
+                  ),
                 ),
                 const SizedBox(height: AppTheme.spacingMedium),
 
@@ -168,13 +176,10 @@ class AddUserScreen extends HookConsumerWidget {
                       return;
                     }
 
-                    final selectedRoleName = selectedRole.value;
-                    final roleId = roleIdByName[selectedRoleName] ?? 2;
-
                     isSubmitting.value = true;
 
                     final body = <String, dynamic>{
-                      'role_id': roleId,
+                      'role_id': selectedRoleId.value,
                       'firstname': firstNameController.text.trim(),
                       'lastname': lastNameController.text.trim(),
                       'email': emailController.text.trim(),

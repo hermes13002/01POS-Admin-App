@@ -67,13 +67,13 @@ class AppTools {
       icon: Icons.warning_amber_outlined,
       route: '/low-stock',
     ),
-    ToolModel(
-      id: 'low_stock_ai',
-      name: 'Low Stock AI',
-      iconPath: 'assets/icons/low_stock_ai.png',
-      icon: Icons.smart_toy_outlined,
-      route: '/low-stock-ai',
-    ),
+    // ToolModel(
+    //   id: 'low_stock_ai',
+    //   name: 'Low Stock AI',
+    //   iconPath: 'assets/icons/low_stock_ai.png',
+    //   icon: Icons.smart_toy_outlined,
+    //   route: '/low-stock-ai',
+    // ),
     ToolModel(
       id: 'sales',
       name: 'Sales',
@@ -81,13 +81,13 @@ class AppTools {
       icon: Icons.point_of_sale_outlined,
       route: '/sales',
     ),
-    ToolModel(
-      id: 'orders',
-      name: 'Orders',
-      iconPath: 'assets/icons/orders.png',
-      icon: Icons.shopping_cart_outlined,
-      route: '/orders',
-    ),
+    // ToolModel(
+    //   id: 'orders',
+    //   name: 'Orders',
+    //   iconPath: 'assets/icons/orders.png',
+    //   icon: Icons.shopping_cart_outlined,
+    //   route: '/orders',
+    // ),
     ToolModel(
       id: 'customers',
       name: 'Customers',
@@ -153,6 +153,6 @@ class AppTools {
     ),
   ];
 
-  /// Default quick actions (first 8 tools)
-  static List<ToolModel> get defaultQuickActions => allTools.take(8).toList();
+  /// Default quick actions (first 6 tools)
+  static List<ToolModel> get defaultQuickActions => allTools.take(6).toList();
 }

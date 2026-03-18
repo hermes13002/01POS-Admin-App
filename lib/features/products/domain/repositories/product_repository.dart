@@ -9,4 +9,7 @@ abstract class ProductRepository {
     int id,
     Map<String, dynamic> data,
   );
+  Future<ApiResponse<ProductModel>> addProduct(Map<String, dynamic> data);
+  Future<ApiResponse<void>> setLowStockLimit(int companyId, int limit);
+  Future<ApiResponse<List<ProductModel>>> fetchLowStockProducts({int page = 1});
 }

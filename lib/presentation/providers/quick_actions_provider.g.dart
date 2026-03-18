@@ -6,7 +6,7 @@ part of 'quick_actions_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$quickActionsHash() => r'617b08fba208974e8cde1ae047489e2cc65b1dee';
+String _$quickActionsHash() => r'ec639adfba6d13c1c9c238beb13ec2938e427bd1';
 
 /// Quick actions notifier
 ///

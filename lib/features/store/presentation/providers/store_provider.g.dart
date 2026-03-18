@@ -26,7 +26,7 @@ final storeCategoriesProvider =
 
 typedef _$StoreCategories = AutoDisposeAsyncNotifier<StoreCategoriesState>;
 String _$storeSubCategoriesHash() =>
-    r'd5c6a1a121d5aa7a4ad98f5454fffbc963d33497';
+    r'a54121c21b8966e82d1ed60b3fa0fa4d2674e936';
 
 /// See also [StoreSubCategories].
 @ProviderFor(StoreSubCategories)

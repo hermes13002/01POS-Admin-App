@@ -14,6 +14,9 @@ abstract class UsersRemoteDatasource {
   /// creates a user
   Future<UserModel> createUser(Map<String, dynamic> body);
 
+  /// updates a user
+  Future<UserModel> updateUser(int userId, Map<String, dynamic> body);
+
   /// activates a user by id
   Future<UserModel> activateUser(int userId);
 
@@ -25,6 +28,9 @@ abstract class UsersRemoteDatasource {
 
   /// deletes a user by id
   Future<void> deleteUser(int userId);
+
+  /// fetches roles
+  Future<List<RoleModel>> getRoles();
 }
 
 class UsersRemoteDatasourceImpl implements UsersRemoteDatasource {
@@ -81,16 +87,38 @@ class UsersRemoteDatasourceImpl implements UsersRemoteDatasource {
   }
 
   @override
+  Future<UserModel> updateUser(int userId, Map<String, dynamic> body) async {
+    final url = '${AppConstants.baseUrl}${ApiEndpoints.updateUser}/$userId';
+
+    log('update_user url: $url', name: 'API');
+    log('update_user body: ${jsonEncode(body)}', name: 'API');
+
+    final response = await _client.put(
+      '${ApiEndpoints.updateUser}/$userId',
+      data: body,
+    );
+    final responseBody = response.data as Map<String, dynamic>;
+
+    log('update_user response: ${jsonEncode(responseBody)}', name: 'API');
+
+    if (responseBody['error'] == true) {
+      throw ServerException(
+        message: responseBody['message'] ?? 'Failed to update user',
+      );
+    }
+
+    return UserModel.fromJson(responseBody['data'] as Map<String, dynamic>);
+  }
+
+  @override
   Future<UserModel> activateUser(int userId) async {
-    final url =
-        '${AppConstants.baseUrl}${ApiEndpoints.activateUser}/$userId';
+    final url = '${AppConstants.baseUrl}${ApiEndpoints.activateUser}/$userId';
     final body = <String, dynamic>{};
 
     log('activate_user url: $url', name: 'API');
     log('activate_user body: ${jsonEncode(body)}', name: 'API');
 
-    final response =
-        await _client.get('${ApiEndpoints.activateUser}/$userId');
+    final response = await _client.get('${ApiEndpoints.activateUser}/$userId');
     final responseBody = response.data as Map<String, dynamic>;
 
     log('activate_user response: ${jsonEncode(responseBody)}', name: 'API');
@@ -106,15 +134,15 @@ class UsersRemoteDatasourceImpl implements UsersRemoteDatasource {
 
   @override
   Future<UserModel> deactivateUser(int userId) async {
-    final url =
-        '${AppConstants.baseUrl}${ApiEndpoints.deactivateUser}/$userId';
+    final url = '${AppConstants.baseUrl}${ApiEndpoints.deactivateUser}/$userId';
     final body = <String, dynamic>{};
 
     log('deactivate_user url: $url', name: 'API');
     log('deactivate_user body: ${jsonEncode(body)}', name: 'API');
 
-    final response =
-        await _client.get('${ApiEndpoints.deactivateUser}/$userId');
+    final response = await _client.get(
+      '${ApiEndpoints.deactivateUser}/$userId',
+    );
     final responseBody = response.data as Map<String, dynamic>;
 
     log('deactivate_user response: ${jsonEncode(responseBody)}', name: 'API');
@@ -158,8 +186,7 @@ class UsersRemoteDatasourceImpl implements UsersRemoteDatasource {
     log('delete_user url: $url', name: 'API');
     log('delete_user body: ${jsonEncode(body)}', name: 'API');
 
-    final response =
-        await _client.delete('${ApiEndpoints.deleteUser}/$userId');
+    final response = await _client.delete('${ApiEndpoints.deleteUser}/$userId');
     final responseBody = response.data as Map<String, dynamic>;
 
     log('delete_user response: ${jsonEncode(responseBody)}', name: 'API');
@@ -169,5 +196,29 @@ class UsersRemoteDatasourceImpl implements UsersRemoteDatasource {
         message: responseBody['message'] ?? 'Failed to delete user',
       );
     }
+  }
+
+  @override
+  Future<List<RoleModel>> getRoles() async {
+    final url = '${AppConstants.baseUrl}${ApiEndpoints.getRoles}';
+
+    log('get_roles url: $url', name: 'API');
+
+    final response = await _client.get(ApiEndpoints.getRoles);
+    final responseBody = response.data as Map<String, dynamic>;
+
+    log('get_roles response: ${jsonEncode(responseBody)}', name: 'API');
+
+    if (responseBody['error'] == true) {
+      throw ServerException(
+        message: responseBody['message'] ?? 'Failed to fetch roles',
+      );
+    }
+
+    final rolesList = responseBody['data'] as List<dynamic>? ?? [];
+
+    return rolesList
+        .map((r) => RoleModel.fromJson(r as Map<String, dynamic>))
+        .toList();
   }
 }

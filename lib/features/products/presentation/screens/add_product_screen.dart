@@ -3,11 +3,13 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:onepos_admin_app/core/routes/app_routes.dart';
 import 'package:onepos_admin_app/core/theme/app_theme.dart';
 import 'package:onepos_admin_app/core/utils/image_picker_util.dart';
-import 'package:onepos_admin_app/features/products/data/models/product_model.dart';
 import 'package:onepos_admin_app/features/products/presentation/providers/products_provider.dart';
+import 'package:onepos_admin_app/features/store/presentation/providers/store_provider.dart';
 import 'package:onepos_admin_app/shared/widgets/app_dropdown.dart';
+import 'package:onepos_admin_app/shared/widgets/app_snackbar.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_app_bar2.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_button.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_text_field.dart';
@@ -20,14 +22,14 @@ class AddProductScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final formKey = useMemoized(() => GlobalKey<FormState>());
-    final categoriesAsync = ref.watch(productCategoriesProvider);
+    final categoriesAsync = ref.watch(storeCategoriesProvider);
 
     // step 1 controllers
     final nameController = useTextEditingController();
     final quantityController = useTextEditingController();
     final priceController = useTextEditingController();
-    final selectedCategory = useState<String?>(null);
-    final selectedSubCategory = useState<String?>(null);
+    final selectedCategoryId = useState<int?>(null);
+    final selectedSubCategoryId = useState<int?>(null);
 
     // step 2 controllers
     final storeController = useTextEditingController();
@@ -47,18 +49,18 @@ class AddProductScreen extends HookConsumerWidget {
 
     // available sub-categories based on selected category
     final subCategories = useMemoized(() {
-      if (selectedCategory.value == null) return <String>[];
-      final categories = categoriesAsync.valueOrNull ?? [];
-      final match = categories.where((c) => c.name == selectedCategory.value);
-      if (match.isEmpty) return <String>[];
+      if (selectedCategoryId.value == null) return [];
+      final categories = categoriesAsync.valueOrNull?.categories ?? [];
+      final match = categories.where((c) => c.id == selectedCategoryId.value);
+      if (match.isEmpty) return [];
       return match.first.subCategories;
-    }, [selectedCategory.value, categoriesAsync]);
+    }, [selectedCategoryId.value, categoriesAsync]);
 
     // reset sub-category when category changes
     useEffect(() {
-      selectedSubCategory.value = null;
+      selectedSubCategoryId.value = null;
       return null;
-    }, [selectedCategory.value]);
+    }, [selectedCategoryId.value]);
 
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
@@ -94,37 +96,48 @@ class AddProductScreen extends HookConsumerWidget {
 
               // category dropdown
               categoriesAsync.when(
-                data: (categories) => AppDropdown<String>(
+                data: (state) => AppDropdown<int>(
                   label: 'Category *',
                   hint: 'Select category',
-                  value: selectedCategory.value,
-                  items: categories
+                  value: selectedCategoryId.value,
+                  items: state.categories
                       .map(
-                        (c) => DropdownMenuItem(
-                          value: c.name,
+                        (c) => DropdownMenuItem<int>(
+                          value: c.id,
                           child: Text(c.name),
                         ),
                       )
                       .toList(),
-                  onChanged: (value) => selectedCategory.value = value,
-                  validator: (val) =>
-                      Validators.validateRequired(val, 'Category'),
+                  onChanged: (value) => selectedCategoryId.value = value,
+                  validator: (val) {
+                    if (val == null) return 'Category is required';
+                    return null;
+                  },
                 ),
                 loading: () => const LinearProgressIndicator(),
-                error: (_, __) => const Text('Failed to load categories'),
+                error: (error, _) => Text('Failed to load categories: $error'),
               ),
               const SizedBox(height: AppTheme.spacingMedium),
 
               // sub-category dropdown
-              AppDropdown<String>(
+              AppDropdown<int>(
                 label: 'Sub-category *',
                 hint: 'Select sub-category',
-                value: selectedSubCategory.value,
+                value: selectedSubCategoryId.value,
                 enabled: subCategories.isNotEmpty,
                 items: subCategories
-                    .map((s) => DropdownMenuItem(value: s, child: Text(s)))
+                    .map(
+                      (s) => DropdownMenuItem<int>(
+                        value: s.id,
+                        child: Text(s.name),
+                      ),
+                    )
                     .toList(),
-                onChanged: (value) => selectedSubCategory.value = value,
+                onChanged: (value) => selectedSubCategoryId.value = value,
+                validator: (val) {
+                  if (val == null) return 'Sub-category is required';
+                  return null;
+                },
               ),
               const SizedBox(height: AppTheme.spacingMedium),
 
@@ -251,47 +264,54 @@ class AddProductScreen extends HookConsumerWidget {
 
                   isLoading.value = true;
 
-                  final product = ProductModel(
-                    id: DateTime.now().millisecondsSinceEpoch,
-                    name: nameController.text.trim(),
-                    price: double.parse(priceController.text.trim()),
-                    category: selectedCategory.value ?? '',
-                    subCategory: selectedSubCategory.value,
-                    stock: int.parse(quantityController.text.trim()),
-                    imageUrl: productImage.value,
-                    store: storeController.text.trim().isNotEmpty
-                        ? storeController.text.trim()
+                  // prepare API body
+                  final body = <String, dynamic>{
+                    'store': storeController.text.trim(),
+                    'warehouse': warehouseController.text.trim(),
+                    'supplier': supplierController.text.trim(),
+                    'cat_id': selectedCategoryId.value,
+                    'sub_cat_id': selectedSubCategoryId.value,
+                    'product_name': nameController.text.trim(),
+                    'sku': skuController.text.trim(),
+                    'barcode': barcodeController.text.trim(),
+                    'quantity': quantityController.text.trim(),
+                    'price': priceController.text.trim(),
+                    'manufacturing_date': manufacturingDate.value != null
+                        ? DateFormat(
+                            'yyyy-MM-dd HH:mm:ss',
+                          ).format(manufacturingDate.value!)
                         : null,
-                    warehouse: warehouseController.text.trim().isNotEmpty
-                        ? warehouseController.text.trim()
+                    'expiring_date': expiryDate.value != null
+                        ? DateFormat(
+                            'yyyy-MM-dd HH:mm:ss',
+                          ).format(expiryDate.value!)
                         : null,
-                    supplier: supplierController.text.trim().isNotEmpty
-                        ? supplierController.text.trim()
-                        : null,
-                    sku: skuController.text.trim().isNotEmpty
-                        ? skuController.text.trim()
-                        : null,
-                    barcode: barcodeController.text.trim().isNotEmpty
-                        ? barcodeController.text.trim()
-                        : null,
-                    manufacturingDate: manufacturingDate.value != null
-                        ? manufacturingDate.value!.toIso8601String()
-                        : null,
-                    expiryDate: expiryDate.value != null
-                        ? expiryDate.value!.toIso8601String()
-                        : null,
-                    description: descriptionController.text.trim().isNotEmpty
-                        ? descriptionController.text.trim()
-                        : null,
-                  );
+                    'product_image': productImage.value,
+                    'description': descriptionController.text.trim(),
+                  };
 
-                  // TODO: Wire to real add product remote datasource when implemented
-                  // await ref.read(productsProvider.notifier).addProduct(product);
+                  final response = await ref
+                      .read(productsProvider.notifier)
+                      .addProductItem(body);
 
                   isLoading.value = false;
 
                   if (context.mounted) {
-                    Navigator.pop(context);
+                    if (response.success) {
+                      AppSnackbar.showSuccess(
+                        context,
+                        'Product created successfully',
+                      );
+                      Navigator.pushReplacementNamed(
+                        context,
+                        AppRoutes.products,
+                      );
+                    } else {
+                      AppSnackbar.showError(
+                        context,
+                        response.message ?? 'Failed to add product',
+                      );
+                    }
                   }
                 },
               ),

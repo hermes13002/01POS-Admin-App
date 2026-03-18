@@ -11,8 +11,9 @@ class UsersRepositoryImpl implements UsersRepository {
   UsersRepositoryImpl(this._datasource);
 
   @override
-  Future<Either<Failure, PaginatedUsersResponse>> getUsers(
-      {int page = 1}) async {
+  Future<Either<Failure, PaginatedUsersResponse>> getUsers({
+    int page = 1,
+  }) async {
     try {
       final result = await _datasource.getUsers(page: page);
       return Right(result);
@@ -33,6 +34,25 @@ class UsersRepositoryImpl implements UsersRepository {
   ) async {
     try {
       final result = await _datasource.createUser(body);
+      return Right(result);
+    } on AuthenticationException catch (e) {
+      return Left(AuthenticationFailure(message: e.message));
+    } on NetworkException catch (e) {
+      return Left(NetworkFailure(message: e.message));
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message, statusCode: e.statusCode));
+    } catch (e) {
+      return Left(UnknownFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, UserModel>> updateUser(
+    int userId,
+    Map<String, dynamic> body,
+  ) async {
+    try {
+      final result = await _datasource.updateUser(userId, body);
       return Right(result);
     } on AuthenticationException catch (e) {
       return Left(AuthenticationFailure(message: e.message));
@@ -98,6 +118,22 @@ class UsersRepositoryImpl implements UsersRepository {
     try {
       await _datasource.deleteUser(userId);
       return const Right(null);
+    } on AuthenticationException catch (e) {
+      return Left(AuthenticationFailure(message: e.message));
+    } on NetworkException catch (e) {
+      return Left(NetworkFailure(message: e.message));
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message, statusCode: e.statusCode));
+    } catch (e) {
+      return Left(UnknownFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<RoleModel>>> getRoles() async {
+    try {
+      final result = await _datasource.getRoles();
+      return Right(result);
     } on AuthenticationException catch (e) {
       return Left(AuthenticationFailure(message: e.message));
     } on NetworkException catch (e) {

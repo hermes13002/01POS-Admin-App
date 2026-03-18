@@ -1,3 +1,4 @@
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:onepos_admin_app/data/models/api_response_model.dart';
 import 'package:onepos_admin_app/features/products/data/models/product_model.dart';
 import 'package:onepos_admin_app/features/products/data/repositories/product_repository_impl.dart';
@@ -6,15 +7,19 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'products_provider.g.dart';
 
-final _productRepository = ProductRepositoryImpl();
+@riverpod
+ProductRepositoryImpl productRepository(Ref ref) {
+  return ProductRepositoryImpl();
+}
 
 /// products paginated data provider
 @riverpod
 class Products extends _$Products {
   @override
   FutureOr<ProductsState> build() async {
+    final repository = ref.watch(productRepositoryProvider);
     // initial fetch
-    final response = await _productRepository.fetchProducts(1);
+    final response = await repository.fetchProducts(1);
 
     if (response.success && response.data != null) {
       final meta = response.meta;
@@ -40,7 +45,8 @@ class Products extends _$Products {
     state = AsyncData(current.copyWith(isLoading: true));
 
     final nextPage = current.currentPage + 1;
-    final response = await _productRepository.fetchProducts(nextPage);
+    final repository = ref.read(productRepositoryProvider);
+    final response = await repository.fetchProducts(nextPage);
 
     if (response.success && response.data != null) {
       final meta = response.meta;
@@ -67,7 +73,8 @@ class Products extends _$Products {
   Future<void> refresh() async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
-      final response = await _productRepository.fetchProducts(1);
+      final repository = ref.read(productRepositoryProvider);
+      final response = await repository.fetchProducts(1);
       if (response.success && response.data != null) {
         final meta = response.meta;
         final hasMorePages = meta == null
@@ -86,7 +93,8 @@ class Products extends _$Products {
 
   /// delete a product by id via api
   Future<ApiResponse<void>> deleteProductItem(int productId) async {
-    final response = await _productRepository.deleteProduct(productId);
+    final repository = ref.read(productRepositoryProvider);
+    final response = await repository.deleteProduct(productId);
 
     if (response.success) {
       final current = state.valueOrNull;
@@ -106,17 +114,36 @@ class Products extends _$Products {
     int productId,
     Map<String, dynamic> data,
   ) async {
-    final response = await _productRepository.updateProduct(productId, data);
+    final repository = ref.read(productRepositoryProvider);
+    final response = await repository.updateProduct(productId, data);
 
     if (response.success && response.data != null) {
       final current = state.valueOrNull;
       if (current != null) {
         state = AsyncData(
           current.copyWith(
-            products: current.products.map((p) {
+            products: current.products.map<ProductModel>((p) {
               return p.id == productId ? response.data! : p;
             }).toList(),
           ),
+        );
+      }
+    }
+    return response;
+  }
+
+  /// add a new product via api
+  Future<ApiResponse<ProductModel>> addProductItem(
+    Map<String, dynamic> data,
+  ) async {
+    final repository = ref.read(productRepositoryProvider);
+    final response = await repository.addProduct(data);
+
+    if (response.success && response.data != null) {
+      final current = state.valueOrNull;
+      if (current != null) {
+        state = AsyncData(
+          current.copyWith(products: [response.data!, ...current.products]),
         );
       }
     }
@@ -127,7 +154,8 @@ class Products extends _$Products {
 /// fetch single product by id endpoint
 @riverpod
 Future<ApiResponse<ProductModel>> singleProduct(SingleProductRef ref, int id) {
-  return _productRepository.fetchSingleProduct(id);
+  final repository = ref.read(productRepositoryProvider);
+  return repository.fetchSingleProduct(id);
 }
 
 /// categories provider

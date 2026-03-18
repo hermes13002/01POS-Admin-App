@@ -36,8 +36,8 @@ class QuickActions extends _$QuickActions {
 
   /// Update quick actions
   Future<void> updateQuickActions(List<ToolModel> tools) async {
-    // max 8 tools
-    final updatedTools = tools.take(8).toList();
+    // max 6 tools
+    final updatedTools = tools.take(6).toList();
     state = updatedTools;
 
     // save to shared preferences
@@ -48,7 +48,7 @@ class QuickActions extends _$QuickActions {
 
   /// Add tool to quick actions
   Future<void> addTool(ToolModel tool) async {
-    if (state.length < 8 && !state.any((t) => t.id == tool.id)) {
+    if (state.length < 6 && !state.any((t) => t.id == tool.id)) {
       await updateQuickActions([...state, tool]);
     }
   }

@@ -6,6 +6,8 @@ import 'package:onepos_admin_app/core/theme/app_theme.dart';
 import 'package:onepos_admin_app/core/utils/amount_formatter.dart';
 import 'package:onepos_admin_app/features/products/data/models/product_model.dart';
 import 'package:onepos_admin_app/features/low_stock/presentation/providers/low_stock_provider.dart';
+import 'package:onepos_admin_app/features/products/presentation/screens/products_screen.dart';
+import 'package:onepos_admin_app/features/products/presentation/widgets/edit_product_dialog.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_app_bar2.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_search_bar.dart';
 import 'package:onepos_admin_app/shared/widgets/loading_widget.dart';
@@ -92,8 +94,19 @@ class LowStockScreen extends HookConsumerWidget {
                             ? null
                             : product.id;
                       },
+                      onView: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) =>
+                              ViewProductDialog(productId: product.id),
+                        );
+                      },
                       onEdit: () {
-                        // TODO: navigate to edit product screen
+                        showDialog(
+                          context: context,
+                          builder: (context) =>
+                              EditProductDialog(product: product),
+                        );
                       },
                     );
                   },
@@ -142,12 +155,14 @@ class _LowStockTile extends StatelessWidget {
   final ProductModel product;
   final bool isExpanded;
   final VoidCallback onToggle;
+  final VoidCallback onView;
   final VoidCallback onEdit;
 
   const _LowStockTile({
     required this.product,
     required this.isExpanded,
     required this.onToggle,
+    required this.onView,
     required this.onEdit,
   });
 
@@ -277,7 +292,7 @@ class _LowStockTile extends StatelessWidget {
               child: Divider(color: AppTheme.grey200, height: 1),
             ),
 
-            // edit button (single centered button, no delete)
+            // actions (View and Edit)
             Padding(
               padding: const EdgeInsets.fromLTRB(
                 AppTheme.spacingMedium,
@@ -285,32 +300,65 @@ class _LowStockTile extends StatelessWidget {
                 AppTheme.spacingMedium,
                 AppTheme.spacingMedium,
               ),
-              child: SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  onPressed: onEdit,
-                  icon: Icon(
-                    Icons.edit_outlined,
-                    size: 18,
-                    color: AppTheme.textSecondary,
-                  ),
-                  label: Text(
-                    'Edit',
-                    style: GoogleFonts.poppins(
-                      fontSize: 14,
-                      color: AppTheme.textSecondary,
-                    ),
-                  ),
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    side: const BorderSide(color: AppTheme.grey300),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(
-                        AppTheme.borderRadiusMedium,
+              child: Row(
+                children: [
+                  // view button
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: onView,
+                      icon: Icon(
+                        Icons.visibility_outlined,
+                        size: 16,
+                        color: AppTheme.textSecondary,
+                      ),
+                      label: Text(
+                        'View',
+                        style: GoogleFonts.poppins(
+                          fontSize: 13,
+                          color: AppTheme.textSecondary,
+                        ),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        side: const BorderSide(color: AppTheme.grey300),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(
+                            AppTheme.borderRadiusMedium,
+                          ),
+                        ),
                       ),
                     ),
                   ),
-                ),
+                  const SizedBox(width: AppTheme.spacingSmall),
+
+                  // edit button
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: onEdit,
+                      icon: Icon(
+                        Icons.edit_outlined,
+                        size: 16,
+                        color: AppTheme.textSecondary,
+                      ),
+                      label: Text(
+                        'Edit',
+                        style: GoogleFonts.poppins(
+                          fontSize: 13,
+                          color: AppTheme.textSecondary,
+                        ),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        side: const BorderSide(color: AppTheme.grey300),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(
+                            AppTheme.borderRadiusMedium,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],

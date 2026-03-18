@@ -9,6 +9,12 @@ abstract class UsersRepository {
   /// creates a user
   Future<Either<Failure, UserModel>> createUser(Map<String, dynamic> body);
 
+  /// updates a user
+  Future<Either<Failure, UserModel>> updateUser(
+    int userId,
+    Map<String, dynamic> body,
+  );
+
   /// activates a user by id
   Future<Either<Failure, UserModel>> activateUser(int userId);
 
@@ -20,4 +26,7 @@ abstract class UsersRepository {
 
   /// deletes a user by id
   Future<Either<Failure, void>> deleteUser(int userId);
+
+  /// fetches roles
+  Future<Either<Failure, List<RoleModel>>> getRoles();
 }

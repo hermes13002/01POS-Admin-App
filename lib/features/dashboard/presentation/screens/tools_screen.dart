@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:onepos_admin_app/core/theme/app_theme.dart';
 import 'package:onepos_admin_app/core/routes/app_routes.dart';
+import 'package:onepos_admin_app/shared/widgets/custom_search_bar.dart';
 import 'package:onepos_admin_app/data/models/tool_model.dart';
 import 'package:onepos_admin_app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:onepos_admin_app/presentation/providers/quick_actions_provider.dart';
@@ -61,39 +62,9 @@ class ToolsScreen extends HookConsumerWidget {
               padding: const EdgeInsets.symmetric(
                 horizontal: AppTheme.spacingMedium,
               ),
-              child: TextField(
+              child: CustomSearchBar(
+                hintText: 'Search',
                 onChanged: (value) => searchQuery.value = value,
-                decoration: InputDecoration(
-                  hintText: 'Search',
-                  prefixIcon: const Icon(Icons.search, color: AppTheme.grey500),
-                  filled: true,
-                  fillColor: Colors.white,
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: AppTheme.spacingMedium,
-                    vertical: AppTheme.spacingSmall,
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(
-                      AppTheme.borderRadiusMedium,
-                    ),
-                    borderSide: const BorderSide(color: AppTheme.grey300),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(
-                      AppTheme.borderRadiusMedium,
-                    ),
-                    borderSide: const BorderSide(color: AppTheme.grey300),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(
-                      AppTheme.borderRadiusMedium,
-                    ),
-                    borderSide: const BorderSide(
-                      color: AppTheme.primaryColor,
-                      width: 1.5,
-                    ),
-                  ),
-                ),
               ),
             ),
 

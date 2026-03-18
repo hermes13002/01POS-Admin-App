@@ -5,6 +5,8 @@ import 'package:onepos_admin_app/core/routes/app_routes.dart';
 import 'package:onepos_admin_app/core/theme/app_theme.dart';
 import 'package:onepos_admin_app/features/auth/data/models/profile_model.dart';
 import 'package:onepos_admin_app/features/online_store/presentation/providers/profile_provider.dart';
+import 'package:onepos_admin_app/features/products/presentation/providers/products_provider.dart';
+import 'package:onepos_admin_app/shared/widgets/app_snackbar.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_app_bar.dart';
 
 /// store profile screen — company details and admin profile
@@ -55,13 +57,13 @@ class StoreProfileScreen extends HookConsumerWidget {
   }
 }
 
-class _ProfileContent extends StatelessWidget {
+class _ProfileContent extends ConsumerWidget {
   final ProfileModel profile;
 
   const _ProfileContent({required this.profile});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final company = profile.company;
 
     // format license expiry
@@ -255,6 +257,71 @@ class _ProfileContent extends StatelessWidget {
           _ProfileListItem(
             title: 'Low Stock Limit Settings',
             value: company?.lowStockLimit,
+            onTap: () async {
+              final controller = TextEditingController(
+                text: company?.lowStockLimit ?? '0',
+              );
+              final result = await showDialog<String>(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: Text(
+                    'Set Low Stock Limit',
+                    style: GoogleFonts.poppins(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  content: TextField(
+                    controller: controller,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      labelText: 'Limit',
+                      hintText: 'e.g. 10',
+                    ),
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('Cancel'),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.pop(context, controller.text),
+                      child: const Text('Save'),
+                    ),
+                  ],
+                ),
+              );
+
+              if (result != null && result.isNotEmpty && context.mounted) {
+                final limit = int.tryParse(result);
+                if (limit == null) {
+                  AppSnackbar.showError(context, 'Please enter a valid number');
+                  return;
+                }
+
+                final repository = ref.read(productRepositoryProvider);
+                // companyId is used from profile.company.id
+                final companyId = profile.company?.id;
+                if (companyId == null) {
+                  AppSnackbar.showError(context, 'Company ID not found');
+                  return;
+                }
+
+                final response = await repository.setLowStockLimit(
+                  companyId,
+                  limit,
+                );
+                if (response.success && context.mounted) {
+                  AppSnackbar.showSuccess(context, response.message!);
+                  ref.invalidate(userProfileProvider);
+                } else if (context.mounted) {
+                  AppSnackbar.showError(
+                    context,
+                    response.message ?? 'Failed to update limit',
+                  );
+                }
+              }
+            },
           ),
           const SizedBox(height: AppTheme.spacingLarge),
 

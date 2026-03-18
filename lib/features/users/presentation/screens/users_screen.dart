@@ -5,12 +5,16 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:onepos_admin_app/core/routes/app_routes.dart';
 import 'package:onepos_admin_app/core/theme/app_theme.dart';
 import 'package:onepos_admin_app/features/users/data/models/user_model.dart';
+import 'package:onepos_admin_app/features/users/presentation/providers/roles_provider.dart';
 import 'package:onepos_admin_app/features/users/presentation/providers/users_provider.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_app_bar.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_button_with_icon.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_search_bar.dart';
 import 'package:onepos_admin_app/shared/widgets/loading_widget.dart';
 import 'package:onepos_admin_app/shared/widgets/app_snackbar.dart';
+import 'package:onepos_admin_app/shared/widgets/custom_text_field.dart';
+import 'package:onepos_admin_app/shared/widgets/app_dropdown.dart';
+import 'package:onepos_admin_app/core/utils/validators.dart';
 
 /// Screen for viewing and managing users
 class UsersScreen extends HookConsumerWidget {
@@ -348,9 +352,26 @@ class _UserCard extends HookConsumerWidget {
                 children: [
                   Expanded(
                     child: CustomButtonWithIcon(
+                      text: 'View',
+                      icon: Icons.visibility_outlined,
+                      onPressed: () {
+                        _showViewDialog(context, ref, user);
+                      },
+                      isOutlined: true,
+                      textColor: AppTheme.grey400,
+                      iconColor: AppTheme.grey400,
+                      borderColor: AppTheme.grey400,
+                      height: 44,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: CustomButtonWithIcon(
                       text: 'Edit',
                       icon: Icons.edit_outlined,
-                      onPressed: () {},
+                      onPressed: () {
+                        _showEditDialog(context, ref, user);
+                      },
                       isOutlined: true,
                       textColor: AppTheme.blue,
                       iconColor: AppTheme.blue,
@@ -358,7 +379,7 @@ class _UserCard extends HookConsumerWidget {
                       height: 44,
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 8),
                   Expanded(
                     child: CustomButtonWithIcon(
                       text: isDeleting.value ? 'Deleting...' : 'Delete',
@@ -386,6 +407,18 @@ class _UserCard extends HookConsumerWidget {
           ],
         ),
       ),
+    );
+  }
+
+  /// shows view user details dialog
+  static void _showViewDialog(
+    BuildContext context,
+    WidgetRef ref,
+    UserModel user,
+  ) {
+    showDialog(
+      context: context,
+      builder: (context) => _ViewUserDialog(user: user),
     );
   }
 
@@ -439,6 +472,557 @@ class _UserCard extends HookConsumerWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  /// shows edit user dialog
+  static void _showEditDialog(
+    BuildContext context,
+    WidgetRef ref,
+    UserModel user,
+  ) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => _EditUserDialog(user: user),
+    );
+  }
+}
+
+/// dialog for viewing user details
+class _ViewUserDialog extends HookConsumerWidget {
+  final UserModel user;
+
+  const _ViewUserDialog({required this.user});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final userDetail = useState<UserModel?>(user);
+    final isLoading = useState<bool>(true);
+
+    useEffect(() {
+      Future.microtask(() async {
+        final result = await ref
+            .read(allUsersProvider.notifier)
+            .getUser(user.id);
+        result.fold(
+          (_) {
+            isLoading.value = false;
+          },
+          (fetchedUser) {
+            userDetail.value = fetchedUser;
+            isLoading.value = false;
+          },
+        );
+      });
+      return null;
+    }, []);
+
+    final currentUser = userDetail.value ?? user;
+
+    return Dialog(
+      backgroundColor: Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+      child: Container(
+        padding: const EdgeInsets.all(AppTheme.spacingLarge),
+        constraints: const BoxConstraints(maxWidth: 450),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // header
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'User Details',
+                  style: GoogleFonts.poppins(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w600,
+                    color: AppTheme.textPrimary,
+                  ),
+                ),
+                IconButton(
+                  onPressed: () => Navigator.pop(context),
+                  icon: const Icon(Icons.close_rounded),
+                  color: AppTheme.textSecondary,
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+
+            if (isLoading.value)
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(vertical: 40),
+                  child: CircularProgressIndicator(),
+                ),
+              )
+            else ...[
+              // Profile Section
+              Center(
+                child: Column(
+                  children: [
+                    Container(
+                      width: 80,
+                      height: 80,
+                      decoration: BoxDecoration(
+                        color: AppTheme.blue.withOpacity(0.1),
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: AppTheme.blue.withOpacity(0.2),
+                          width: 2,
+                        ),
+                      ),
+                      child: Center(
+                        child: Text(
+                          currentUser.firstname.isNotEmpty
+                              ? currentUser.firstname[0].toUpperCase()
+                              : '?',
+                          style: GoogleFonts.poppins(
+                            fontSize: 32,
+                            fontWeight: FontWeight.w600,
+                            color: AppTheme.blue,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      currentUser.fullName,
+                      style: GoogleFonts.poppins(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: AppTheme.textPrimary,
+                      ),
+                    ),
+                    Container(
+                      margin: const EdgeInsets.only(top: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.black,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        currentUser.roles.isNotEmpty
+                            ? currentUser.roles.first.name
+                            : 'No Role',
+                        style: GoogleFonts.poppins(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 32),
+
+              // details grid/list
+              _DetailItem(
+                label: 'Email Address',
+                value: currentUser.email,
+                icon: Icons.email_outlined,
+              ),
+              const _Divider(),
+              _DetailItem(
+                label: 'Phone Number',
+                value: currentUser.phoneno,
+                icon: Icons.phone_outlined,
+              ),
+              const _Divider(),
+              _DetailItem(
+                label: 'Address',
+                value: currentUser.address ?? 'N/A',
+                icon: Icons.location_on_outlined,
+              ),
+              const _Divider(),
+              Row(
+                children: [
+                  Expanded(
+                    child: _DetailItem(
+                      label: 'Account Status',
+                      value: currentUser.isActive ? 'Active' : 'Inactive',
+                      icon: Icons.verified_user_outlined,
+                      valueColor: currentUser.isActive
+                          ? const Color(0xFF2E7D32)
+                          : const Color(0xFFD32F2F),
+                    ),
+                  ),
+                  Expanded(
+                    child: _DetailItem(
+                      label: 'Verified',
+                      value: currentUser.isVerified ? 'Verified' : 'Pending',
+                      icon: Icons.check_circle_outline,
+                      valueColor: currentUser.isVerified
+                          ? const Color(0xFF2E7D32)
+                          : Colors.orange,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 32),
+
+              // Action buttons
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.black,
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
+                      child: Text(
+                        'Close',
+                        style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _DetailItem extends StatelessWidget {
+  final String label;
+  final String value;
+  final IconData icon;
+  final Color? valueColor;
+
+  const _DetailItem({
+    required this.label,
+    required this.value,
+    required this.icon,
+    this.valueColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.grey.withOpacity(0.05),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(icon, size: 20, color: AppTheme.textSecondary),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  label,
+                  style: GoogleFonts.poppins(
+                    fontSize: 11,
+                    color: AppTheme.textSecondary,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                Text(
+                  value,
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    color: valueColor ?? AppTheme.textPrimary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _Divider extends StatelessWidget {
+  const _Divider();
+
+  @override
+  Widget build(BuildContext context) {
+    return Divider(height: 24, color: Colors.grey.withOpacity(0.1));
+  }
+}
+
+/// dialog for editing user details
+class _EditUserDialog extends HookConsumerWidget {
+  final UserModel user;
+
+  const _EditUserDialog({required this.user});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final formKey = useMemoized(() => GlobalKey<FormState>());
+    final firstNameController = useTextEditingController(text: user.firstname);
+    final lastNameController = useTextEditingController(text: user.lastname);
+    final emailController = useTextEditingController(text: user.email);
+    final addressController = useTextEditingController(text: user.address);
+    final phoneController = useTextEditingController(text: user.phoneno);
+
+    final rolesAsync = ref.watch(rolesProvider);
+
+    final selectedRoleId = useState<int?>(
+      user.roles.isNotEmpty ? user.roles.first.id : null,
+    );
+    final isSubmitting = useState<bool>(false);
+
+    return Dialog(
+      backgroundColor: Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+      child: Container(
+        padding: const EdgeInsets.all(AppTheme.spacingLarge),
+        constraints: const BoxConstraints(maxWidth: 400),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // header with icon
+            Center(
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: AppTheme.blue.withOpacity(0.12),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.edit_rounded,
+                  color: AppTheme.blue,
+                  size: 32,
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Edit User Profile',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.poppins(
+                fontSize: 20,
+                fontWeight: FontWeight.w600,
+                color: AppTheme.textPrimary,
+              ),
+            ),
+            Text(
+              'Update details for ${user.fullName}',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.poppins(
+                fontSize: 12,
+                color: AppTheme.textSecondary,
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            // form fields
+            Flexible(
+              child: SingleChildScrollView(
+                child: Form(
+                  key: formKey,
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: CustomTextField(
+                              hint: 'First name',
+                              controller: firstNameController,
+                              validator: (val) => Validators.validateRequired(
+                                val,
+                                'First name',
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: CustomTextField(
+                              hint: 'Last name',
+                              controller: lastNameController,
+                              validator: (val) =>
+                                  Validators.validateRequired(val, 'Last name'),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      CustomTextField(
+                        hint: 'Email address',
+                        controller: emailController,
+                        keyboardType: TextInputType.emailAddress,
+                        prefixIcon: const Icon(Icons.email_outlined, size: 20),
+                        validator: Validators.validateEmail,
+                      ),
+                      const SizedBox(height: 16),
+                      rolesAsync.when(
+                        data: (roles) => AppDropdown<int>(
+                          hint: 'Role',
+                          value: selectedRoleId.value,
+                          prefixIcon: const Icon(
+                            Icons.badge_outlined,
+                            size: 20,
+                          ),
+                          items: roles.map((role) {
+                            return DropdownMenuItem<int>(
+                              value: role.id,
+                              child: Text(role.name),
+                            );
+                          }).toList(),
+                          onChanged: (val) {
+                            if (val != null) selectedRoleId.value = val;
+                          },
+                          validator: (val) {
+                            if (val == null) return 'Role is required';
+                            return null;
+                          },
+                        ),
+                        loading: () => const AppDropdown<int>(
+                          hint: 'Loading roles...',
+                          items: [],
+                          onChanged: null,
+                        ),
+                        error: (_, __) => const AppDropdown<int>(
+                          hint: 'Error loading roles',
+                          items: [],
+                          onChanged: null,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      CustomTextField(
+                        hint: 'Address',
+                        controller: addressController,
+                        prefixIcon: const Icon(
+                          Icons.location_on_outlined,
+                          size: 20,
+                        ),
+                        validator: (val) =>
+                            Validators.validateRequired(val, 'Address'),
+                      ),
+                      const SizedBox(height: 16),
+                      CustomTextField(
+                        hint: 'Phone number',
+                        controller: phoneController,
+                        keyboardType: TextInputType.phone,
+                        prefixIcon: const Icon(Icons.phone_outlined, size: 20),
+                        validator: Validators.validatePhone,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 32),
+
+            // actions
+            Row(
+              children: [
+                Expanded(
+                  child: TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                    child: Text(
+                      'Cancel',
+                      style: GoogleFonts.poppins(
+                        color: AppTheme.textSecondary,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: isSubmitting.value
+                        ? null
+                        : () async {
+                            if (!formKey.currentState!.validate()) {
+                              return;
+                            }
+
+                            final body = <String, dynamic>{
+                              'role_id': selectedRoleId.value,
+                              'firstname': firstNameController.text.trim(),
+                              'lastname': lastNameController.text.trim(),
+                              'email': emailController.text.trim(),
+                              'address': addressController.text.trim(),
+                              'phoneno': phoneController.text.trim(),
+                            };
+
+                            final error = await ref
+                                .read(allUsersProvider.notifier)
+                                .updateUser(user.id, body);
+
+                            isSubmitting.value = false;
+
+                            if (!context.mounted) return;
+
+                            if (error != null) {
+                              AppSnackbar.showError(context, error);
+                              return;
+                            }
+
+                            AppSnackbar.showSuccess(
+                              context,
+                              'User updated successfully',
+                            );
+                            Navigator.pop(context);
+                          },
+                    style:
+                        ElevatedButton.styleFrom(
+                          backgroundColor: Colors.black,
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                        ).copyWith(
+                          overlayColor: WidgetStateProperty.all(Colors.white10),
+                        ),
+                    child: isSubmitting.value
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : Text(
+                            'Save Changes',
+                            style: GoogleFonts.poppins(
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
