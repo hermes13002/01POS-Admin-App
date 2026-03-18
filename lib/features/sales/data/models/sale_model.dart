@@ -37,25 +37,32 @@ class SaleModel {
   factory SaleModel.fromJson(Map<String, dynamic> json) {
     final orderDetails = json['orderdetails'] as List<dynamic>? ?? [];
     final userJson = _asMap(json['user']);
+    final customerJson = _asMap(json['customer']);
 
-    final customerId = json['customer_id']?.toString() ?? '';
-    final customerName = customerId.isNotEmpty ? 'Customer #$customerId' : 'N/A';
+    final customerName =
+        customerJson['name']?.toString() ??
+        'Customer #${json['customer_id']?.toString() ?? 'N/A'}';
 
     return SaleModel(
       id: json['id']?.toString() ?? '',
       orderNumber: json['orderNO']?.toString() ?? 'N/A',
       customerName: customerName,
       cashierName:
-          '${userJson['firstname']?.toString() ?? ''} ${userJson['lastname']?.toString() ?? ''}'.trim().isEmpty
+          '${userJson['firstname']?.toString() ?? ''} ${userJson['lastname']?.toString() ?? ''}'
+              .trim()
+              .isEmpty
           ? 'N/A'
-          : '${userJson['firstname']?.toString() ?? ''} ${userJson['lastname']?.toString() ?? ''}'.trim(),
+          : '${userJson['firstname']?.toString() ?? ''} ${userJson['lastname']?.toString() ?? ''}'
+                .trim(),
       cashierEmail: userJson['email']?.toString(),
       cashierPhone: userJson['phoneno']?.toString(),
       totalAmount: _toDouble(json['total_price']),
       totalPrice: _toDouble(json['total_price']),
-      date: DateTime.tryParse(json['created_at']?.toString() ?? '') ?? DateTime.now(),
+      date:
+          DateTime.tryParse(json['created_at']?.toString() ?? '') ??
+          DateTime.now(),
       status: json['status']?.toString() ?? 'N/A',
-      customerAddress: null,
+      customerAddress: customerJson['address']?.toString(),
       paymentMethod: json['payment_type']?.toString(),
       discountApplied: null,
       loyaltyApplied: null,
@@ -99,6 +106,12 @@ class SaleModel {
       loyaltyApplied: loyaltyApplied ?? this.loyaltyApplied,
       totalPrice: totalPrice ?? this.totalPrice,
     );
+  }
+
+  static int _asInt(dynamic value, int defaultValue) {
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    return int.tryParse(value?.toString() ?? '') ?? defaultValue;
   }
 
   static double _toDouble(dynamic value) {
@@ -157,22 +170,29 @@ class PaginatedSalesResponse {
   });
 
   factory PaginatedSalesResponse.fromJson(Map<String, dynamic> json) {
-    final salesList = json['data'] as List<dynamic>? ?? [];
-    final currentPage = json['current_page'] is int
-        ? json['current_page'] as int
-        : int.tryParse(json['current_page']?.toString() ?? '') ?? 1;
-    final lastPage = json['last_page'] is int
-        ? json['last_page'] as int
-        : int.tryParse(json['last_page']?.toString() ?? '') ?? 1;
-    final perPage = json['per_page'] is int
-        ? json['per_page'] as int
-        : int.tryParse(json['per_page']?.toString() ?? '') ?? 10;
-    final total = json['total'] is int
-        ? json['total'] as int
-        : int.tryParse(json['total']?.toString() ?? '') ?? 0;
+    // Some endpoints wrap the pagination object in 'data', others return it directly
+    final rawData = json['data'];
+    final bool isDataMap = rawData is Map<String, dynamic>;
+    final Map<String, dynamic> paginationSource = isDataMap ? rawData : json;
+
+    // The actual items list can be in paginationSource['data'] or rawData (if it was already a list)
+    final salesListValue = (paginationSource['data'] is List)
+        ? paginationSource['data'] as List<dynamic>
+        : (rawData is List ? rawData : []);
+
+    final int currentPage = SaleModel._asInt(
+      paginationSource['current_page'],
+      1,
+    );
+    final int lastPage = SaleModel._asInt(paginationSource['last_page'], 1);
+    final int perPage = SaleModel._asInt(paginationSource['per_page'], 10);
+    final int total = SaleModel._asInt(
+      paginationSource['total'],
+      salesListValue.length,
+    );
 
     return PaginatedSalesResponse(
-      sales: salesList
+      sales: salesListValue
           .map((s) => SaleModel.fromJson(SaleModel._asMap(s)))
           .toList(),
       currentPage: currentPage,
@@ -279,8 +299,9 @@ class SalesFilter {
       cashier: clearCashier ? null : (cashier ?? this.cashier),
       customer: clearCustomer ? null : (customer ?? this.customer),
       discount: clearDiscount ? null : (discount ?? this.discount),
-      paymentMethod:
-          clearPaymentMethod ? null : (paymentMethod ?? this.paymentMethod),
+      paymentMethod: clearPaymentMethod
+          ? null
+          : (paymentMethod ?? this.paymentMethod),
       status: clearStatus ? null : (status ?? this.status),
       startDate: clearStartDate ? null : (startDate ?? this.startDate),
       endDate: clearEndDate ? null : (endDate ?? this.endDate),

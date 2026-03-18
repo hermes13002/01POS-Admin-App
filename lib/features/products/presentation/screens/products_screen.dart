@@ -53,12 +53,12 @@ class ProductsScreen extends HookConsumerWidget {
         title: 'Products',
         backgroundColor: AppTheme.backgroundColor,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.more_horiz, color: Colors.black),
-            onPressed: () {
-              // TODO: menu options
-            },
-          ),
+          // IconButton(
+          //   icon: const Icon(Icons.more_horiz, color: Colors.black),
+          //   onPressed: () {
+          //     // TODO: menu options
+          //   },
+          // ),
         ],
       ),
       body: Column(

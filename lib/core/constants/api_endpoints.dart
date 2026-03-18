@@ -23,7 +23,7 @@ class ApiEndpoints {
   // Sales
   static const String sales = '/sales';
   static const String saleById = '/sales/{id}';
-  static const String allSales = '/admin/dashboard/all-sales';
+  static const String allSales = '/admin/orders';
 
   // Orders
   static const String orders = '/orders';

@@ -7,10 +7,15 @@ import 'package:onepos_admin_app/core/theme/app_theme.dart';
 import 'package:onepos_admin_app/core/utils/amount_formatter.dart';
 import 'package:onepos_admin_app/features/sales/data/models/sale_model.dart';
 import 'package:onepos_admin_app/features/sales/presentation/providers/sales_provider.dart';
+import 'package:onepos_admin_app/features/sales/presentation/widgets/sale_detail_dialog.dart';
 import 'package:onepos_admin_app/shared/widgets/app_dropdown.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_app_bar2.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_button.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_button_with_icon.dart';
+import 'package:onepos_admin_app/shared/widgets/custom_search_bar.dart';
+import 'package:onepos_admin_app/shared/widgets/empty_state_widget.dart';
+import 'package:onepos_admin_app/shared/widgets/dots_loader.dart';
+import 'package:onepos_admin_app/shared/widgets/error_widget.dart';
 import 'package:onepos_admin_app/shared/widgets/loading_widget.dart';
 
 /// sales screen with expandable sale tiles
@@ -33,16 +38,7 @@ class SalesScreen extends HookConsumerWidget {
       return null;
     }, const []);
 
-    // listen for search changes
-    useEffect(() {
-      void listener() {
-        searchQuery.value = searchController.text;
-      }
-
-      searchController.addListener(listener);
-      return () => searchController.removeListener(listener);
-    }, [searchController]);
-
+    // listen for scroll changes for pagination
     useEffect(() {
       void onScroll() {
         if (scrollController.position.pixels >=
@@ -64,95 +60,32 @@ class SalesScreen extends HookConsumerWidget {
       body: Column(
         children: [
           // search bar with filter icon
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppTheme.spacingMedium,
-              vertical: AppTheme.spacingSmall,
-            ),
-            child: Row(
-              children: [
-                // search field
-                Expanded(
-                  child: TextField(
-                    controller: searchController,
-                    onChanged: (value) => searchQuery.value = value,
-                    decoration: InputDecoration(
-                      hintText: 'Search',
-                      hintStyle: GoogleFonts.poppins(
-                        fontSize: 14,
-                        color: AppTheme.textHint,
-                      ),
-                      prefixIcon: const Icon(Icons.search),
-                      suffixIcon: searchController.text.isNotEmpty
-                          ? IconButton(
-                              icon: const Icon(Icons.clear),
-                              onPressed: () {
-                                searchController.clear();
-                                searchQuery.value = '';
-                              },
-                            )
-                          : null,
-                      filled: true,
-                      fillColor: Colors.white,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(
-                            AppTheme.borderRadiusMedium),
-                        borderSide: BorderSide(color: AppTheme.grey300),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(
-                            AppTheme.borderRadiusMedium),
-                        borderSide: BorderSide(color: AppTheme.grey300),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(
-                            AppTheme.borderRadiusMedium),
-                        borderSide: const BorderSide(
-                          color: Colors.black,
-                          width: 1,
-                        ),
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
-                      ),
-                    ),
-                  ),
+          CustomSearchBar(
+            controller: searchController,
+            onChanged: (value) => searchQuery.value = value,
+            onClear: () => searchQuery.value = '',
+            hintText: 'Search by customer, order #, or cashier',
+            trailing: [
+              IconButton(
+                icon: const Icon(
+                  Icons.tune,
+                  size: 22,
+                  color: AppTheme.textPrimary,
                 ),
-                const SizedBox(width: AppTheme.spacingSmall),
-
-                // filter button
-                GestureDetector(
-                  onTap: () async {
-                    final currentSales =
-                        salesAsync.valueOrNull?.sales ?? const <SaleModel>[];
-                    final nextFilter = await _showFilterDialog(
-                      context,
-                      currentFilter: activeFilter.value,
-                      sales: currentSales,
-                    );
-                    if (nextFilter != null) {
-                      activeFilter.value = nextFilter;
-                    }
-                  },
-                  child: Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(
-                          AppTheme.borderRadiusMedium),
-                      border: Border.all(color: AppTheme.grey300),
-                    ),
-                    child: const Icon(
-                      Icons.tune,
-                      color: AppTheme.textPrimary,
-                      size: 22,
-                    ),
-                  ),
-                ),
-              ],
-            ),
+                onPressed: () async {
+                  final currentSales =
+                      salesAsync.valueOrNull?.sales ?? const <SaleModel>[];
+                  final nextFilter = await _showFilterDialog(
+                    context,
+                    currentFilter: activeFilter.value,
+                    sales: currentSales,
+                  );
+                  if (nextFilter != null) {
+                    activeFilter.value = nextFilter;
+                  }
+                },
+              ),
+            ],
           ),
 
           // sales list
@@ -166,70 +99,57 @@ class SalesScreen extends HookConsumerWidget {
                 );
 
                 if (filtered.isEmpty) {
-                  return Center(
-                    child: Text(
-                      'No sales found',
-                      style: GoogleFonts.poppins(
-                        fontSize: 14,
-                        color: AppTheme.textSecondary,
-                      ),
-                    ),
+                  return EmptyStateWidget(
+                    title: 'No sales found',
+                    message:
+                        searchQuery.value.isNotEmpty ||
+                            activeFilter.value.hasActiveFilters
+                        ? 'Try adjusting your search or filters'
+                        : 'No sales recorded yet',
+                    icon: Icons.history,
                   );
                 }
 
-                return ListView.separated(
-                  controller: scrollController,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppTheme.spacingMedium,
-                    vertical: AppTheme.spacingSmall,
-                  ),
-                  itemCount: filtered.length + (salesState.hasMorePages ? 1 : 0),
-                  separatorBuilder: (_, __) =>
-                      const SizedBox(height: AppTheme.spacingSmall),
-                  itemBuilder: (context, index) {
-                    if (index >= filtered.length) {
-                      return const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 16),
-                        child: LoadingWidget(size: 32),
+                return RefreshIndicator(
+                  onRefresh: () =>
+                      ref.read(salesProvider.notifier).refreshSales(),
+                  child: ListView.separated(
+                    controller: scrollController,
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppTheme.spacingMedium,
+                      vertical: AppTheme.spacingSmall,
+                    ),
+                    itemCount:
+                        filtered.length + (salesState.hasMorePages ? 1 : 0),
+                    separatorBuilder: (_, __) =>
+                        const SizedBox(height: AppTheme.spacingSmall),
+                    itemBuilder: (context, index) {
+                      if (index >= filtered.length) {
+                        return const DotsLoader();
+                      }
+
+                      final sale = filtered[index];
+                      final isExpanded = expandedSaleId.value == sale.id;
+
+                      return _SaleTile(
+                        sale: sale,
+                        isExpanded: isExpanded,
+                        onToggle: () {
+                          expandedSaleId.value = isExpanded ? null : sale.id;
+                        },
+                        onView: () {
+                          _showSaleDetailsDialog(context, sale);
+                        },
                       );
-                    }
-
-                    final sale = filtered[index];
-                    final isExpanded = expandedSaleId.value == sale.id;
-
-                    return _SaleTile(
-                      sale: sale,
-                      isExpanded: isExpanded,
-                      onToggle: () {
-                        expandedSaleId.value =
-                            isExpanded ? null : sale.id;
-                      },
-                      onView: () {
-                        _showSaleDetailsDialog(context, sale);
-                      },
-                    );
-                  },
+                    },
+                  ),
                 );
               },
               loading: () => const Center(child: LoadingWidget()),
-              error: (error, stack) => Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Failed to load sales',
-                      style: GoogleFonts.poppins(
-                        fontSize: 16,
-                        color: AppTheme.textSecondary,
-                      ),
-                    ),
-                    const SizedBox(height: AppTheme.spacingMedium),
-                    ElevatedButton(
-                      onPressed: () => ref.read(salesProvider.notifier).refreshSales(),
-                      child: const Text('Retry'),
-                    ),
-                  ],
-                ),
+              error: (error, stack) => CustomErrorWidget(
+                message: error.toString(),
+                onRetry: () => ref.read(salesProvider.notifier).refreshSales(),
               ),
             ),
           ),
@@ -244,30 +164,30 @@ class SalesScreen extends HookConsumerWidget {
     required SalesFilter currentFilter,
     required List<SaleModel> sales,
   }) {
-    final cashierOptions = sales
-        .map((s) => s.cashierName)
-        .where((s) => s.isNotEmpty)
-        .toSet()
-        .toList()
-      ..sort();
-    final customerOptions = sales
-        .map((s) => s.customerName)
-        .where((s) => s.isNotEmpty)
-        .toSet()
-        .toList()
-      ..sort();
-    final paymentOptions = sales
-        .map((s) => s.paymentMethod ?? 'N/A')
-        .where((s) => s.isNotEmpty)
-        .toSet()
-        .toList()
-      ..sort();
-    final statusOptions = sales
-        .map((s) => s.status)
-        .where((s) => s.isNotEmpty)
-        .toSet()
-        .toList()
-      ..sort();
+    final cashierOptions =
+        sales
+            .map((s) => s.cashierName)
+            .where((s) => s.isNotEmpty && s != 'N/A')
+            .toSet()
+            .toList()
+          ..sort();
+    final customerOptions =
+        sales
+            .map((s) => s.customerName)
+            .where((s) => s.isNotEmpty && s != 'N/A')
+            .toSet()
+            .toList()
+          ..sort();
+    final paymentOptions =
+        sales
+            .map((s) => s.paymentMethod ?? 'N/A')
+            .where((s) => s.isNotEmpty)
+            .toSet()
+            .toList()
+          ..sort();
+    final statusOptions =
+        sales.map((s) => s.status).where((s) => s.isNotEmpty).toSet().toList()
+          ..sort();
 
     return showDialog<SalesFilter>(
       context: context,
@@ -285,7 +205,7 @@ class SalesScreen extends HookConsumerWidget {
   void _showSaleDetailsDialog(BuildContext context, SaleModel sale) {
     showDialog(
       context: context,
-      builder: (context) => _SaleDetailsDialog(sale: sale),
+      builder: (context) => SaleDetailDialog(sale: sale),
     );
   }
 
@@ -297,28 +217,34 @@ class SalesScreen extends HookConsumerWidget {
     final lowerQuery = query.trim().toLowerCase();
 
     return sales.where((sale) {
-      final matchesSearch = lowerQuery.isEmpty ||
+      final matchesSearch =
+          lowerQuery.isEmpty ||
           sale.customerName.toLowerCase().contains(lowerQuery) ||
           sale.orderNumber.toLowerCase().contains(lowerQuery) ||
           sale.cashierName.toLowerCase().contains(lowerQuery) ||
           sale.status.toLowerCase().contains(lowerQuery);
 
       final saleTotal = sale.totalPrice ?? sale.totalAmount;
-      final matchesMinPrice = filter.minPrice == null || saleTotal >= filter.minPrice!;
-      final matchesMaxPrice = filter.maxPrice == null || saleTotal <= filter.maxPrice!;
+      final matchesMinPrice =
+          filter.minPrice == null || saleTotal >= filter.minPrice!;
+      final matchesMaxPrice =
+          filter.maxPrice == null || saleTotal <= filter.maxPrice!;
       final matchesCashier =
           filter.cashier == null || sale.cashierName == filter.cashier;
       final matchesCustomer =
           filter.customer == null || sale.customerName == filter.customer;
-      final matchesPayment = filter.paymentMethod == null ||
+      final matchesPayment =
+          filter.paymentMethod == null ||
           (sale.paymentMethod ?? 'N/A') == filter.paymentMethod;
       final matchesStatus =
           filter.status == null || sale.status == filter.status;
 
       final matchesStartDate =
-          filter.startDate == null || !sale.date.isBefore(_startOfDay(filter.startDate!));
+          filter.startDate == null ||
+          !sale.date.isBefore(_startOfDay(filter.startDate!));
       final matchesEndDate =
-          filter.endDate == null || !sale.date.isAfter(_endOfDay(filter.endDate!));
+          filter.endDate == null ||
+          !sale.date.isAfter(_endOfDay(filter.endDate!));
 
       return matchesSearch &&
           matchesMinPrice &&
@@ -358,92 +284,76 @@ class _SaleTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
+      duration: const Duration(milliseconds: 250),
+      curve: Curves.easeInOut,
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         children: [
-          // header row (always visible)
+          // header row
           InkWell(
             onTap: onToggle,
             borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
             child: Padding(
               padding: const EdgeInsets.all(AppTheme.spacingMedium),
-              child: Column(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // left column: customer name label + value
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Customer name',
-                              style: GoogleFonts.poppins(
-                                fontSize: 12,
-                                color: AppTheme.textSecondary,
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              sale.customerName,
-                              style: GoogleFonts.poppins(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w500,
-                                color: AppTheme.textPrimary,
-                              ),
-                            ),
-                          ],
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Customer name',
+                          style: GoogleFonts.poppins(
+                            fontSize: 12,
+                            color: AppTheme.textSecondary,
+                          ),
                         ),
-                      ),
-
-                      // right column: status + amount
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          // status badge
-                          Text(
-                            sale.status,
-                            style: GoogleFonts.poppins(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
-                              color: _getStatusColor(sale.status),
-                            ),
+                        const SizedBox(height: 2),
+                        Text(
+                          sale.customerName,
+                          style: GoogleFonts.poppins(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: AppTheme.textPrimary,
                           ),
-                          const SizedBox(height: 2),
-                          // amount
-                          Text(
-                            AmountFormatter.formatCurrency(
-                              sale.totalAmount,
-                              showDecimals: false,
-                            ),
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w600,
-                              color: AppTheme.textPrimary,
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      const SizedBox(width: 4),
-
-                      // expand/collapse icon
-                      Padding(
-                        padding: const EdgeInsets.only(top: 8),
-                        child: Icon(
-                          isExpanded
-                              ? Icons.keyboard_arrow_up
-                              : Icons.keyboard_arrow_down,
-                          color: AppTheme.textSecondary,
-                          size: 22,
+                        ),
+                      ],
+                    ),
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      _buildStatusLabel(sale.status),
+                      const SizedBox(height: 2),
+                      Text(
+                        AmountFormatter.formatCurrency(
+                          sale.totalAmount,
+                          showDecimals: false,
+                        ),
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: AppTheme.textPrimary,
                         ),
                       ),
                     ],
+                  ),
+                  const SizedBox(width: 8),
+                  Icon(
+                    isExpanded ? Icons.expand_less : Icons.expand_more,
+                    color: AppTheme.textSecondary,
+                    size: 24,
                   ),
                 ],
               ),
@@ -454,100 +364,72 @@ class _SaleTile extends StatelessWidget {
           if (isExpanded) ...[
             Padding(
               padding: const EdgeInsets.symmetric(
-                  horizontal: AppTheme.spacingMedium),
+                horizontal: AppTheme.spacingMedium,
+              ),
               child: Divider(color: AppTheme.grey200, height: 1),
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(
-                AppTheme.spacingMedium,
-                AppTheme.spacingSmall + 4,
-                AppTheme.spacingMedium,
-                0,
-              ),
+              padding: const EdgeInsets.all(AppTheme.spacingMedium),
               child: Column(
                 children: [
-                  // order number row
-                  _DetailRow(
-                    label: 'Order number:',
-                    value: sale.orderNumber,
-                  ),
-                  const SizedBox(height: AppTheme.spacingSmall),
-
-                  // cashier name row
-                  _DetailRow(
-                    label: 'Cashier name:',
-                    value: sale.cashierName,
-                  ),
-                  const SizedBox(height: AppTheme.spacingSmall),
-
-                  // date row
+                  _DetailRow(label: 'Order number:', value: sale.orderNumber),
+                  const SizedBox(height: 8),
+                  _DetailRow(label: 'Cashier name:', value: sale.cashierName),
+                  const SizedBox(height: 8),
                   _DetailRow(
                     label: 'Date:',
-                    value: _formatDate(sale.date),
+                    value: DateFormat('MMM d, yyyy').format(sale.date),
+                  ),
+                  const SizedBox(height: AppTheme.spacingMedium),
+                  CustomButtonWithIcon(
+                    text: 'View Details',
+                    icon: Icons.visibility_outlined,
+                    onPressed: onView,
+                    backgroundColor: Colors.white,
+                    textColor: AppTheme.primaryColor,
+                    isOutlined: true,
+                    height: 44,
                   ),
                 ],
               ),
             ),
-
-            // divider before action
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppTheme.spacingMedium,
-                vertical: AppTheme.spacingSmall + 4,
-              ),
-              child: Divider(color: AppTheme.grey200, height: 1),
-            ),
-
-            // view button
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppTheme.spacingMedium,
-                vertical: AppTheme.spacingSmall,
-              ),
-              child: CustomButtonWithIcon(
-                text: 'View', 
-                icon: Icons.visibility_outlined,
-                onPressed: (){
-                  onView();
-                },
-                backgroundColor: AppTheme.white,
-                textColor: AppTheme.primaryColor,
-                isOutlined: true
-              ),
-            )
           ],
         ],
       ),
     );
   }
 
-  Color _getStatusColor(String status) {
+  Widget _buildStatusLabel(String status) {
+    Color color;
     switch (status.toLowerCase()) {
       case 'completed':
-        return AppTheme.successColor;
+        color = AppTheme.successColor;
+        break;
       case 'pending':
-        return Colors.orange;
+        color = Colors.orange;
+        break;
       case 'cancelled':
-        return AppTheme.errorColor;
+        color = AppTheme.errorColor;
+        break;
       default:
-        return AppTheme.textSecondary;
+        color = AppTheme.textSecondary;
     }
-  }
-
-  String _formatDate(DateTime date) {
-    return DateFormat('MMM d\'th\', yyyy').format(date);
+    return Text(
+      status.toUpperCase(),
+      style: GoogleFonts.poppins(
+        fontSize: 11,
+        fontWeight: FontWeight.w700,
+        color: color,
+        letterSpacing: 0.5,
+      ),
+    );
   }
 }
 
-/// detail row with label and value
 class _DetailRow extends StatelessWidget {
   final String label;
   final String value;
-
-  const _DetailRow({
-    required this.label,
-    required this.value,
-  });
+  const _DetailRow({required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {
@@ -557,14 +439,14 @@ class _DetailRow extends StatelessWidget {
         Text(
           label,
           style: GoogleFonts.poppins(
-            fontSize: 14,
+            fontSize: 13,
             color: AppTheme.textSecondary,
           ),
         ),
         Text(
           value,
           style: GoogleFonts.poppins(
-            fontSize: 14,
+            fontSize: 13,
             fontWeight: FontWeight.w500,
             color: AppTheme.textPrimary,
           ),
@@ -594,13 +476,12 @@ class _SalesFilterDialog extends HookWidget {
   Widget build(BuildContext context) {
     final selectedCashier = useState<String?>(initialFilter.cashier);
     final selectedCustomer = useState<String?>(initialFilter.customer);
-    final selectedDiscount = useState<String?>(null);
-    final selectedPaymentMethod = useState<String?>(initialFilter.paymentMethod);
+    final selectedPaymentMethod = useState<String?>(
+      initialFilter.paymentMethod,
+    );
     final selectedStatus = useState<String?>(initialFilter.status);
     final startDate = useState<DateTime?>(initialFilter.startDate);
     final endDate = useState<DateTime?>(initialFilter.endDate);
-
-    // price range
     final rangeValues = useState(
       RangeValues(
         initialFilter.minPrice ?? 0,
@@ -609,9 +490,7 @@ class _SalesFilterDialog extends HookWidget {
     );
 
     return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
       child: Padding(
         padding: const EdgeInsets.all(AppTheme.spacingLarge),
@@ -620,7 +499,6 @@ class _SalesFilterDialog extends HookWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // header row
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -629,191 +507,105 @@ class _SalesFilterDialog extends HookWidget {
                     style: GoogleFonts.poppins(
                       fontSize: 20,
                       fontWeight: FontWeight.w600,
-                      color: AppTheme.textPrimary,
                     ),
                   ),
-                  GestureDetector(
-                    onTap: () => Navigator.pop(context),
-                    child: const Icon(
-                      Icons.close,
-                      color: AppTheme.textPrimary,
-                      size: 24,
-                    ),
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.close),
                   ),
                 ],
               ),
               const SizedBox(height: AppTheme.spacingLarge),
 
-              // price range section
               Text(
-                'Select a price range',
+                'Price Range',
                 style: GoogleFonts.poppins(
                   fontSize: 14,
                   color: AppTheme.textSecondary,
                 ),
               ),
-              const SizedBox(height: AppTheme.spacingSmall),
+              const SizedBox(height: 8),
               Text(
-                '\$${rangeValues.value.start.toInt().toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]},')}  -  \$${rangeValues.value.end.toInt().toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]},')}',
-                style: GoogleFonts.poppins(
+                '${AmountFormatter.formatCurrency(rangeValues.value.start)} - ${AmountFormatter.formatCurrency(rangeValues.value.end)}',
+                style: GoogleFonts.plusJakartaSans(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: AppTheme.textPrimary,
                 ),
               ),
-              const SizedBox(height: AppTheme.spacingSmall),
-              SliderTheme(
-                data: SliderThemeData(
-                  activeTrackColor: Colors.black,
-                  inactiveTrackColor: AppTheme.grey300,
-                  thumbColor: Colors.black,
-                  overlayColor: Colors.black.withValues(alpha: 0.1),
-                  trackHeight: 3,
-                  thumbShape:
-                      const RoundSliderThumbShape(enabledThumbRadius: 8),
-                ),
-                child: RangeSlider(
-                  values: rangeValues.value,
-                  min: 0,
-                  max: 1000000,
-                  onChanged: (values) {
-                    rangeValues.value = values;
-                  },
-                ),
+              RangeSlider(
+                values: rangeValues.value,
+                min: 0,
+                max: 1000000,
+                activeColor: AppTheme.primaryColor,
+                inactiveColor: AppTheme.grey300,
+                onChanged: (v) => rangeValues.value = v,
               ),
               const SizedBox(height: AppTheme.spacingMedium),
 
-              // select cashier dropdown
-              AppDropdown<String>(
-                hint: 'Select cashier',
-                value: selectedCashier.value,
-                items: cashierOptions
-                    .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                    .toList(),
-                onChanged: (value) => selectedCashier.value = value,
+              _buildDropdown('Cashier', selectedCashier, cashierOptions),
+              const SizedBox(height: AppTheme.spacingMedium),
+              _buildDropdown('Customer', selectedCustomer, customerOptions),
+              const SizedBox(height: AppTheme.spacingMedium),
+              _buildDropdown(
+                'Payment Type',
+                selectedPaymentMethod,
+                paymentOptions,
               ),
               const SizedBox(height: AppTheme.spacingMedium),
-
-              // select customer dropdown
-              AppDropdown<String>(
-                hint: 'Select customer',
-                value: selectedCustomer.value,
-                items: customerOptions
-                    .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                    .toList(),
-                onChanged: (value) => selectedCustomer.value = value,
-              ),
+              _buildDropdown('Status', selectedStatus, statusOptions),
               const SizedBox(height: AppTheme.spacingMedium),
 
-              // select discount dropdown
-              AppDropdown<String>(
-                hint: 'Select discount',
-                value: selectedDiscount.value,
-                items: const ['10%', '20%', '30%', '50%']
-                    .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                    .toList(),
-                onChanged: (value) => selectedDiscount.value = value,
-              ),
-              const SizedBox(height: AppTheme.spacingMedium),
-
-              // select payment method dropdown
-              AppDropdown<String>(
-                hint: 'Select payment method',
-                value: selectedPaymentMethod.value,
-                items: paymentOptions
-                    .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                    .toList(),
-                onChanged: (value) =>
-                    selectedPaymentMethod.value = value,
-              ),
-              const SizedBox(height: AppTheme.spacingMedium),
-
-              AppDropdown<String>(
-                hint: 'Select status',
-                value: selectedStatus.value,
-                items: statusOptions
-                    .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                    .toList(),
-                onChanged: (value) => selectedStatus.value = value,
-              ),
-              const SizedBox(height: AppTheme.spacingMedium),
-
-              // date range row
               Row(
                 children: [
                   Expanded(
-                    child: _DatePickerField(
-                      hint: 'Start date',
+                    child: _DatePickerButton(
+                      label: 'Start Date',
                       value: startDate.value,
-                      onTap: () async {
-                        final picked = await showDatePicker(
-                          context: context,
-                          initialDate: DateTime.now(),
-                          firstDate: DateTime(2020),
-                          lastDate: DateTime.now(),
-                        );
-                        if (picked != null) {
-                          startDate.value = picked;
-                        }
-                      },
+                      onPicked: (d) => startDate.value = d,
                     ),
                   ),
-                  const SizedBox(width: AppTheme.spacingSmall),
+                  const SizedBox(width: 8),
                   Expanded(
-                    child: _DatePickerField(
-                      hint: 'End date',
+                    child: _DatePickerButton(
+                      label: 'End Date',
                       value: endDate.value,
-                      onTap: () async {
-                        final picked = await showDatePicker(
-                          context: context,
-                          initialDate: DateTime.now(),
-                          firstDate: DateTime(2020),
-                          lastDate: DateTime.now(),
-                        );
-                        if (picked != null) {
-                          endDate.value = picked;
-                        }
-                      },
+                      onPicked: (d) => endDate.value = d,
                     ),
                   ),
                 ],
               ),
               const SizedBox(height: AppTheme.spacingLarge),
 
-              // action buttons
               Row(
                 children: [
-                  // cancel button
                   Expanded(
                     child: CustomButton(
-                      text: 'Cancel',
-                      onPressed: () => Navigator.pop(context, SalesFilter.empty),
+                      text: 'Reset',
+                      onPressed: () =>
+                          Navigator.pop(context, SalesFilter.empty),
                       isOutlined: true,
-                      height: 50,
                     ),
                   ),
-                  const SizedBox(width: AppTheme.spacingMedium),
-
-                  // search button
+                  const SizedBox(width: 12),
                   Expanded(
                     child: CustomButton(
-                      text: 'Search',
+                      text: 'Apply',
                       onPressed: () {
-                        final nextFilter = SalesFilter(
-                          minPrice: rangeValues.value.start,
-                          maxPrice: rangeValues.value.end,
-                          cashier: selectedCashier.value,
-                          customer: selectedCustomer.value,
-                          discount: selectedDiscount.value,
-                          paymentMethod: selectedPaymentMethod.value,
-                          status: selectedStatus.value,
-                          startDate: startDate.value,
-                          endDate: endDate.value,
+                        Navigator.pop(
+                          context,
+                          SalesFilter(
+                            minPrice: rangeValues.value.start,
+                            maxPrice: rangeValues.value.end,
+                            cashier: selectedCashier.value,
+                            customer: selectedCustomer.value,
+                            paymentMethod: selectedPaymentMethod.value,
+                            status: selectedStatus.value,
+                            startDate: startDate.value,
+                            endDate: endDate.value,
+                          ),
                         );
-                        Navigator.pop(context, nextFilter);
                       },
-                      backgroundColor: AppTheme.blue,
-                      height: 50,
+                      backgroundColor: AppTheme.primaryColor,
                     ),
                   ),
                 ],
@@ -824,31 +616,51 @@ class _SalesFilterDialog extends HookWidget {
       ),
     );
   }
+
+  Widget _buildDropdown(
+    String hint,
+    ValueNotifier<String?> notifier,
+    List<String> options,
+  ) {
+    return AppDropdown<String>(
+      hint: hint,
+      value: notifier.value,
+      items: options
+          .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+          .toList(),
+      onChanged: (v) => notifier.value = v,
+    );
+  }
 }
 
-/// date picker field widget
-class _DatePickerField extends StatelessWidget {
-  final String hint;
+class _DatePickerButton extends StatelessWidget {
+  final String label;
   final DateTime? value;
-  final VoidCallback onTap;
+  final Function(DateTime) onPicked;
 
-  const _DatePickerField({
-    required this.hint,
+  const _DatePickerButton({
+    required this.label,
     required this.value,
-    required this.onTap,
+    required this.onPicked,
   });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: () async {
+        final d = await showDatePicker(
+          context: context,
+          initialDate: value ?? DateTime.now(),
+          firstDate: DateTime(2020),
+          lastDate: DateTime.now(),
+        );
+        if (d != null) onPicked(d);
+      },
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
         decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius:
-              BorderRadius.circular(AppTheme.borderRadiusMedium),
           border: Border.all(color: AppTheme.grey300),
+          borderRadius: BorderRadius.circular(8),
         ),
         child: Row(
           children: [
@@ -856,434 +668,23 @@ class _DatePickerField extends StatelessWidget {
               child: Text(
                 value != null
                     ? DateFormat('MMM d, yyyy').format(value!)
-                    : hint,
+                    : label,
                 style: GoogleFonts.poppins(
-                  fontSize: 14,
+                  fontSize: 13,
                   color: value != null
                       ? AppTheme.textPrimary
                       : AppTheme.textHint,
                 ),
               ),
             ),
-            Icon(
-              Icons.keyboard_arrow_down,
+            const Icon(
+              Icons.calendar_today,
+              size: 16,
               color: AppTheme.textSecondary,
-              size: 20,
             ),
           ],
         ),
       ),
-    );
-  }
-}
-
-/// sale details dialog
-class _SaleDetailsDialog extends StatelessWidget {
-  final SaleModel sale;
-
-  const _SaleDetailsDialog({required this.sale});
-
-  @override
-  Widget build(BuildContext context) {
-    return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
-      ),
-      insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
-      child: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(AppTheme.spacingLarge),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // header row with order number and close button
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // order number
-                        RichText(
-                          text: TextSpan(
-                            children: [
-                              TextSpan(
-                                text: 'Order No: ',
-                                style: GoogleFonts.poppins(
-                                  fontSize: 12,
-                                  color: AppTheme.successColor,
-                                ),
-                              ),
-                              TextSpan(
-                                text: sale.orderNumber,
-                                style: GoogleFonts.poppins(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: AppTheme.successColor,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-
-                        // title
-                        Text(
-                          'Sales Details',
-                          style: GoogleFonts.poppins(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                            color: AppTheme.textPrimary,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-
-                        // status badge + date
-                        Row(
-                          children: [
-                            // status chip
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: AppTheme.successColor
-                                  .withValues(alpha: 0.1),
-                                borderRadius: BorderRadius.circular(
-                                    AppTheme.borderRadiusSmall),
-                              ),
-                              child: Text(
-                                sale.status,
-                                style: GoogleFonts.poppins(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w500,
-                                  color: AppTheme.successColor,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: AppTheme.spacingSmall),
-
-                            // date
-                            Text(
-                              DateFormat('MMM d, yyyy, h:mma')
-                                  .format(sale.date),
-                              style: GoogleFonts.poppins(
-                                fontSize: 11,
-                                color: AppTheme.textSecondary,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  // close button
-                  GestureDetector(
-                    onTap: () => Navigator.pop(context),
-                    child: const Icon(
-                      Icons.close,
-                      color: AppTheme.textPrimary,
-                      size: 22,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppTheme.spacingLarge),
-
-              // order section
-              _SectionHeader(title: 'Order'),
-              const SizedBox(height: AppTheme.spacingSmall),
-              _InfoRow(
-                label: 'Total',
-                value: AmountFormatter.formatCurrency(
-                  sale.totalPrice ?? sale.totalAmount,
-                ),
-              ),
-              const SizedBox(height: AppTheme.spacingMedium),
-
-              // customer section
-              _SectionHeader(title: 'Customer'),
-              const SizedBox(height: AppTheme.spacingSmall),
-              _InfoRow(
-                label: 'Customer name:',
-                value: sale.customerName,
-              ),
-              const SizedBox(height: 6),
-              _InfoRow(
-                label: 'Address:',
-                value: sale.customerAddress ?? 'N/A',
-              ),
-              const SizedBox(height: AppTheme.spacingMedium),
-
-              // cashier section
-              _SectionHeader(title: 'Cashier'),
-              const SizedBox(height: AppTheme.spacingSmall),
-              _InfoRow(
-                label: 'Cashier name:',
-                value: sale.cashierName,
-              ),
-              const SizedBox(height: 6),
-              _InfoRow(
-                label: 'Email:',
-                value: sale.cashierEmail ?? 'N/A',
-              ),
-              const SizedBox(height: 6),
-              _InfoRow(
-                label: 'Phone:',
-                value: sale.cashierPhone ?? 'N/A',
-              ),
-              const SizedBox(height: AppTheme.spacingLarge),
-
-              // order items section
-              Text(
-                'Order Items',
-                style: GoogleFonts.poppins(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: AppTheme.textPrimary,
-                ),
-              ),
-              const SizedBox(height: AppTheme.spacingSmall),
-
-              // items table header
-              Container(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 12, vertical: 10),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF4DA6C9),
-                  borderRadius: BorderRadius.only(
-                    topLeft:
-                        Radius.circular(AppTheme.borderRadiusSmall),
-                    topRight:
-                        Radius.circular(AppTheme.borderRadiusSmall),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      flex: 3,
-                      child: Text(
-                        'Product',
-                        style: GoogleFonts.poppins(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      flex: 2,
-                      child: Text(
-                        'Quantity',
-                        textAlign: TextAlign.center,
-                        style: GoogleFonts.poppins(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      flex: 2,
-                      child: Text(
-                        'Unit Price',
-                        textAlign: TextAlign.right,
-                        style: GoogleFonts.poppins(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              // items table body
-              ...sale.items.map(
-                (item) => Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 12, vertical: 10),
-                  decoration: BoxDecoration(
-                    border: Border(
-                      left: BorderSide(color: AppTheme.grey200),
-                      right: BorderSide(color: AppTheme.grey200),
-                      bottom: BorderSide(color: AppTheme.grey200),
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        flex: 3,
-                        child: Text(
-                          item.productName,
-                          style: GoogleFonts.poppins(
-                            fontSize: 12,
-                            color: AppTheme.textPrimary,
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        flex: 2,
-                        child: Text(
-                          '${item.quantity}',
-                          textAlign: TextAlign.center,
-                          style: GoogleFonts.poppins(
-                            fontSize: 12,
-                            color: AppTheme.textPrimary,
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        flex: 2,
-                        child: Text(
-                          AmountFormatter.formatCurrency(
-                            item.unitPrice,
-                            symbol: '\$',
-                            showDecimals: false,
-                          ),
-                          textAlign: TextAlign.right,
-                          style: GoogleFonts.poppins(
-                            fontSize: 12,
-                            color: AppTheme.textPrimary,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-              // total row
-              Container(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 12, vertical: 10),
-                decoration: BoxDecoration(
-                  border: Border(
-                    left: BorderSide(color: AppTheme.grey200),
-                    right: BorderSide(color: AppTheme.grey200),
-                    bottom: BorderSide(color: AppTheme.grey200),
-                  ),
-                  borderRadius: BorderRadius.only(
-                    bottomLeft:
-                        Radius.circular(AppTheme.borderRadiusSmall),
-                    bottomRight:
-                        Radius.circular(AppTheme.borderRadiusSmall),
-                  ),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Text(
-                      'Total: ${AmountFormatter.formatCurrency(sale.totalPrice ?? sale.totalAmount, showDecimals: false)}',
-                      style: GoogleFonts.poppins(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: AppTheme.textPrimary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: AppTheme.spacingMedium),
-
-              // payment method section
-              _SectionHeader(title: 'Payment Method'),
-              const SizedBox(height: AppTheme.spacingSmall),
-              _InfoRow(
-                label: 'Loyalty applied:',
-                value: sale.loyaltyApplied != null
-                    ? AmountFormatter.formatCurrency(sale.loyaltyApplied)
-                    : 'N/A',
-              ),
-              const SizedBox(height: 6),
-              _InfoRow(
-                label: 'Payment type:',
-                value: sale.paymentMethod ?? 'N/A',
-              ),
-              const SizedBox(height: 6),
-              _InfoRow(
-                label: 'Total price:',
-                value: AmountFormatter.formatCurrency(
-                  sale.totalPrice ?? sale.totalAmount,
-                ),
-              ),
-              const SizedBox(height: AppTheme.spacingLarge),
-
-              // close button
-              CustomButton(
-                text: 'Close',
-                onPressed: () => Navigator.pop(context),
-                backgroundColor: AppTheme.blue,
-                height: 50,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// section header label
-class _SectionHeader extends StatelessWidget {
-  final String title;
-
-  const _SectionHeader({required this.title});
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      title,
-      style: GoogleFonts.poppins(
-        fontSize: 14,
-        fontWeight: FontWeight.w600,
-        color: AppTheme.textPrimary,
-      ),
-    );
-  }
-}
-
-/// info row with label and value for the details dialog
-class _InfoRow extends StatelessWidget {
-  final String label;
-  final String value;
-
-  const _InfoRow({
-    required this.label,
-    required this.value,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: GoogleFonts.poppins(
-            fontSize: 13,
-            color: AppTheme.textSecondary,
-          ),
-        ),
-        const SizedBox(width: AppTheme.spacingSmall),
-        Flexible(
-          child: Text(
-            value,
-            textAlign: TextAlign.right,
-            style: GoogleFonts.poppins(
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
-              color: AppTheme.textPrimary,
-            ),
-          ),
-        ),
-      ],
     );
   }
 }
