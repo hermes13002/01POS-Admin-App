@@ -11,9 +11,37 @@ class SalesRepositoryImpl implements SalesRepository {
   SalesRepositoryImpl(this._datasource);
 
   @override
-  Future<Either<Failure, PaginatedSalesResponse>> getSales({int page = 1}) async {
+  Future<Either<Failure, PaginatedSalesResponse>> getSales({
+    int page = 1,
+  }) async {
+    return _handleException(() => _datasource.getSales(page: page));
+  }
+
+  @override
+  Future<Either<Failure, void>> activateDownload(int companyId) async {
+    return _handleException(() => _datasource.activateDownload(companyId));
+  }
+
+  @override
+  Future<Either<Failure, void>> deactivateDownload(int companyId) async {
+    return _handleException(() => _datasource.deactivateDownload(companyId));
+  }
+
+  @override
+  Future<Either<Failure, List<SaleModel>>> downloadSales({
+    required String from,
+    required String to,
+  }) async {
+    return _handleException(
+      () => _datasource.downloadSales(from: from, to: to),
+    );
+  }
+
+  Future<Either<Failure, T>> _handleException<T>(
+    Future<T> Function() action,
+  ) async {
     try {
-      final result = await _datasource.getSales(page: page);
+      final result = await action();
       return Right(result);
     } on AuthenticationException catch (e) {
       return Left(AuthenticationFailure(message: e.message));

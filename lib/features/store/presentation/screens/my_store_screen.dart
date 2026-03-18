@@ -7,6 +7,7 @@ import 'package:onepos_admin_app/shared/widgets/custom_app_bar2.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_search_bar.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_text_field.dart';
 import 'package:onepos_admin_app/shared/widgets/app_snackbar.dart';
+import 'package:onepos_admin_app/shared/widgets/custom_switch.dart';
 import '../../data/models/category_model.dart';
 import '../providers/store_provider.dart';
 
@@ -607,16 +608,11 @@ class _CategoryCard extends StatelessWidget {
                     ),
                   ),
                   Transform.scale(
-                    scale: 0.7,
-                    child: Switch(
+                    scale: 0.8,
+                    child: CustomSwitch(
                       value: category.isActive == 1,
                       onChanged: onStatusToggle,
-                      activeThumbColor: AppTheme.primaryColor,
-                      activeTrackColor: AppTheme.primaryColor.withOpacity(0.2),
-                      inactiveThumbColor: AppTheme.primaryColor,
-                      inactiveTrackColor: AppTheme.primaryColor.withOpacity(
-                        0.2,
-                      ),
+                      activeColor: AppTheme.primaryColor,
                     ),
                   ),
                   Icon(

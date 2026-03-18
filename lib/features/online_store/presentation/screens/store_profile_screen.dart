@@ -8,6 +8,8 @@ import 'package:onepos_admin_app/features/online_store/presentation/providers/pr
 import 'package:onepos_admin_app/features/products/presentation/providers/products_provider.dart';
 import 'package:onepos_admin_app/shared/widgets/app_snackbar.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_app_bar.dart';
+import 'package:onepos_admin_app/shared/widgets/custom_button_with_icon.dart';
+import 'package:onepos_admin_app/features/auth/presentation/providers/auth_provider.dart';
 
 /// store profile screen — company details and admin profile
 class StoreProfileScreen extends HookConsumerWidget {
@@ -323,6 +325,11 @@ class _ProfileContent extends ConsumerWidget {
               }
             },
           ),
+          const SizedBox(height: AppTheme.spacingMedium),
+          _ProfileListItem(
+            title: 'Sales Download Settings',
+            onTap: () => Navigator.pushNamed(context, AppRoutes.salesSettings),
+          ),
           const SizedBox(height: AppTheme.spacingLarge),
 
           // profile details section
@@ -345,7 +352,63 @@ class _ProfileContent extends ConsumerWidget {
           _ProfileDetailField(label: 'Phone Number', value: profile.phoneno),
           const SizedBox(height: AppTheme.spacingMedium),
           _ProfileDetailField(label: 'Address', value: profile.address ?? '—'),
+          const SizedBox(height: AppTheme.spacingMedium),
+          CustomButtonWithIcon(
+            text: 'Logout',
+            icon: Icons.logout_rounded,
+            backgroundColor: AppTheme.errorColor.withValues(alpha: 0.1),
+            textColor: AppTheme.errorColor,
+            iconColor: AppTheme.errorColor,
+            onPressed: () => _showLogoutDialog(context, ref),
+          ),
           const SizedBox(height: AppTheme.spacingLarge),
+        ],
+      ),
+    );
+  }
+
+  /// show logout confirmation dialog
+  void _showLogoutDialog(BuildContext context, WidgetRef ref) {
+    final navigator = Navigator.of(context);
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
+        ),
+        title: Text(
+          'Logout',
+          style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+        ),
+        content: Text(
+          'Are you sure you want to logout?',
+          style: GoogleFonts.poppins(fontSize: 14),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: Text(
+              'Cancel',
+              style: GoogleFonts.poppins(color: AppTheme.textSecondary),
+            ),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.of(dialogContext).pop();
+              await ref.read(authProvider.notifier).logout();
+              navigator.pushNamedAndRemoveUntil(
+                AppRoutes.login,
+                (route) => false,
+              );
+            },
+            child: Text(
+              'Logout',
+              style: GoogleFonts.poppins(
+                color: AppTheme.errorColor,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
         ],
       ),
     );

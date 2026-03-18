@@ -9,9 +9,10 @@ import 'package:onepos_admin_app/core/theme/app_theme.dart';
 import 'package:onepos_admin_app/data/models/tool_model.dart';
 import 'package:onepos_admin_app/features/dashboard/presentation/screens/_quick_action_card.dart';
 import 'package:onepos_admin_app/features/online_store/presentation/providers/profile_provider.dart';
-import 'package:onepos_admin_app/presentation/providers/quick_actions_provider.dart';
 import 'package:onepos_admin_app/features/notifications/presentation/providers/notifications_provider.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
+import 'package:onepos_admin_app/presentation/providers/quick_actions_provider.dart';
+import 'package:onepos_admin_app/shared/widgets/app_snackbar.dart';
 
 const List<String> _backgroundImages = [
   'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80',
@@ -371,8 +372,8 @@ class HomeScreen extends HookConsumerWidget {
                           100 +
                           (30 * MediaQuery.textScalerOf(context).scale(1)),
                     ),
-                    itemCount: quickActions.length > 8
-                        ? 8
+                    itemCount: quickActions.length > 6
+                        ? 6
                         : quickActions.length,
                     itemBuilder: (context, index) {
                       final tool = quickActions[index];
@@ -479,7 +480,7 @@ class EditQuickActionsSheet extends HookConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Add to Quick Actions',
+                'Manage Quick Actions',
                 style: GoogleFonts.poppins(
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
@@ -495,7 +496,7 @@ class EditQuickActionsSheet extends HookConsumerWidget {
           const SizedBox(height: AppTheme.spacingSmall),
 
           Text(
-            'Select a tool to add. Max 8 tools allowed.',
+            'Tap tools below to add or remove them from your Dashboard.',
             style: GoogleFonts.poppins(
               fontSize: 14,
               color: AppTheme.textSecondary,
@@ -503,23 +504,23 @@ class EditQuickActionsSheet extends HookConsumerWidget {
           ),
           const SizedBox(height: AppTheme.spacingLarge),
 
-          // available tools grid
           Flexible(
-            child: availableTools.isEmpty
-                ? Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(AppTheme.spacingLarge),
-                      child: Text(
-                        'All tools are already in Quick Actions.',
-                        style: GoogleFonts.poppins(
-                          fontSize: 14,
-                          color: AppTheme.textSecondary,
-                        ),
-                      ),
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Active Quick Actions (Min 1, Max 6)',
+                    style: GoogleFonts.poppins(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: AppTheme.textPrimary,
                     ),
-                  )
-                : GridView.builder(
+                  ),
+                  const SizedBox(height: AppTheme.spacingSmall),
+                  GridView.builder(
                     shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
                     gridDelegate:
                         const SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 4,
@@ -527,211 +528,277 @@ class EditQuickActionsSheet extends HookConsumerWidget {
                           mainAxisSpacing: AppTheme.spacingSmall,
                           childAspectRatio: 0.8,
                         ),
-                    itemCount: availableTools.length,
+                    itemCount: quickActions.length,
                     itemBuilder: (context, index) {
-                      final tool = availableTools[index];
-
-                      return GestureDetector(
-                        onTap: () {
-                          if (quickActions.length < 8) {
-                            ref
-                                .read(quickActionsProvider.notifier)
-                                .addTool(tool);
-                            Navigator.pop(context);
-                          } else {
-                            // Trigger replace dialog
-                            _showReplaceDialog(
-                              context,
-                              ref,
-                              tool,
-                              quickActions,
-                            );
+                      final tool = quickActions[index];
+                      return _buildToolItem(
+                        tool: tool,
+                        isAdded: true,
+                        onTap: () async {
+                          final error = await ref
+                              .read(quickActionsProvider.notifier)
+                              .removeTool(tool.id);
+                          if (error != null && context.mounted) {
+                            AppSnackbar.showError(context, error);
                           }
                         },
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: AppTheme.white,
-                            borderRadius: BorderRadius.circular(
-                              AppTheme.borderRadiusMedium,
-                            ),
-                          ),
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Container(
-                                width: 46,
-                                height: 46,
-                                decoration: BoxDecoration(
-                                  color: const Color.fromRGBO(
-                                    83,
-                                    157,
-                                    243,
-                                    0.15,
-                                  ),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Center(
-                                  child: Icon(
-                                    tool.icon,
-                                    size: 24,
-                                    color: const Color(0xFF2196F3),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 4,
-                                ),
-                                child: Text(
-                                  tool.name,
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w500,
-                                    color: AppTheme.textPrimary.withOpacity(
-                                      0.7,
-                                    ),
-                                  ),
-                                  textAlign: TextAlign.center,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
                       );
                     },
                   ),
+                  const SizedBox(height: AppTheme.spacingLarge),
+                  Text(
+                    '➕ Available Tools',
+                    style: GoogleFonts.poppins(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: AppTheme.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: AppTheme.spacingSmall),
+                  availableTools.isEmpty
+                      ? Padding(
+                          padding: const EdgeInsets.symmetric(
+                            vertical: AppTheme.spacingMedium,
+                          ),
+                          child: Text(
+                            'All tools are already in Quick Actions.',
+                            style: GoogleFonts.poppins(
+                              fontSize: 14,
+                              color: AppTheme.textSecondary,
+                            ),
+                          ),
+                        )
+                      : GridView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 4,
+                                crossAxisSpacing: AppTheme.spacingSmall,
+                                mainAxisSpacing: AppTheme.spacingSmall,
+                                childAspectRatio: 0.8,
+                              ),
+                          itemCount: availableTools.length,
+                          itemBuilder: (context, index) {
+                            final tool = availableTools[index];
+                            return _buildToolItem(
+                              tool: tool,
+                              isAdded: false,
+                              onTap: () async {
+                                if (quickActions.length < 6) {
+                                  final error = await ref
+                                      .read(quickActionsProvider.notifier)
+                                      .addTool(tool);
+                                  if (error != null && context.mounted) {
+                                    AppSnackbar.showError(context, error);
+                                  }
+                                } else {
+                                  _showReplaceDialog(
+                                    context,
+                                    ref,
+                                    tool,
+                                    quickActions,
+                                  );
+                                }
+                              },
+                            );
+                          },
+                        ),
+                ],
+              ),
+            ),
           ),
         ],
       ),
     );
   }
 
-  void _showReplaceDialog(
-    BuildContext context,
-    WidgetRef ref,
-    ToolModel newTool,
-    List<ToolModel> currentQuickActions,
-  ) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppTheme.borderRadiusLarge),
-          ),
-          title: Text(
-            'Replace Tool',
-            style: GoogleFonts.poppins(
-              fontWeight: FontWeight.w600,
-              fontSize: 18,
-            ),
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Quick Actions is full. Select a tool to replace with ${newTool.name}:',
-                style: GoogleFonts.poppins(
-                  fontSize: 14,
-                  color: AppTheme.textSecondary,
-                ),
+  Widget _buildToolItem({
+    required ToolModel tool,
+    required bool isAdded,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Stack(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              color: AppTheme.white,
+              borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
+              border: Border.all(
+                color: isAdded
+                    ? AppTheme.primaryColor.withValues(alpha: 0.3)
+                    : Colors.transparent,
+                width: 1,
               ),
-              const SizedBox(height: 16),
-              Flexible(
-                child: SizedBox(
-                  width: double.maxFinite,
-                  child: GridView.builder(
-                    shrinkWrap: true,
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 3,
-                          crossAxisSpacing: 8,
-                          mainAxisSpacing: 8,
-                          childAspectRatio: 0.8,
-                        ),
-                    itemCount: currentQuickActions.length,
-                    itemBuilder: (context, index) {
-                      final tool = currentQuickActions[index];
-                      return GestureDetector(
-                        onTap: () {
-                          ref
-                              .read(quickActionsProvider.notifier)
-                              .replaceTool(tool.id, newTool);
-                          // Close dialog and bottom sheet
-                          Navigator.pop(context);
-                          Navigator.pop(context);
-                        },
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: AppTheme.white,
-                            borderRadius: BorderRadius.circular(
-                              AppTheme.borderRadiusMedium,
-                            ),
-                            border: Border.all(
-                              color: AppTheme.grey300,
-                              width: 0.5,
-                            ),
-                          ),
-                          padding: const EdgeInsets.symmetric(vertical: 4),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Container(
-                                width: 40,
-                                height: 40,
-                                decoration: BoxDecoration(
-                                  color: const Color.fromRGBO(
-                                    83,
-                                    157,
-                                    243,
-                                    0.15,
-                                  ),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Center(
-                                  child: Icon(
-                                    tool.icon,
-                                    size: 20,
-                                    color: const Color(0xFF2196F3),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 6),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 4,
-                                ),
-                                child: Text(
-                                  tool.name,
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.w500,
-                                    color: AppTheme.textPrimary.withOpacity(
-                                      0.7,
-                                    ),
-                                  ),
-                                  textAlign: TextAlign.center,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
+            ),
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: 46,
+                  height: 46,
+                  decoration: const BoxDecoration(
+                    color: Color.fromRGBO(83, 157, 243, 0.15),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Center(
+                    child: Icon(
+                      tool.icon,
+                      size: 24,
+                      color: const Color(0xFF2196F3),
+                    ),
                   ),
                 ),
-              ),
-            ],
+                const SizedBox(height: 8),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: Text(
+                    tool.name,
+                    style: GoogleFonts.poppins(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                      color: AppTheme.textPrimary.withValues(alpha: 0.7),
+                    ),
+                    textAlign: TextAlign.center,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
           ),
-        );
-      },
+          if (isAdded)
+            Positioned(
+              top: 4,
+              right: 4,
+              child: Container(
+                padding: const EdgeInsets.all(2),
+                decoration: const BoxDecoration(
+                  color: AppTheme.errorColor,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.remove, size: 12, color: Colors.white),
+              ),
+            ),
+        ],
+      ),
     );
   }
+}
+
+void _showReplaceDialog(
+  BuildContext context,
+  WidgetRef ref,
+  ToolModel newTool,
+  List<ToolModel> currentQuickActions,
+) {
+  showDialog(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppTheme.borderRadiusLarge),
+        ),
+        title: Text(
+          'Replace Tool',
+          style: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 18),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Quick Actions is full. Select a tool to replace with ${newTool.name}:',
+              style: GoogleFonts.poppins(
+                fontSize: 14,
+                color: AppTheme.textSecondary,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Flexible(
+              child: SizedBox(
+                width: double.maxFinite,
+                child: GridView.builder(
+                  shrinkWrap: true,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3,
+                    crossAxisSpacing: 8,
+                    mainAxisSpacing: 8,
+                    childAspectRatio: 0.8,
+                  ),
+                  itemCount: currentQuickActions.length,
+                  itemBuilder: (context, index) {
+                    final tool = currentQuickActions[index];
+                    return GestureDetector(
+                      onTap: () {
+                        ref
+                            .read(quickActionsProvider.notifier)
+                            .replaceTool(tool.id, newTool);
+                        // Close dialog and bottom sheet
+                        Navigator.pop(context);
+                        Navigator.pop(context);
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: AppTheme.white,
+                          borderRadius: BorderRadius.circular(
+                            AppTheme.borderRadiusMedium,
+                          ),
+                          border: Border.all(
+                            color: AppTheme.grey300,
+                            width: 0.5,
+                          ),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 4),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              width: 40,
+                              height: 40,
+                              decoration: BoxDecoration(
+                                color: const Color.fromRGBO(83, 157, 243, 0.15),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Center(
+                                child: Icon(
+                                  tool.icon,
+                                  size: 20,
+                                  color: const Color(0xFF2196F3),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 4,
+                              ),
+                              child: Text(
+                                tool.name,
+                                style: GoogleFonts.poppins(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w500,
+                                  color: AppTheme.textPrimary.withOpacity(0.7),
+                                ),
+                                textAlign: TextAlign.center,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    },
+  );
 }

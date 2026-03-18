@@ -3,6 +3,7 @@ import 'package:onepos_admin_app/core/network/dio_client.dart';
 import 'package:onepos_admin_app/features/sales/data/datasources/sales_remote_datasource.dart';
 import 'package:onepos_admin_app/features/sales/data/models/sale_model.dart';
 import 'package:onepos_admin_app/features/sales/data/repositories/sales_repository_impl.dart';
+import 'package:onepos_admin_app/features/online_store/presentation/providers/profile_provider.dart';
 
 part 'sales_provider.g.dart';
 
@@ -14,7 +15,10 @@ class Sales extends _$Sales {
 
   @override
   Future<SalesState> build() async {
-    return _fetchPage(1);
+    final profile = await ref.watch(userProfileProvider.future);
+    final isDownloadEnabled = profile.company?.salesDownload ?? false;
+    final state = await _fetchPage(1);
+    return state.copyWith(isDownloadEnabled: isDownloadEnabled);
   }
 
   /// fetches a page and returns fresh state
@@ -63,7 +67,41 @@ class Sales extends _$Sales {
 
   /// refresh sales list
   Future<void> refreshSales() async {
+    final currentEnabled = state.valueOrNull?.isDownloadEnabled ?? false;
     state = const AsyncLoading();
-    state = await AsyncValue.guard(() => _fetchPage(1));
+    state = await AsyncValue.guard(() async {
+      final newState = await _fetchPage(1);
+      return newState.copyWith(isDownloadEnabled: currentEnabled);
+    });
+  }
+
+  /// toggle sales download activation
+  Future<void> toggleDownloadActivation(int companyId, bool activate) async {
+    final result = activate
+        ? await _repo.activateDownload(companyId)
+        : await _repo.deactivateDownload(companyId);
+
+    result.fold((failure) => throw Exception(failure.message), (_) {
+      final current = state.valueOrNull;
+      if (current != null) {
+        state = AsyncData(current.copyWith(isDownloadEnabled: activate));
+        // We removed ref.invalidate(userProfileProvider) here because:
+        // 1. It forces a complete rebuild of the sales list (kills pagination).
+        // 2. The API might not immediately reflect the update, causing a local stale state flash.
+        // Instead, the UI in StoreProfileScreen now strictly listens to this provider for sync.
+      }
+    });
+  }
+
+  /// download sales
+  Future<List<SaleModel>> downloadSales({
+    required String from,
+    required String to,
+  }) async {
+    final result = await _repo.downloadSales(from: from, to: to);
+    return result.fold(
+      (failure) => throw Exception(failure.message),
+      (sales) => sales,
+    );
   }
 }

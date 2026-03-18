@@ -47,16 +47,24 @@ class QuickActions extends _$QuickActions {
   }
 
   /// Add tool to quick actions
-  Future<void> addTool(ToolModel tool) async {
-    if (state.length < 6 && !state.any((t) => t.id == tool.id)) {
+  Future<String?> addTool(ToolModel tool) async {
+    if (state.length >= 6) {
+      return 'Maximum of 6 quick actions allowed.';
+    }
+    if (!state.any((t) => t.id == tool.id)) {
       await updateQuickActions([...state, tool]);
     }
+    return null;
   }
 
   /// Remove tool from quick actions
-  Future<void> removeTool(String toolId) async {
+  Future<String?> removeTool(String toolId) async {
+    if (state.length <= 1) {
+      return 'You must have at least 1 quick action.';
+    }
     final updatedTools = state.where((tool) => tool.id != toolId).toList();
     await updateQuickActions(updatedTools);
+    return null;
   }
 
   /// Replace tool in quick actions

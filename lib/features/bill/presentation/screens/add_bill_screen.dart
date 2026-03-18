@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -9,6 +8,7 @@ import 'package:onepos_admin_app/shared/widgets/custom_app_bar.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_button.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_text_field.dart';
 import 'package:onepos_admin_app/core/utils/validators.dart';
+import 'package:onepos_admin_app/shared/widgets/custom_switch.dart';
 
 /// Screen for adding a new bill
 class AddBillScreen extends HookConsumerWidget {
@@ -110,7 +110,7 @@ class AddBillScreen extends HookConsumerWidget {
                           color: AppTheme.textSecondary,
                         ),
                       ),
-                      CupertinoSwitch(
+                      CustomSwitch(
                         value: isActive.value,
                         activeColor: const Color(0xFF4CAF50), // green
                         onChanged: (val) {

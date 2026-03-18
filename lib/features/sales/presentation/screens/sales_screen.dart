@@ -3,6 +3,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:onepos_admin_app/core/routes/app_routes.dart';
 import 'package:onepos_admin_app/core/theme/app_theme.dart';
 import 'package:onepos_admin_app/core/utils/amount_formatter.dart';
 import 'package:onepos_admin_app/features/sales/data/models/sale_model.dart';
@@ -56,6 +57,16 @@ class SalesScreen extends HookConsumerWidget {
       appBar: CustomAppBar2(
         title: 'Sales',
         backgroundColor: AppTheme.backgroundColor,
+        actions: [
+          IconButton(
+            icon: const Icon(
+              Icons.settings_outlined,
+              color: AppTheme.textPrimary,
+            ),
+            onPressed: () =>
+                Navigator.pushNamed(context, AppRoutes.salesSettings),
+          ),
+        ],
       ),
       body: Column(
         children: [

@@ -9,6 +9,7 @@ class CompanyModel {
   final String licenseDuration;
   final String? logo;
   final String lowStockLimit;
+  final bool salesDownload;
   final bool isActive;
 
   const CompanyModel({
@@ -21,6 +22,7 @@ class CompanyModel {
     required this.licenseDuration,
     this.logo,
     required this.lowStockLimit,
+    required this.salesDownload,
     required this.isActive,
   });
 
@@ -35,6 +37,10 @@ class CompanyModel {
       licenseDuration: json['license_duration']?.toString() ?? '',
       logo: json['logo']?.toString(),
       lowStockLimit: json['low_stock_limit']?.toString() ?? '0',
+      salesDownload:
+          json['sales_download'] == true ||
+          json['sales_download'] == '1' ||
+          json['sales_download'] == 1,
       isActive:
           json['is_active'] == true ||
           json['is_active'] == '1' ||

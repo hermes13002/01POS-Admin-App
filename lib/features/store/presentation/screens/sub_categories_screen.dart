@@ -8,6 +8,7 @@ import 'package:onepos_admin_app/shared/widgets/custom_search_bar.dart';
 import 'package:onepos_admin_app/shared/widgets/app_snackbar.dart';
 import '../../data/models/category_model.dart';
 import '../providers/store_provider.dart';
+import 'package:onepos_admin_app/shared/widgets/custom_switch.dart';
 
 class SubCategoriesScreen extends HookConsumerWidget {
   const SubCategoriesScreen({super.key});
@@ -443,7 +444,7 @@ class _SubCategoryCard extends StatelessWidget {
               ],
             ),
           ),
-          Switch(
+          CustomSwitch(
             value: subCategory.isActive == 1,
             onChanged: onToggleStatus,
             activeColor: AppTheme.successColor,

@@ -4,6 +4,7 @@ import 'package:onepos_admin_app/features/auth/presentation/screens/reset_passwo
 import 'package:onepos_admin_app/features/low_stock/presentation/screens/low_stock_screen.dart';
 import 'package:onepos_admin_app/features/products/presentation/screens/add_product_screen.dart';
 import 'package:onepos_admin_app/features/sales/presentation/screens/sales_screen.dart';
+import 'package:onepos_admin_app/features/sales/presentation/screens/sales_settings_screen.dart';
 import 'package:onepos_admin_app/features/products/presentation/screens/products_screen.dart';
 import 'package:onepos_admin_app/features/reports/presentation/screens/reports_screen.dart';
 import 'package:onepos_admin_app/features/store/presentation/screens/add_category_screen.dart';
@@ -77,6 +78,7 @@ class AppRoutes {
   static const String notifications = '/notifications';
   static const String notificationDetail = '/notification-detail';
   static const String subCategories = '/sub-categories';
+  static const String salesSettings = '/sales-settings';
 
   // route map
   static Map<String, WidgetBuilder> get routes => {
@@ -118,6 +120,7 @@ class AppRoutes {
     updateReceiptTemplate: (context) => const UpdateReceiptTemplateScreen(),
     notifications: (context) => const NotificationsScreen(),
     subCategories: (context) => const SubCategoriesScreen(),
+    salesSettings: (context) => const SalesSettingsScreen(),
     notificationDetail: (context) {
       final args = ModalRoute.of(context)!.settings.arguments as int;
       return NotificationDetailScreen(notificationId: args);

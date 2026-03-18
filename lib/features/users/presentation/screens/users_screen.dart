@@ -15,6 +15,7 @@ import 'package:onepos_admin_app/shared/widgets/app_snackbar.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_text_field.dart';
 import 'package:onepos_admin_app/shared/widgets/app_dropdown.dart';
 import 'package:onepos_admin_app/core/utils/validators.dart';
+import 'package:onepos_admin_app/shared/widgets/custom_switch.dart';
 
 /// Screen for viewing and managing users
 class UsersScreen extends HookConsumerWidget {
@@ -327,9 +328,9 @@ class _UserCard extends HookConsumerWidget {
                       else
                         SizedBox(
                           height: 24,
-                          child: Switch(
+                          child: CustomSwitch(
                             value: user.isActive,
-                            activeThumbColor: const Color(0xFF4CAF50),
+                            activeColor: const Color(0xFF4CAF50),
                             onChanged: (value) async {
                               isToggling.value = true;
                               final error = await ref

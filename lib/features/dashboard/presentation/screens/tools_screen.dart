@@ -44,16 +44,33 @@ class ToolsScreen extends HookConsumerWidget {
             // header with title
             Padding(
               padding: const EdgeInsets.all(AppTheme.spacingMedium),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  'Tools',
-                  style: GoogleFonts.poppins(
-                    fontSize: 24,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Tools',
+                    style: GoogleFonts.poppins(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black,
+                    ),
                   ),
-                ),
+                  IconButton(
+                    onPressed: () => _showLogoutDialog(context, ref),
+                    icon: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: AppTheme.errorColor.withValues(alpha: 0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.logout_rounded,
+                        color: AppTheme.errorColor,
+                        size: 20,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
 
@@ -120,53 +137,7 @@ class ToolsScreen extends HookConsumerWidget {
               ),
             ),
 
-            // logout button
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppTheme.spacingMedium,
-                vertical: AppTheme.spacingMedium,
-              ),
-              child: SizedBox(
-                width: double.infinity,
-                child: InkWell(
-                  onTap: () => _showLogoutDialog(context, ref),
-                  borderRadius: BorderRadius.circular(
-                    AppTheme.borderRadiusMedium,
-                  ),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    decoration: BoxDecoration(
-                      color: AppTheme.white,
-                      borderRadius: BorderRadius.circular(
-                        AppTheme.borderRadiusMedium,
-                      ),
-                      border: Border.all(
-                        color: AppTheme.errorColor.withValues(alpha: 0.3),
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(
-                          Icons.logout,
-                          color: AppTheme.errorColor,
-                          size: 22,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Logout',
-                          style: GoogleFonts.poppins(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                            color: AppTheme.errorColor,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
+            const SizedBox(height: AppTheme.spacingMedium),
           ],
         ),
       ),

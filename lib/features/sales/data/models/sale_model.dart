@@ -211,6 +211,7 @@ class SalesState {
   final int lastPage;
   final bool isLoadingMore;
   final bool hasMorePages;
+  final bool isDownloadEnabled;
 
   const SalesState({
     this.sales = const [],
@@ -218,6 +219,7 @@ class SalesState {
     this.lastPage = 1,
     this.isLoadingMore = false,
     this.hasMorePages = true,
+    this.isDownloadEnabled = false,
   });
 
   SalesState copyWith({
@@ -226,6 +228,7 @@ class SalesState {
     int? lastPage,
     bool? isLoadingMore,
     bool? hasMorePages,
+    bool? isDownloadEnabled,
   }) {
     return SalesState(
       sales: sales ?? this.sales,
@@ -233,6 +236,7 @@ class SalesState {
       lastPage: lastPage ?? this.lastPage,
       isLoadingMore: isLoadingMore ?? this.isLoadingMore,
       hasMorePages: hasMorePages ?? this.hasMorePages,
+      isDownloadEnabled: isDownloadEnabled ?? this.isDownloadEnabled,
     );
   }
 }

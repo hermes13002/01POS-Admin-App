@@ -10,6 +10,18 @@ import 'package:onepos_admin_app/features/sales/data/models/sale_model.dart';
 abstract class SalesRemoteDatasource {
   /// fetches sales list for a page
   Future<PaginatedSalesResponse> getSales({int page = 1});
+
+  /// activate sales download
+  Future<void> activateDownload(int companyId);
+
+  /// deactivate sales download
+  Future<void> deactivateDownload(int companyId);
+
+  /// download sales data for a date range
+  Future<List<SaleModel>> downloadSales({
+    required String from,
+    required String to,
+  });
 }
 
 class SalesRemoteDatasourceImpl implements SalesRemoteDatasource {
@@ -63,6 +75,55 @@ class SalesRemoteDatasourceImpl implements SalesRemoteDatasource {
     }
 
     throw ServerException(message: 'invalid sales response');
+  }
+
+  @override
+  Future<void> activateDownload(int companyId) async {
+    final url = '${ApiEndpoints.activateSalesDownload}$companyId';
+    final response = await _client.get(url);
+    final responseBody = _asMap(response.data);
+
+    if (_isError(responseBody['error'])) {
+      throw ServerException(
+        message: responseBody['message'] ?? 'failed to activate download',
+      );
+    }
+  }
+
+  @override
+  Future<void> deactivateDownload(int companyId) async {
+    final url = '${ApiEndpoints.deactivateSalesDownload}$companyId';
+    final response = await _client.get(url);
+    final responseBody = _asMap(response.data);
+
+    if (_isError(responseBody['error'])) {
+      throw ServerException(
+        message: responseBody['message'] ?? 'failed to deactivate download',
+      );
+    }
+  }
+
+  @override
+  Future<List<SaleModel>> downloadSales({
+    required String from,
+    required String to,
+  }) async {
+    final body = {'from': from, 'to': to};
+    final response = await _client.post(ApiEndpoints.downloadSales, data: body);
+    final responseBody = _asMap(response.data);
+
+    if (_isError(responseBody['error'])) {
+      throw ServerException(
+        message: responseBody['message'] ?? 'failed to download sales',
+      );
+    }
+
+    final data = responseBody['data'];
+    if (data is List) {
+      return data.map((item) => SaleModel.fromJson(_asMap(item))).toList();
+    }
+
+    return [];
   }
 
   Map<String, dynamic> _asMap(dynamic value) {

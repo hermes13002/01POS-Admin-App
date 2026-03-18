@@ -24,6 +24,10 @@ class ApiEndpoints {
   static const String sales = '/sales';
   static const String saleById = '/sales/{id}';
   static const String allSales = '/admin/orders';
+  static const String activateSalesDownload = '/admin/orders/activate/'; // {id}
+  static const String deactivateSalesDownload =
+      '/admin/orders/deactivate/'; // {id}
+  static const String downloadSales = '/admin/orders/download';
 
   // Orders
   static const String orders = '/orders';

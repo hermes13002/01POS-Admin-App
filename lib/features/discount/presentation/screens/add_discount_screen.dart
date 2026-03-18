@@ -9,6 +9,7 @@ import 'package:onepos_admin_app/shared/widgets/custom_app_bar.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_button.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_text_field.dart';
 import 'package:onepos_admin_app/core/utils/validators.dart';
+import 'package:onepos_admin_app/shared/widgets/custom_switch.dart';
 
 /// Screen for adding a new discount
 class AddDiscountScreen extends HookConsumerWidget {
@@ -112,7 +113,7 @@ class AddDiscountScreen extends HookConsumerWidget {
                           color: AppTheme.textSecondary,
                         ),
                       ),
-                      CupertinoSwitch(
+                      CustomSwitch(
                         value: isActive.value,
                         activeColor: const Color(0xFF4CAF50), // green
                         onChanged: (val) {
