@@ -1,29 +1,26 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'profile_provider.dart';
+part of 'discount_provider.dart';
 
 // **************************************************************************
 // RiverpodGenerator
 // **************************************************************************
 
-String _$userProfileHash() => r'fa6a6f7381d350b36faae52f1636c4d864e7484c';
+String _$discountsHash() => r'd028dbab901b177aa213c0cd1fca79ef3f147125';
 
-/// fetches authenticated user profile — kept alive so it is shared
-/// between the home screen and store profile screen without re-fetching
-///
-/// Copied from [UserProfile].
-@ProviderFor(UserProfile)
-final userProfileProvider =
-    AsyncNotifierProvider<UserProfile, ProfileModel>.internal(
-      UserProfile.new,
-      name: r'userProfileProvider',
+/// See also [Discounts].
+@ProviderFor(Discounts)
+final discountsProvider =
+    AutoDisposeAsyncNotifierProvider<Discounts, List<DiscountModel>>.internal(
+      Discounts.new,
+      name: r'discountsProvider',
       debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
           ? null
-          : _$userProfileHash,
+          : _$discountsHash,
       dependencies: null,
       allTransitiveDependencies: null,
     );
 
-typedef _$UserProfile = AsyncNotifier<ProfileModel>;
+typedef _$Discounts = AutoDisposeAsyncNotifier<List<DiscountModel>>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

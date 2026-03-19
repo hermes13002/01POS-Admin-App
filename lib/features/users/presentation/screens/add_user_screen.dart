@@ -51,7 +51,8 @@ class AddUserScreen extends HookConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 CustomTextField(
-                  hint: 'First name',
+                  label: 'First Name',
+                  hint: 'e.g. John',
                   controller: firstNameController,
                   validator: (val) =>
                       Validators.validateRequired(val, 'First name'),
@@ -59,7 +60,8 @@ class AddUserScreen extends HookConsumerWidget {
                 const SizedBox(height: AppTheme.spacingMedium),
 
                 CustomTextField(
-                  hint: 'Last name',
+                  label: 'Last Name',
+                  hint: 'e.g. Doe',
                   controller: lastNameController,
                   validator: (val) =>
                       Validators.validateRequired(val, 'Last name'),
@@ -67,7 +69,8 @@ class AddUserScreen extends HookConsumerWidget {
                 const SizedBox(height: AppTheme.spacingMedium),
 
                 CustomTextField(
-                  hint: 'Email address',
+                  label: 'Email address',
+                  hint: 'e.g. john.doe@example.com',
                   controller: emailController,
                   keyboardType: TextInputType.emailAddress,
                   validator: Validators.validateEmail,
@@ -106,7 +109,8 @@ class AddUserScreen extends HookConsumerWidget {
                 const SizedBox(height: AppTheme.spacingMedium),
 
                 CustomTextField(
-                  hint: 'Address',
+                  label: 'Address',
+                  hint: 'e.g. 123 Main St, Lagos',
                   controller: addressController,
                   validator: (val) =>
                       Validators.validateRequired(val, 'Address'),
@@ -114,7 +118,8 @@ class AddUserScreen extends HookConsumerWidget {
                 const SizedBox(height: AppTheme.spacingMedium),
 
                 CustomTextField(
-                  hint: 'Phone number',
+                  label: 'Phone number',
+                  hint: 'e.g. 08012345678',
                   controller: phoneController,
                   keyboardType: TextInputType.phone,
                   validator: Validators.validatePhone,
@@ -122,6 +127,7 @@ class AddUserScreen extends HookConsumerWidget {
                 const SizedBox(height: AppTheme.spacingMedium),
 
                 CustomTextField(
+                  label: 'Password',
                   hint: 'Password',
                   controller: passwordController,
                   obscureText: !isPasswordVisible.value,
@@ -142,7 +148,8 @@ class AddUserScreen extends HookConsumerWidget {
                 const SizedBox(height: AppTheme.spacingMedium),
 
                 CustomTextField(
-                  hint: 'Confirm password',
+                  label: 'Confirm Password',
+                  hint: 'Confirm Password',
                   controller: confirmPasswordController,
                   obscureText: !isConfirmPasswordVisible.value,
                   validator: (val) {

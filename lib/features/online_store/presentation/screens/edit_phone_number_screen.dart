@@ -7,6 +7,8 @@ import 'package:onepos_admin_app/shared/widgets/custom_app_bar.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_button.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_text_field.dart';
 import 'package:onepos_admin_app/core/utils/validators.dart';
+import 'package:onepos_admin_app/features/online_store/presentation/providers/profile_provider.dart';
+import 'package:onepos_admin_app/shared/widgets/app_snackbar.dart';
 
 /// Screen for editing the phone number
 class EditPhoneNumberScreen extends HookConsumerWidget {
@@ -14,9 +16,44 @@ class EditPhoneNumberScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final profileAsync = ref.watch(userProfileProvider);
     final formKey = useMemoized(() => GlobalKey<FormState>());
     final phoneController = useTextEditingController();
     final selectedCountry = useState<String?>('Nigeria (+234)');
+    final isLoading = useState(false);
+
+    // Initialize controller with current phone number
+    useEffect(() {
+      if (profileAsync.hasValue) {
+        phoneController.text = profileAsync.value?.company?.companyNumber ?? '';
+      }
+      return null;
+    }, [profileAsync.hasValue]);
+
+    Future<void> handleSave() async {
+      if (!formKey.currentState!.validate()) return;
+
+      isLoading.value = true;
+      try {
+        await ref.read(userProfileProvider.notifier).updateProfile({
+          'firstname': profileAsync.value?.firstname,
+          'lastname': profileAsync.value?.lastname,
+          'phoneno':
+              phoneController.text, // Field name from ProfileModel/API mapping
+        });
+
+        if (context.mounted) {
+          AppSnackbar.showSuccess(context, 'Phone number updated successfully');
+          Navigator.pop(context);
+        }
+      } catch (e) {
+        if (context.mounted) {
+          AppSnackbar.showError(context, e.toString());
+        }
+      } finally {
+        isLoading.value = false;
+      }
+    }
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -33,60 +70,63 @@ class EditPhoneNumberScreen extends HookConsumerWidget {
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(AppTheme.spacingMedium),
-          child: Form(
-            key: formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                AppDropdown<String>(
-                  hint: 'Country Code',
-                  value: selectedCountry.value,
-                  items: const [
-                    DropdownMenuItem(
-                      value: 'Nigeria (+234)',
-                      child: Text('Nigeria (+234)'),
-                    ),
-                    DropdownMenuItem(
-                      value: 'USA (+1)',
-                      child: Text('USA (+1)'),
-                    ),
-                    DropdownMenuItem(
-                      value: 'UK (+44)',
-                      child: Text('UK (+44)'),
-                    ),
-                  ],
-                  onChanged: (val) {
-                    if (val != null) selectedCountry.value = val;
-                  },
-                  validator: (val) =>
-                      Validators.validateRequired(val, 'Country code'),
-                ),
-                const SizedBox(height: AppTheme.spacingMedium),
+      body: profileAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (e, _) => Center(child: Text('Error: $e')),
+        data: (profile) => SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(AppTheme.spacingMedium),
+            child: Form(
+              key: formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  AppDropdown<String>(
+                    label: 'Country Code',
+                    hint: 'Select country code',
+                    value: selectedCountry.value,
+                    items: const [
+                      DropdownMenuItem(
+                        value: 'Nigeria (+234)',
+                        child: Text('Nigeria (+234)'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'USA (+1)',
+                        child: Text('USA (+1)'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'UK (+44)',
+                        child: Text('UK (+44)'),
+                      ),
+                    ],
+                    onChanged: (val) {
+                      if (val != null) selectedCountry.value = val;
+                    },
+                    validator: (val) =>
+                        Validators.validateRequired(val, 'Country code'),
+                  ),
+                  const SizedBox(height: AppTheme.spacingMedium),
 
-                CustomTextField(
-                  hint: 'Phone Number',
-                  controller: phoneController,
-                  keyboardType: TextInputType.phone,
-                  validator: Validators.validatePhone,
-                ),
+                  CustomTextField(
+                    label: 'Phone Number',
+                    hint: 'e.g. 08012345678',
+                    controller: phoneController,
+                    keyboardType: TextInputType.phone,
+                    validator: Validators.validatePhone,
+                  ),
 
-                const Spacer(),
+                  const Spacer(),
 
-                CustomButton(
-                  text: 'Save',
-                  onPressed: () {
-                    if (formKey.currentState!.validate()) {
-                      Navigator.pop(context);
-                    }
-                  },
-                  backgroundColor: Colors.black,
-                  textColor: Colors.white,
-                ),
-                const SizedBox(height: AppTheme.spacingMedium),
-              ],
+                  CustomButton(
+                    text: 'Save',
+                    isLoading: isLoading.value,
+                    onPressed: handleSave,
+                    backgroundColor: Colors.black,
+                    textColor: Colors.white,
+                  ),
+                  const SizedBox(height: AppTheme.spacingMedium),
+                ],
+              ),
             ),
           ),
         ),

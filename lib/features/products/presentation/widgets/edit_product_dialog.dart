@@ -434,10 +434,10 @@ class EditProductDialog extends HookConsumerWidget {
           style: GoogleFonts.poppins(
             fontSize: 13,
             fontWeight: FontWeight.w500,
-            color: AppTheme.textPrimary.withOpacity(0.8),
+            color: AppTheme.textPrimary,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 6),
         TextFormField(
           controller: controller,
           keyboardType: keyboardType,
@@ -499,10 +499,10 @@ Widget _AmountbuildField(
         style: GoogleFonts.poppins(
           fontSize: 13,
           fontWeight: FontWeight.w500,
-          color: AppTheme.textPrimary.withOpacity(0.8),
+          color: AppTheme.textPrimary,
         ),
       ),
-      const SizedBox(height: 8),
+      const SizedBox(height: 6),
       TextFormField(
         controller: controller,
         keyboardType: keyboardType,

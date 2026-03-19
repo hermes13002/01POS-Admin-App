@@ -12,6 +12,7 @@ import 'package:onepos_admin_app/shared/widgets/custom_button_with_icon.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_search_bar.dart';
 import 'package:onepos_admin_app/shared/widgets/loading_widget.dart';
 import 'package:onepos_admin_app/shared/widgets/app_snackbar.dart';
+import 'package:onepos_admin_app/shared/widgets/custom_text_field.dart';
 
 class PaymentMethodScreen extends HookConsumerWidget {
   const PaymentMethodScreen({super.key});
@@ -401,11 +402,10 @@ class PaymentMethodScreen extends HookConsumerWidget {
         builder: (dialogContext) {
           return AlertDialog(
             title: const Text('Edit Payment Method'),
-            content: TextField(
+            content: CustomTextField(
+              label: 'Payment Method Name',
               controller: controller,
-              decoration: const InputDecoration(
-                hintText: 'Payment method name',
-              ),
+              hint: 'e.g. Bank Transfer',
             ),
             actions: [
               TextButton(

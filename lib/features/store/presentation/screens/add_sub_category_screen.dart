@@ -86,8 +86,9 @@ class AddSubCategoryScreen extends HookConsumerWidget {
 
               // sub-category name field
               CustomTextField(
+                label: 'Sub-category Name',
+                hint: 'e.g. Soft Drinks',
                 controller: nameController,
-                hint: 'Sub-category name',
                 validator: (val) =>
                     Validators.validateRequired(val, 'Sub-category name'),
               ),

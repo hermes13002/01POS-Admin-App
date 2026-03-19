@@ -140,16 +140,8 @@ class ConnectBankAccountDialog extends HookConsumerWidget {
                 ),
                 const SizedBox(height: AppTheme.spacingMedium),
 
-                Text(
-                  'Account Number',
-                  style: GoogleFonts.poppins(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                    color: AppTheme.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: 6),
                 CustomTextField(
+                  label: 'Account Number',
                   hint: 'Enter 10-digit account number',
                   controller: accountController,
                   keyboardType: TextInputType.number,
@@ -170,16 +162,8 @@ class ConnectBankAccountDialog extends HookConsumerWidget {
                 ),
                 const SizedBox(height: AppTheme.spacingSmall),
 
-                Text(
-                  'Find Bank',
-                  style: GoogleFonts.poppins(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                    color: AppTheme.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: 6),
                 CustomTextField(
+                  label: 'Find Bank',
                   hint: 'Type to search banks...',
                   controller: bankSearchController,
                   onChanged: (value) {

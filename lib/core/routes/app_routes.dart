@@ -19,12 +19,14 @@ import 'package:onepos_admin_app/features/bill/presentation/screens/bills_screen
 import 'package:onepos_admin_app/features/bill/presentation/screens/add_bill_screen.dart';
 import 'package:onepos_admin_app/features/discount/presentation/screens/discount_screen.dart';
 import 'package:onepos_admin_app/features/discount/presentation/screens/add_discount_screen.dart';
+import 'package:onepos_admin_app/features/discount/data/models/discount_model.dart';
 import 'package:onepos_admin_app/features/users/presentation/screens/users_screen.dart';
 import 'package:onepos_admin_app/features/users/presentation/screens/add_user_screen.dart';
 import 'package:onepos_admin_app/features/payment_method/presentation/screens/payment_method_screen.dart';
 import 'package:onepos_admin_app/features/payment_method/presentation/screens/add_payment_method_screen.dart';
 import 'package:onepos_admin_app/features/payment_method/presentation/screens/connect_bank_account_screen.dart';
 import 'package:onepos_admin_app/features/online_store/presentation/screens/store_profile_screen.dart';
+import 'package:onepos_admin_app/features/online_store/presentation/screens/edit_profile_screen.dart';
 import 'package:onepos_admin_app/features/online_store/presentation/screens/edit_store_name_screen.dart';
 import 'package:onepos_admin_app/features/online_store/presentation/screens/edit_email_address_screen.dart';
 import 'package:onepos_admin_app/features/online_store/presentation/screens/edit_phone_number_screen.dart';
@@ -79,6 +81,7 @@ class AppRoutes {
   static const String notificationDetail = '/notification-detail';
   static const String subCategories = '/sub-categories';
   static const String salesSettings = '/sales-settings';
+  static const String editProfile = '/edit-profile';
 
   // route map
   static Map<String, WidgetBuilder> get routes => {
@@ -103,7 +106,10 @@ class AppRoutes {
     bills: (context) => const BillsScreen(),
     addBill: (context) => const AddBillScreen(),
     discount: (context) => const DiscountScreen(),
-    addDiscount: (context) => const AddDiscountScreen(),
+    addDiscount: (context) {
+      final args = ModalRoute.of(context)!.settings.arguments as DiscountModel?;
+      return AddDiscountScreen(discount: args);
+    },
     users: (context) => const UsersScreen(),
     addUser: (context) => const AddUserScreen(),
     paymentMethod: (context) => const PaymentMethodScreen(),
@@ -121,6 +127,7 @@ class AppRoutes {
     notifications: (context) => const NotificationsScreen(),
     subCategories: (context) => const SubCategoriesScreen(),
     salesSettings: (context) => const SalesSettingsScreen(),
+    editProfile: (context) => const EditProfileScreen(),
     notificationDetail: (context) {
       final args = ModalRoute.of(context)!.settings.arguments as int;
       return NotificationDetailScreen(notificationId: args);

@@ -6,8 +6,8 @@ import 'package:onepos_admin_app/core/theme/app_theme.dart';
 import 'package:onepos_admin_app/core/utils/amount_formatter.dart';
 import 'package:onepos_admin_app/features/products/data/models/product_model.dart';
 import 'package:onepos_admin_app/features/low_stock/presentation/providers/low_stock_provider.dart';
+import 'package:onepos_admin_app/features/low_stock/presentation/widgets/edit_low_stock_dialog.dart';
 import 'package:onepos_admin_app/features/products/presentation/screens/products_screen.dart';
-import 'package:onepos_admin_app/features/products/presentation/widgets/edit_product_dialog.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_app_bar2.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_search_bar.dart';
 import 'package:onepos_admin_app/shared/widgets/loading_widget.dart';
@@ -19,19 +19,9 @@ class LowStockScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final searchController = useTextEditingController();
-    final searchQuery = useState('');
+    useListenable(searchController);
     final expandedProductId = useState<int?>(null);
     final productsAsync = ref.watch(lowStockProductsProvider);
-
-    // listen for search changes
-    useEffect(() {
-      void listener() {
-        searchQuery.value = searchController.text;
-      }
-
-      searchController.addListener(listener);
-      return () => searchController.removeListener(listener);
-    }, [searchController]);
 
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
@@ -44,22 +34,18 @@ class LowStockScreen extends HookConsumerWidget {
           // search bar
           CustomSearchBar(
             controller: searchController,
-            onChanged: (value) => searchQuery.value = value,
-            onClear: () => searchQuery.value = '',
+            onClear: () => searchController.clear(),
           ),
 
           // products list
           Expanded(
             child: productsAsync.when(
               data: (products) {
-                final filtered = searchQuery.value.isEmpty
+                final query = searchController.text.toLowerCase();
+                final filtered = query.isEmpty
                     ? products
                     : products
-                          .where(
-                            (p) => p.name.toLowerCase().contains(
-                              searchQuery.value.toLowerCase(),
-                            ),
-                          )
+                          .where((p) => p.name.toLowerCase().contains(query))
                           .toList();
 
                 if (filtered.isEmpty) {
@@ -105,7 +91,7 @@ class LowStockScreen extends HookConsumerWidget {
                         showDialog(
                           context: context,
                           builder: (context) =>
-                              EditProductDialog(product: product),
+                              EditLowStockDialog(product: product),
                         );
                       },
                     );

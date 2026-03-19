@@ -27,7 +27,9 @@ class Auth extends _$Auth {
         state = const AsyncData(null);
         return failure.message;
       },
-      (data) {
+      (data) async {
+        // Save password for profile update autofill
+        await SecureStorageService().write('user_password', password);
         state = AsyncData(data);
         return null;
       },

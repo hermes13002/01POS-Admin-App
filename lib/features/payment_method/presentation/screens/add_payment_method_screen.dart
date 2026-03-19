@@ -36,7 +36,8 @@ class AddPaymentMethodScreen extends HookConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 CustomTextField(
-                  hint: 'Payment method name',
+                  label: 'Payment Method Name',
+                  hint: 'e.g. Bank Transfer',
                   controller: nameController,
                   validator: (val) =>
                       Validators.validateRequired(val, 'Payment method name'),

@@ -34,8 +34,9 @@ class AddCategoryScreen extends HookConsumerWidget {
             children: [
               // category name field
               CustomTextField(
+                label: 'Category Name',
+                hint: 'e.g. Beverages',
                 controller: nameController,
-                hint: 'Category name',
                 validator: (val) =>
                     Validators.validateRequired(val, 'Category name'),
               ),
@@ -43,8 +44,9 @@ class AddCategoryScreen extends HookConsumerWidget {
 
               // category description field
               CustomTextField(
+                label: 'Category Description',
+                hint: 'Description of items in this category',
                 controller: descriptionController,
-                hint: 'Category description',
                 maxLines: 5,
               ),
 

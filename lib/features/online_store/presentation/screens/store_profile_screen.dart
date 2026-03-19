@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+
 import 'package:onepos_admin_app/core/routes/app_routes.dart';
 import 'package:onepos_admin_app/core/theme/app_theme.dart';
 import 'package:onepos_admin_app/features/auth/data/models/profile_model.dart';
 import 'package:onepos_admin_app/features/online_store/presentation/providers/profile_provider.dart';
 import 'package:onepos_admin_app/features/products/presentation/providers/products_provider.dart';
 import 'package:onepos_admin_app/shared/widgets/app_snackbar.dart';
+import 'package:onepos_admin_app/shared/widgets/custom_text_field.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_app_bar.dart';
+import 'package:onepos_admin_app/shared/widgets/custom_button.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_button_with_icon.dart';
 import 'package:onepos_admin_app/features/auth/presentation/providers/auth_provider.dart';
 
@@ -212,7 +216,17 @@ class _ProfileContent extends ConsumerWidget {
           ),
           const SizedBox(height: AppTheme.spacingMedium),
 
+          // Edit Profile Button
+          CustomButton(
+            text: 'Edit Profile',
+            onPressed: () =>
+                Navigator.pushNamed(context, AppRoutes.editProfile),
+            icon: Icons.edit_note_rounded,
+          ),
+          const SizedBox(height: AppTheme.spacingMedium),
+
           // settings list
+          /*
           _ProfileListItem(
             title: 'Store Name',
             value: company?.companyName,
@@ -244,6 +258,7 @@ class _ProfileContent extends ConsumerWidget {
             onTap: () => Navigator.pushNamed(context, AppRoutes.loginSettings),
           ),
           const SizedBox(height: AppTheme.spacingMedium),
+          */
           _ProfileListItem(
             title: 'Currency Settings',
             onTap: () =>
@@ -273,13 +288,11 @@ class _ProfileContent extends ConsumerWidget {
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  content: TextField(
+                  content: CustomTextField(
+                    label: 'Limit',
                     controller: controller,
                     keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      labelText: 'Limit',
-                      hintText: 'e.g. 10',
-                    ),
+                    hint: 'e.g. 10',
                   ),
                   actions: [
                     TextButton(
@@ -332,27 +345,32 @@ class _ProfileContent extends ConsumerWidget {
           ),
           const SizedBox(height: AppTheme.spacingLarge),
 
-          // profile details section
-          Text(
-            'Profile Details',
-            style: GoogleFonts.poppins(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: AppTheme.textPrimary,
-            ),
+          // profile details expandable section
+          _ExpandableProfileSection(
+            title: 'Profile Details',
+            children: [
+              _ProfileDetailField(
+                label: 'First Name',
+                value: profile.firstname,
+              ),
+              const SizedBox(height: AppTheme.spacingSmall),
+              _ProfileDetailField(label: 'Last Name', value: profile.lastname),
+              const SizedBox(height: AppTheme.spacingSmall),
+              _ProfileDetailField(label: 'Email', value: profile.email),
+              const SizedBox(height: AppTheme.spacingSmall),
+              _ProfileDetailField(
+                label: 'Phone Number',
+                value: profile.phoneno,
+              ),
+              const SizedBox(height: AppTheme.spacingSmall),
+              _ProfileDetailField(
+                label: 'Address',
+                value: profile.address ?? '—',
+              ),
+            ],
           ),
-          const SizedBox(height: AppTheme.spacingMedium),
-
-          _ProfileDetailField(label: 'First Name', value: profile.firstname),
-          const SizedBox(height: AppTheme.spacingMedium),
-          _ProfileDetailField(label: 'Last Name', value: profile.lastname),
-          const SizedBox(height: AppTheme.spacingMedium),
-          _ProfileDetailField(label: 'Email', value: profile.email),
-          const SizedBox(height: AppTheme.spacingMedium),
-          _ProfileDetailField(label: 'Phone Number', value: profile.phoneno),
-          const SizedBox(height: AppTheme.spacingMedium),
-          _ProfileDetailField(label: 'Address', value: profile.address ?? '—'),
-          const SizedBox(height: AppTheme.spacingMedium),
+          const SizedBox(height: AppTheme.spacingLarge),
+          const SizedBox(height: AppTheme.spacingLarge),
           CustomButtonWithIcon(
             text: 'Logout',
             icon: Icons.logout_rounded,
@@ -478,6 +496,72 @@ class _ProfileListItem extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// expandable section for profile details
+class _ExpandableProfileSection extends HookWidget {
+  final String title;
+  final List<Widget> children;
+
+  const _ExpandableProfileSection({
+    required this.title,
+    required this.children,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isExpanded = useState(false);
+
+    return Column(
+      children: [
+        GestureDetector(
+          onTap: () => isExpanded.value = !isExpanded.value,
+          child: Container(
+            padding: const EdgeInsets.all(AppTheme.spacingMedium),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  title,
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: AppTheme.textPrimary,
+                  ),
+                ),
+                Icon(
+                  isExpanded.value
+                      ? Icons.keyboard_arrow_up
+                      : Icons.keyboard_arrow_down,
+                  color: AppTheme.textPrimary,
+                ),
+              ],
+            ),
+          ),
+        ),
+        AnimatedSize(
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+          child: SizedBox(
+            width: double.infinity,
+            height: isExpanded.value ? null : 0,
+            child: Padding(
+              padding: const EdgeInsets.only(
+                top: AppTheme.spacingMedium,
+                left: AppTheme.spacingMedium,
+                right: AppTheme.spacingMedium,
+              ),
+              child: Column(children: children),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

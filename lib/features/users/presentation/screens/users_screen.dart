@@ -845,7 +845,8 @@ class _EditUserDialog extends HookConsumerWidget {
                         children: [
                           Expanded(
                             child: CustomTextField(
-                              hint: 'First name',
+                              label: 'First Name',
+                              hint: 'e.g. John',
                               controller: firstNameController,
                               validator: (val) => Validators.validateRequired(
                                 val,
@@ -856,7 +857,8 @@ class _EditUserDialog extends HookConsumerWidget {
                           const SizedBox(width: 12),
                           Expanded(
                             child: CustomTextField(
-                              hint: 'Last name',
+                              label: 'Last Name',
+                              hint: 'e.g. Doe',
                               controller: lastNameController,
                               validator: (val) =>
                                   Validators.validateRequired(val, 'Last name'),
@@ -866,7 +868,8 @@ class _EditUserDialog extends HookConsumerWidget {
                       ),
                       const SizedBox(height: 16),
                       CustomTextField(
-                        hint: 'Email address',
+                        label: 'Email address',
+                        hint: 'e.g. john.doe@example.com',
                         controller: emailController,
                         keyboardType: TextInputType.emailAddress,
                         prefixIcon: const Icon(Icons.email_outlined, size: 20),
@@ -908,7 +911,8 @@ class _EditUserDialog extends HookConsumerWidget {
                       ),
                       const SizedBox(height: 16),
                       CustomTextField(
-                        hint: 'Address',
+                        label: 'Address',
+                        hint: 'e.g. 123 Main St, Lagos',
                         controller: addressController,
                         prefixIcon: const Icon(
                           Icons.location_on_outlined,
@@ -919,7 +923,8 @@ class _EditUserDialog extends HookConsumerWidget {
                       ),
                       const SizedBox(height: 16),
                       CustomTextField(
-                        hint: 'Phone number',
+                        label: 'Phone number',
+                        hint: 'e.g. 08012345678',
                         controller: phoneController,
                         keyboardType: TextInputType.phone,
                         prefixIcon: const Icon(Icons.phone_outlined, size: 20),

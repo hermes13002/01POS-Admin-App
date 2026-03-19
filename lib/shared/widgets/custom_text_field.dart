@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:onepos_admin_app/core/theme/app_theme.dart';
 
 /// Custom text field widget
@@ -22,6 +23,7 @@ class CustomTextField extends StatelessWidget {
   final List<TextInputFormatter>? inputFormatters;
   final TextCapitalization textCapitalization;
   final EdgeInsetsGeometry? contentPadding;
+  final bool showLabelAbove;
 
   const CustomTextField({
     super.key,
@@ -43,58 +45,79 @@ class CustomTextField extends StatelessWidget {
     this.inputFormatters,
     this.textCapitalization = TextCapitalization.none,
     this.contentPadding,
+    this.showLabelAbove = true,
   });
 
   @override
   Widget build(BuildContext context) {
-    return TextFormField(
-      controller: controller,
-      validator: validator,
-      keyboardType: keyboardType,
-      obscureText: obscureText,
-      maxLines: maxLines,
-      maxLength: maxLength,
-      enabled: enabled,
-      readOnly: readOnly,
-      onTap: onTap,
-      onChanged: onChanged,
-      inputFormatters: inputFormatters,
-      textCapitalization: textCapitalization,
-      decoration: InputDecoration(
-        labelText: label,
-        hintText: hint,
-        hintStyle: const TextStyle(color: AppTheme.grey400),
-        prefixIcon: prefixIcon,
-        suffixIcon: suffixIcon,
-        contentPadding:
-            contentPadding ??
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-        filled: true,
-        fillColor: Colors.white,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.grey.shade300),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.grey.shade300),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Colors.black, width: 1.5),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Theme.of(context).colorScheme.error),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(
-            color: Theme.of(context).colorScheme.error,
-            width: 1.5,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (label != null && showLabelAbove) ...[
+          Text(
+            label!,
+            style: GoogleFonts.poppins(
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+              color: AppTheme.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 6),
+        ],
+        TextFormField(
+          controller: controller,
+          validator: validator,
+          keyboardType: keyboardType,
+          obscureText: obscureText,
+          maxLines: maxLines,
+          maxLength: maxLength,
+          enabled: enabled,
+          readOnly: readOnly,
+          onTap: onTap,
+          onChanged: onChanged,
+          inputFormatters: inputFormatters,
+          textCapitalization: textCapitalization,
+          decoration: InputDecoration(
+            // removed labelText to avoid floating labels
+            hintText: hint,
+            hintStyle: hintStyle ?? const TextStyle(color: AppTheme.grey400),
+            prefixIcon: prefixIcon,
+            suffixIcon: suffixIcon,
+            contentPadding:
+                contentPadding ??
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            filled: true,
+            fillColor: Colors.white,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
+              borderSide: const BorderSide(color: AppTheme.grey300),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
+              borderSide: const BorderSide(color: AppTheme.grey300),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
+              borderSide: const BorderSide(
+                color: AppTheme.primaryColor,
+                width: 1.5,
+              ),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
+              borderSide: const BorderSide(color: AppTheme.errorColor),
+            ),
+            focusedErrorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
+              borderSide: const BorderSide(
+                color: AppTheme.errorColor,
+                width: 1.5,
+              ),
+            ),
           ),
         ),
-      ),
+      ],
     );
   }
 }

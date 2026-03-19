@@ -46,7 +46,8 @@ class LoginSettingsScreen extends HookConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 CustomTextField(
-                  hint: 'Enter Current Password',
+                  label: 'Current Password',
+                  hint: 'Enter your current password',
                   controller: currentPasswordController,
                   obscureText: obscureCurrent.value,
                   suffixIcon: IconButton(
@@ -66,7 +67,8 @@ class LoginSettingsScreen extends HookConsumerWidget {
                 const SizedBox(height: AppTheme.spacingMedium),
 
                 CustomTextField(
-                  hint: 'Enter New Password',
+                  label: 'New Password',
+                  hint: 'Enter your new password',
                   controller: newPasswordController,
                   obscureText: obscureNew.value,
                   suffixIcon: IconButton(
@@ -84,7 +86,8 @@ class LoginSettingsScreen extends HookConsumerWidget {
                 const SizedBox(height: AppTheme.spacingMedium),
 
                 CustomTextField(
-                  hint: 'Confirm New Password',
+                  label: 'Confirm New Password',
+                  hint: 'Re-enter your new password',
                   controller: confirmPasswordController,
                   obscureText: obscureConfirm.value,
                   suffixIcon: IconButton(
