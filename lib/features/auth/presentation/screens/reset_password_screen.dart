@@ -158,7 +158,7 @@ class ResetPasswordScreen extends HookConsumerWidget {
                               onFieldSubmitted: (_) => submit(),
                               validator: Validators.validateEmail,
                               decoration: const InputDecoration(
-                                hintText: 'Youremail@mail.com',
+                                hintText: 'youremail@mail.com',
                               ),
                             ),
                             const SizedBox(height: 24),

@@ -198,7 +198,7 @@ class LoginScreen extends HookConsumerWidget {
                               textInputAction: TextInputAction.next,
                               validator: Validators.validateEmail,
                               decoration: const InputDecoration(
-                                hintText: 'Youremail@mail.com',
+                                hintText: 'youremail@mail.com',
                               ),
                             ),
                             const SizedBox(height: 16),

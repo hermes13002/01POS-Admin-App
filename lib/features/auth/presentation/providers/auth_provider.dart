@@ -2,6 +2,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:onepos_admin_app/core/network/dio_client.dart';
 import 'package:onepos_admin_app/core/storage/secure_storage_service.dart';
 import 'package:onepos_admin_app/features/online_store/presentation/providers/profile_provider.dart';
+import 'package:onepos_admin_app/features/chats/presentation/providers/chat_provider.dart';
 import 'package:onepos_admin_app/features/users/presentation/providers/users_provider.dart';
 import '../../data/datasources/auth_remote_datasource.dart';
 import '../../data/models/login_response_model.dart';
@@ -30,6 +31,10 @@ class Auth extends _$Auth {
       (data) async {
         // Save password for profile update autofill
         await SecureStorageService().write('user_password', password);
+
+        // Trigger immediate fetch of chat data
+        ref.invalidate(chatContactsProvider);
+
         state = AsyncData(data);
         return null;
       },
@@ -45,6 +50,9 @@ class Auth extends _$Auth {
         return failure.message;
       },
       (data) {
+        // Trigger immediate fetch of chat data
+        ref.invalidate(chatContactsProvider);
+
         state = AsyncData(data);
         return null;
       },

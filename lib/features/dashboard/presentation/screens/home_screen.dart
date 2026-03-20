@@ -12,6 +12,7 @@ import 'package:onepos_admin_app/features/online_store/presentation/providers/pr
 import 'package:onepos_admin_app/features/notifications/presentation/providers/notifications_provider.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:onepos_admin_app/presentation/providers/quick_actions_provider.dart';
+import 'package:onepos_admin_app/features/chats/presentation/providers/chat_provider.dart';
 import 'package:onepos_admin_app/shared/widgets/app_snackbar.dart';
 
 const List<String> _backgroundImages = [
@@ -37,6 +38,14 @@ class HomeScreen extends HookConsumerWidget {
     useEffect(() {
       final timer = Timer.periodic(const Duration(seconds: 5), (_) {
         bgIndex.value = (bgIndex.value + 1) % _backgroundImages.length;
+      });
+      return timer.cancel;
+    }, []);
+
+    // 10-second polling for chat unread badges
+    useEffect(() {
+      final timer = Timer.periodic(const Duration(seconds: 10), (_) {
+        ref.invalidate(chatContactsProvider);
       });
       return timer.cancel;
     }, []);
@@ -79,15 +88,46 @@ class HomeScreen extends HookConsumerWidget {
                         ),
                       ),
                     ),
-                    IconButton(
-                      icon: Image.asset(
-                        'assets/icons/message.png',
-                        width: 24,
-                        height: 24,
-                        errorBuilder: (_, __, ___) =>
-                            const Icon(Icons.mail_outline, size: 24),
+                    GestureDetector(
+                      onTap: () =>
+                          Navigator.pushNamed(context, AppRoutes.chats),
+                      child: Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          IconButton(
+                            icon: Image.asset(
+                              'assets/icons/message.png',
+                              width: 24,
+                              height: 24,
+                              errorBuilder: (_, __, ___) =>
+                                  const Icon(Icons.mail_outline, size: 24),
+                            ),
+                            onPressed: () =>
+                                Navigator.pushNamed(context, AppRoutes.chats),
+                          ),
+                          Consumer(
+                            builder: (context, ref, _) {
+                              final unreadCount = ref.watch(
+                                totalUnreadCountProvider,
+                              );
+                              if (unreadCount == 0) return const SizedBox();
+
+                              return Positioned(
+                                right: 12,
+                                top: 12,
+                                child: Container(
+                                  width: 8,
+                                  height: 8,
+                                  decoration: const BoxDecoration(
+                                    color: Colors.red,
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ],
                       ),
-                      onPressed: () {},
                     ),
                     const SizedBox(width: 4),
                     GestureDetector(
@@ -798,6 +838,15 @@ void _showReplaceDialog(
             ),
           ],
         ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              'Cancel',
+              style: GoogleFonts.poppins(color: AppTheme.textSecondary),
+            ),
+          ),
+        ],
       );
     },
   );

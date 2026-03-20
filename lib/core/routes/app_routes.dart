@@ -38,6 +38,9 @@ import 'package:onepos_admin_app/features/online_store/presentation/screens/curr
 import 'package:onepos_admin_app/features/notifications/presentation/screens/notifications_screen.dart';
 import 'package:onepos_admin_app/features/notifications/presentation/screens/notification_detail_screen.dart';
 import 'package:onepos_admin_app/features/store/presentation/screens/sub_categories_screen.dart';
+import 'package:onepos_admin_app/features/chats/presentation/screens/chats_screen.dart';
+import 'package:onepos_admin_app/features/chats/presentation/screens/individual_chat_screen.dart';
+import 'package:onepos_admin_app/features/chats/data/models/chat_contact_model.dart';
 
 /// centralized route configuration
 class AppRoutes {
@@ -82,6 +85,8 @@ class AppRoutes {
   static const String subCategories = '/sub-categories';
   static const String salesSettings = '/sales-settings';
   static const String editProfile = '/edit-profile';
+  static const String chats = '/chats';
+  static const String individualChat = '/individual-chat';
 
   // route map
   static Map<String, WidgetBuilder> get routes => {
@@ -131,6 +136,11 @@ class AppRoutes {
     notificationDetail: (context) {
       final args = ModalRoute.of(context)!.settings.arguments as int;
       return NotificationDetailScreen(notificationId: args);
+    },
+    chats: (context) => const ChatsScreen(),
+    individualChat: (context) {
+      final contact = ModalRoute.of(context)!.settings.arguments as ChatContact;
+      return IndividualChatScreen(contact: contact);
     },
   };
 }
