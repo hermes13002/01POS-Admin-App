@@ -11,6 +11,7 @@ import 'package:onepos_admin_app/shared/widgets/app_snackbar.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_app_bar.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_button.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_text_field.dart';
+import 'package:onepos_admin_app/shared/widgets/loading_widget.dart';
 
 /// screen for editing all profile fields in one place
 class EditProfileScreen extends HookConsumerWidget {
@@ -36,7 +37,7 @@ class EditProfileScreen extends HookConsumerWidget {
         ),
       ),
       body: profileAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const LoadingWidget(),
         error: (e, _) => Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -52,7 +53,7 @@ class EditProfileScreen extends HookConsumerWidget {
         ),
         data: (profile) {
           if (oldPasswordSnapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
+            return const LoadingWidget();
           }
           return _EditProfileForm(
             profile: profile,
@@ -86,14 +87,7 @@ class _EditProfileForm extends HookConsumerWidget {
     final addressController = useTextEditingController(
       text: profile.address ?? '',
     );
-    final oldPasswordController = useTextEditingController(
-      text: initialOldPassword,
-    );
-    final newPasswordController = useTextEditingController();
-
     final isSubmitting = useState(false);
-    final obscureOldPassword = useState(true);
-    final obscureNewPassword = useState(true);
 
     Future<void> handleSave() async {
       if (!formKey.currentState!.validate()) return;
@@ -106,10 +100,8 @@ class _EditProfileForm extends HookConsumerWidget {
           'email': emailController.text.trim(),
           'phoneno': phoneController.text.trim(),
           'address': addressController.text.trim(),
-          'old_password': oldPasswordController.text,
-          'new_password': newPasswordController.text.isEmpty
-              ? null
-              : newPasswordController.text,
+          'old_password': initialOldPassword,
+          'new_password': null,
         });
 
         if (context.mounted) {
@@ -174,70 +166,6 @@ class _EditProfileForm extends HookConsumerWidget {
               label: 'Address',
               controller: addressController,
               maxLines: 2,
-            ),
-            const SizedBox(height: AppTheme.spacingLarge),
-            Text(
-              'Security',
-              style: GoogleFonts.poppins(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: AppTheme.primaryColor,
-              ),
-            ),
-            const SizedBox(height: AppTheme.spacingMedium),
-            CustomTextField(
-              label: 'Old Password',
-              controller: oldPasswordController,
-              obscureText: obscureOldPassword.value,
-              suffixIcon: IconButton(
-                icon: Icon(
-                  obscureOldPassword.value
-                      ? Icons.visibility_off
-                      : Icons.visibility,
-                  size: 20,
-                  color: AppTheme.textSecondary,
-                ),
-                onPressed: () =>
-                    obscureOldPassword.value = !obscureOldPassword.value,
-              ),
-              validator: (val) =>
-                  Validators.validateRequired(val, 'Old Password'),
-            ),
-            const SizedBox(height: AppTheme.spacingMedium),
-            CustomTextField(
-              label: 'New Password',
-              controller: newPasswordController,
-              obscureText: obscureNewPassword.value,
-              suffixIcon: IconButton(
-                icon: Icon(
-                  obscureNewPassword.value
-                      ? Icons.visibility_off
-                      : Icons.visibility,
-                  size: 20,
-                  color: AppTheme.textSecondary,
-                ),
-                onPressed: () =>
-                    obscureNewPassword.value = !obscureNewPassword.value,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                const Icon(
-                  Icons.info_outline,
-                  size: 14,
-                  color: AppTheme.errorColor,
-                ),
-                const SizedBox(width: 6),
-                Text(
-                  'Leave blank to keep current password',
-                  style: GoogleFonts.poppins(
-                    fontSize: 11,
-                    color: AppTheme.errorColor,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
             ),
             const SizedBox(height: AppTheme.spacingXLarge),
             CustomButton(

@@ -8,6 +8,7 @@ import 'package:onepos_admin_app/shared/widgets/custom_search_bar.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_text_field.dart';
 import 'package:onepos_admin_app/shared/widgets/app_snackbar.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_switch.dart';
+import 'package:onepos_admin_app/shared/widgets/loading_widget.dart';
 import '../../data/models/category_model.dart';
 import '../providers/store_provider.dart';
 
@@ -156,7 +157,7 @@ class MyStoreScreen extends HookConsumerWidget {
                   },
                 );
               },
-              loading: () => const Center(child: CircularProgressIndicator()),
+              loading: () => const LoadingWidget(),
               error: (error, _) => Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,

@@ -8,6 +8,7 @@ import 'package:onepos_admin_app/core/utils/amount_formatter.dart';
 import 'package:onepos_admin_app/features/expenses/presentation/providers/expenses_provider.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_app_bar.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_button_with_icon.dart';
+import 'package:onepos_admin_app/shared/widgets/loading_widget.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_search_bar.dart';
 import 'package:onepos_admin_app/features/expenses/data/models/expense_model.dart';
 import 'package:onepos_admin_app/features/expenses/presentation/providers/expense_metadata_provider.dart';
@@ -316,7 +317,7 @@ class ExpensesScreen extends HookConsumerWidget {
                     ),
                   );
                 },
-                loading: () => const Center(child: CircularProgressIndicator()),
+                loading: () => const LoadingWidget(),
                 error: (error, _) => Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -657,10 +658,13 @@ class _DetailRow extends StatelessWidget {
             color: AppTheme.textSecondary,
           ),
         ),
+        const SizedBox(width: 16),
         Flexible(
           child: Text(
             value,
             textAlign: TextAlign.end,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
             style: GoogleFonts.poppins(
               fontSize: 12,
               fontWeight: FontWeight.w500,

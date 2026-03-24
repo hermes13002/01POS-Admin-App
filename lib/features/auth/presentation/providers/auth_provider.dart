@@ -77,4 +77,11 @@ class Auth extends _$Auth {
     final result = await _repo.resetPassword(email);
     return result.fold((failure) => failure.message, (_) => null);
   }
+
+  Future<String?> signUp(Map<String, dynamic> body) async {
+    state = const AsyncLoading();
+    final result = await _repo.signUp(body);
+    state = const AsyncData(null);
+    return result.fold((failure) => failure.message, (_) => null);
+  }
 }

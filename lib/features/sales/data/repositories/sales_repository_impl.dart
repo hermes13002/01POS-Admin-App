@@ -4,6 +4,7 @@ import 'package:onepos_admin_app/core/errors/failures.dart';
 import 'package:onepos_admin_app/features/sales/data/datasources/sales_remote_datasource.dart';
 import 'package:onepos_admin_app/features/sales/data/models/sale_model.dart';
 import 'package:onepos_admin_app/features/sales/domain/repositories/sales_repository.dart';
+import 'package:onepos_admin_app/features/reports/data/models/reports_model.dart';
 
 class SalesRepositoryImpl implements SalesRepository {
   final SalesRemoteDatasource _datasource;
@@ -35,6 +36,39 @@ class SalesRepositoryImpl implements SalesRepository {
     return _handleException(
       () => _datasource.downloadSales(from: from, to: to),
     );
+  }
+
+  @override
+  Future<Either<Failure, List<MonthlySalesData>>> getSalesSummaryDashboard({
+    String dateFilter = '12months',
+  }) async {
+    return _handleException(
+      () => _datasource.getSalesSummaryDashboard(dateFilter: dateFilter),
+    );
+  }
+
+  @override
+  Future<Either<Failure, List<SaleModel>>> getAllSalesDashboard() async {
+    return _handleException(() => _datasource.getAllSalesDashboard());
+  }
+
+  @override
+  Future<Either<Failure, SalesOverviewData>> getSalesOverviewDashboard() async {
+    return _handleException(() => _datasource.getSalesOverviewDashboard());
+  }
+
+  @override
+  Future<Either<Failure, List<StockLevelData>>> getStockLevelDashboard({
+    String dateFilter = '12months',
+  }) async {
+    return _handleException(
+      () => _datasource.getStockLevelDashboard(dateFilter: dateFilter),
+    );
+  }
+
+  @override
+  Future<Either<Failure, ExpenseStatisticsData>> getExpenseStatistics() async {
+    return _handleException(() => _datasource.getExpenseStatistics());
   }
 
   Future<Either<Failure, T>> _handleException<T>(

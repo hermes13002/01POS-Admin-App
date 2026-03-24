@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -291,6 +292,36 @@ class LoginScreen extends HookConsumerWidget {
                               onPressed: submit,
                               isLoading: isLoading,
                             ),
+                            const SizedBox(height: 24),
+                            Center(
+                              child: RichText(
+                                text: TextSpan(
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 13,
+                                    color: AppTheme.textSecondary,
+                                  ),
+                                  children: [
+                                    const TextSpan(
+                                      text: "Don't have an account? ",
+                                    ),
+                                    TextSpan(
+                                      text: 'Sign up',
+                                      style: const TextStyle(
+                                        color: AppTheme.blue,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                      recognizer: TapGestureRecognizer()
+                                        ..onTap = () {
+                                          Navigator.pushNamed(
+                                            context,
+                                            AppRoutes.signup,
+                                          );
+                                        },
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -347,8 +378,8 @@ class _LoginButton extends StatelessWidget {
           ),
           child: loading
               ? const SizedBox(
-                  width: 20,
                   height: 20,
+                  width: 20,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
                     color: Colors.white,

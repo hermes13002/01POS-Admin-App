@@ -1,6 +1,5 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../products/data/models/product_model.dart';
-import '../../../../shared/widgets/app_snackbar.dart';
 import '../../../products/presentation/providers/products_provider.dart';
 
 part 'low_stock_provider.g.dart';

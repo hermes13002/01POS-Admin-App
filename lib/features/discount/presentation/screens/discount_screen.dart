@@ -8,6 +8,7 @@ import 'package:onepos_admin_app/core/utils/amount_formatter.dart';
 import 'package:onepos_admin_app/features/discount/presentation/providers/discount_provider.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_app_bar.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_button_with_icon.dart';
+import 'package:onepos_admin_app/shared/widgets/loading_widget.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_search_bar.dart';
 
 /// Screen for viewing and managing discounts
@@ -84,7 +85,7 @@ class DiscountScreen extends HookConsumerWidget {
             const SizedBox(height: AppTheme.spacingSmall),
             Expanded(
               child: discountsAsync.when(
-                loading: () => const Center(child: CircularProgressIndicator()),
+                loading: () => const LoadingWidget(),
                 error: (e, _) => Center(child: Text('Error: $e')),
                 data: (discounts) {
                   final query = searchController.text.toLowerCase();

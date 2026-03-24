@@ -12,6 +12,7 @@ abstract class AuthRemoteDatasource {
   Future<LoginResponseModel> loginWithPin(String pin);
   Future<void> logout();
   Future<void> resetPassword(String email);
+  Future<void> signUp(Map<String, dynamic> body);
 }
 
 class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
@@ -95,6 +96,24 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
     if (responseBody['error'] == true) {
       throw ServerException(
         message: responseBody['message'] ?? 'Failed to send reset email',
+      );
+    }
+  }
+
+  @override
+  Future<void> signUp(Map<String, dynamic> body) async {
+    final url = '${AppConstants.baseUrl}${ApiEndpoints.onboarding}';
+    log('signup url: $url', name: 'API');
+    log('signup body: ${jsonEncode(body)}', name: 'API');
+
+    final response = await _client.post(ApiEndpoints.onboarding, data: body);
+    final responseBody = response.data as Map<String, dynamic>;
+
+    log('signup response: ${jsonEncode(responseBody)}', name: 'API');
+
+    if (responseBody['error'] == true) {
+      throw ServerException(
+        message: responseBody['message'] ?? 'Signup failed',
       );
     }
   }

@@ -34,7 +34,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       navigatorKey: SessionManager.navigatorKey,
-      title: 'OnePOS Admin',
+      title: '01POS',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       home: isLoggedIn ? const MainNavigationScreen() : const LoginScreen(),

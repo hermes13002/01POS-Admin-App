@@ -250,7 +250,7 @@ class EditProductDialog extends HookConsumerWidget {
                       _buildSectionTitle('Basic Information'),
                       _buildFieldRow(
                         _buildField('Product Name', nameController, flex: 2),
-                        _AmountbuildField(
+                        _amountBuildField(
                           'Price',
                           priceController,
                           keyboardType: TextInputType.number,
@@ -481,13 +481,13 @@ class EditProductDialog extends HookConsumerWidget {
   }
 }
 
-Widget _AmountbuildField(
+Widget _amountBuildField(
   String label,
   TextEditingController controller, {
   TextInputType? keyboardType,
   int? maxLines = 1,
   int? minLines,
-  int flex = 1,
+  // int flex = 1,
   String? hintText,
   String? prefixText,
 }) {

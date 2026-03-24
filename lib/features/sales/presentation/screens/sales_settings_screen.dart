@@ -7,6 +7,7 @@ import 'package:onepos_admin_app/core/theme/app_theme.dart';
 import 'package:onepos_admin_app/features/online_store/presentation/providers/profile_provider.dart';
 import 'package:onepos_admin_app/features/sales/presentation/providers/sales_provider.dart';
 import 'package:onepos_admin_app/features/sales/presentation/services/sales_export_service.dart';
+import 'package:onepos_admin_app/shared/widgets/loading_widget.dart';
 import 'package:onepos_admin_app/shared/widgets/app_snackbar.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_app_bar2.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_switch.dart';
@@ -31,7 +32,7 @@ class SalesSettingsScreen extends HookConsumerWidget {
       backgroundColor: AppTheme.backgroundColor,
       appBar: const CustomAppBar2(title: 'Sales Settings'),
       body: salesState.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const LoadingWidget(),
         error: (e, _) => Center(child: Text('Error: $e')),
         data: (state) => Padding(
           padding: const EdgeInsets.all(AppTheme.spacingMedium),

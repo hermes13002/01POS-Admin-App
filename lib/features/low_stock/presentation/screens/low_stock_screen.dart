@@ -327,7 +327,7 @@ class _LowStockTile extends StatelessWidget {
                         color: AppTheme.textSecondary,
                       ),
                       label: Text(
-                        'Edit',
+                        'Restock',
                         style: GoogleFonts.poppins(
                           fontSize: 13,
                           color: AppTheme.textSecondary,

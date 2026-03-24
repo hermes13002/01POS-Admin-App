@@ -9,6 +9,7 @@ import 'package:onepos_admin_app/shared/widgets/custom_text_field.dart';
 import 'package:onepos_admin_app/core/utils/validators.dart';
 import 'package:onepos_admin_app/features/online_store/presentation/providers/profile_provider.dart';
 import 'package:onepos_admin_app/shared/widgets/app_snackbar.dart';
+import 'package:onepos_admin_app/shared/widgets/loading_widget.dart';
 
 /// Screen for editing the address
 class EditAddressScreen extends HookConsumerWidget {
@@ -80,7 +81,7 @@ class EditAddressScreen extends HookConsumerWidget {
         ),
       ),
       body: profileAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const LoadingWidget(),
         error: (e, _) => Center(child: Text('Error: $e')),
         data: (profile) => SafeArea(
           child: Padding(

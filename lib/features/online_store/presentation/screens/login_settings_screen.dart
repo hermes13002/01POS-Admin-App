@@ -6,6 +6,9 @@ import 'package:onepos_admin_app/shared/widgets/custom_app_bar.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_button.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_text_field.dart';
 import 'package:onepos_admin_app/core/utils/validators.dart';
+import 'package:onepos_admin_app/core/storage/secure_storage_service.dart';
+import 'package:onepos_admin_app/features/online_store/presentation/providers/profile_provider.dart';
+import 'package:onepos_admin_app/shared/widgets/app_snackbar.dart';
 
 /// Screen for managing login settings
 class LoginSettingsScreen extends HookConsumerWidget {
@@ -21,6 +24,8 @@ class LoginSettingsScreen extends HookConsumerWidget {
     final obscureCurrent = useState(true);
     final obscureNew = useState(true);
     final obscureConfirm = useState(true);
+    final isSubmitting = useState(false);
+    final profileAsync = ref.watch(userProfileProvider);
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -113,9 +118,50 @@ class LoginSettingsScreen extends HookConsumerWidget {
 
                 CustomButton(
                   text: 'Save',
-                  onPressed: () {
-                    if (formKey.currentState!.validate()) {
-                      Navigator.pop(context);
+                  isLoading: isSubmitting.value,
+                  onPressed: () async {
+                    if (!formKey.currentState!.validate()) return;
+
+                    final profile = profileAsync.valueOrNull;
+                    if (profile == null) {
+                      AppSnackbar.showError(context, 'Profile data not loaded');
+                      return;
+                    }
+
+                    isSubmitting.value = true;
+                    try {
+                      await ref
+                          .read(userProfileProvider.notifier)
+                          .updateProfile({
+                            'firstname': profile.firstname,
+                            'lastname': profile.lastname,
+                            'email': profile.email,
+                            'phoneno': profile.phoneno,
+                            'address': profile.address ?? '',
+                            'old_password': currentPasswordController.text,
+                            'new_password': newPasswordController.text,
+                          });
+
+                      await SecureStorageService().write(
+                        'user_password',
+                        newPasswordController.text,
+                      );
+
+                      if (context.mounted) {
+                        AppSnackbar.showSuccess(
+                          context,
+                          'Password updated successfully',
+                        );
+                        Navigator.pop(context);
+                      }
+                    } catch (e) {
+                      if (context.mounted) {
+                        AppSnackbar.showError(context, e.toString());
+                      }
+                    } finally {
+                      if (context.mounted) {
+                        isSubmitting.value = false;
+                      }
                     }
                   },
                   backgroundColor: Colors.black,

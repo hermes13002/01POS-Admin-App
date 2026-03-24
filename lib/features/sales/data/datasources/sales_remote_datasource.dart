@@ -1,11 +1,8 @@
-import 'dart:convert';
-import 'dart:developer';
-
 import 'package:onepos_admin_app/core/constants/api_endpoints.dart';
-import 'package:onepos_admin_app/core/constants/app_constants.dart';
 import 'package:onepos_admin_app/core/errors/exceptions.dart';
 import 'package:onepos_admin_app/core/network/dio_client.dart';
 import 'package:onepos_admin_app/features/sales/data/models/sale_model.dart';
+import 'package:onepos_admin_app/features/reports/data/models/reports_model.dart';
 
 abstract class SalesRemoteDatasource {
   /// fetches sales list for a page
@@ -22,6 +19,25 @@ abstract class SalesRemoteDatasource {
     required String from,
     required String to,
   });
+
+  /// fetch all sales for dashboard (top sales section)
+  Future<List<SaleModel>> getAllSalesDashboard();
+
+  /// fetch sales summary for dashboard
+  Future<List<MonthlySalesData>> getSalesSummaryDashboard({
+    String dateFilter = '12months',
+  });
+
+  /// fetch sales overview for dashboard
+  Future<SalesOverviewData> getSalesOverviewDashboard();
+
+  /// fetch stock level for dashboard
+  Future<List<StockLevelData>> getStockLevelDashboard({
+    String dateFilter = '12months',
+  });
+
+  /// fetch expense statistics for dashboard
+  Future<ExpenseStatisticsData> getExpenseStatistics();
 }
 
 class SalesRemoteDatasourceImpl implements SalesRemoteDatasource {
@@ -31,20 +47,11 @@ class SalesRemoteDatasourceImpl implements SalesRemoteDatasource {
 
   @override
   Future<PaginatedSalesResponse> getSales({int page = 1}) async {
-    final url = '${AppConstants.baseUrl}${ApiEndpoints.allSales}?page=$page';
-    final body = <String, dynamic>{};
-
-    log('get_all_sales url: $url', name: 'API');
-    log('get_all_sales body: ${jsonEncode(body)}', name: 'API');
-
     final response = await _client.post(
       ApiEndpoints.allSales,
-      queryParameters: {'page': page},
-      data: body,
+      data: {'page': page},
     );
     final responseBody = _asMap(response.data);
-
-    log('get_all_sales response: ${jsonEncode(responseBody)}', name: 'API');
 
     if (_isError(responseBody['error'])) {
       throw ServerException(
@@ -52,26 +59,9 @@ class SalesRemoteDatasourceImpl implements SalesRemoteDatasource {
       );
     }
 
-    final rawData = responseBody['data'];
-
-    final paginatedData = _asNullableMap(rawData);
-    if (paginatedData != null) {
-      return PaginatedSalesResponse.fromJson(paginatedData);
-    }
-
-    if (rawData is List) {
-      final sales = rawData
-          .map((item) => SaleModel.fromJson(_asMap(item)))
-          .toList();
-
-      return PaginatedSalesResponse(
-        sales: sales,
-        currentPage: 1,
-        lastPage: 1,
-        perPage: sales.length,
-        total: sales.length,
-        hasMorePages: false,
-      );
+    final data = responseBody['data'];
+    if (data is Map<String, dynamic>) {
+      return PaginatedSalesResponse.fromJson(data);
     }
 
     throw ServerException(message: 'invalid sales response');
@@ -79,8 +69,9 @@ class SalesRemoteDatasourceImpl implements SalesRemoteDatasource {
 
   @override
   Future<void> activateDownload(int companyId) async {
-    final url = '${ApiEndpoints.activateSalesDownload}$companyId';
-    final response = await _client.get(url);
+    final response = await _client.get(
+      '${ApiEndpoints.activateSalesDownload}$companyId',
+    );
     final responseBody = _asMap(response.data);
 
     if (_isError(responseBody['error'])) {
@@ -92,8 +83,9 @@ class SalesRemoteDatasourceImpl implements SalesRemoteDatasource {
 
   @override
   Future<void> deactivateDownload(int companyId) async {
-    final url = '${ApiEndpoints.deactivateSalesDownload}$companyId';
-    final response = await _client.get(url);
+    final response = await _client.get(
+      '${ApiEndpoints.deactivateSalesDownload}$companyId',
+    );
     final responseBody = _asMap(response.data);
 
     if (_isError(responseBody['error'])) {
@@ -108,8 +100,10 @@ class SalesRemoteDatasourceImpl implements SalesRemoteDatasource {
     required String from,
     required String to,
   }) async {
-    final body = {'from': from, 'to': to};
-    final response = await _client.post(ApiEndpoints.downloadSales, data: body);
+    final response = await _client.post(
+      ApiEndpoints.downloadSales,
+      data: {'from_date': from, 'to_date': to},
+    );
     final responseBody = _asMap(response.data);
 
     if (_isError(responseBody['error'])) {
@@ -126,20 +120,121 @@ class SalesRemoteDatasourceImpl implements SalesRemoteDatasource {
     return [];
   }
 
+  @override
+  Future<List<SaleModel>> getAllSalesDashboard() async {
+    final response = await _client.get(ApiEndpoints.allSalesDashboard);
+    final responseBody = _asMap(response.data);
+
+    if (_isError(responseBody['error'])) {
+      throw ServerException(
+        message: responseBody['message'] ?? 'failed to fetch dashboard sales',
+      );
+    }
+
+    final data = responseBody['data'];
+    if (data is List) {
+      return data.map((item) => SaleModel.fromJson(_asMap(item))).toList();
+    }
+
+    return [];
+  }
+
+  @override
+  Future<List<MonthlySalesData>> getSalesSummaryDashboard({
+    String dateFilter = '12months',
+  }) async {
+    final body = {'date_filter': dateFilter};
+    final response = await _client.post(
+      ApiEndpoints.salesSummaryDashboard,
+      data: body,
+    );
+    final responseBody = _asMap(response.data);
+
+    if (_isError(responseBody['error'])) {
+      throw ServerException(
+        message: responseBody['message'] ?? 'failed to fetch sales summary',
+      );
+    }
+
+    final data = responseBody['data'];
+    if (data is Map<String, dynamic>) {
+      return MonthlySalesData.fromDashboardJson(data);
+    }
+
+    return [];
+  }
+
   Map<String, dynamic> _asMap(dynamic value) {
     if (value is Map<String, dynamic>) return value;
     if (value is Map) return Map<String, dynamic>.from(value);
     return <String, dynamic>{};
   }
 
-  Map<String, dynamic>? _asNullableMap(dynamic value) {
-    if (value == null) return null;
-    if (value is Map<String, dynamic>) return value;
-    if (value is Map) return Map<String, dynamic>.from(value);
-    return null;
-  }
-
   bool _isError(dynamic error) {
     return error == true || error?.toString().toLowerCase() == 'true';
+  }
+
+  @override
+  Future<SalesOverviewData> getSalesOverviewDashboard() async {
+    final response = await _client.get(ApiEndpoints.adminDashboard);
+    final responseBody = _asMap(response.data);
+
+    if (_isError(responseBody['error'])) {
+      throw ServerException(
+        message: responseBody['message'] ?? 'failed to fetch sales overview',
+      );
+    }
+
+    final data = responseBody['data'];
+    if (data is Map<String, dynamic>) {
+      return SalesOverviewData.fromJson(data);
+    }
+
+    throw ServerException(message: 'invalid sales overview response');
+  }
+
+  @override
+  Future<List<StockLevelData>> getStockLevelDashboard({
+    String dateFilter = '12months',
+  }) async {
+    final body = {'date_filter': dateFilter};
+    final response = await _client.post(
+      ApiEndpoints.adminStockLevelDashboard,
+      data: body,
+    );
+    final responseBody = _asMap(response.data);
+
+    if (_isError(responseBody['error'])) {
+      throw ServerException(
+        message: responseBody['message'] ?? 'failed to fetch stock level',
+      );
+    }
+
+    final data = responseBody['data'];
+    if (data is Map<String, dynamic>) {
+      return StockLevelData.fromDashboardJson(data);
+    }
+
+    return [];
+  }
+
+  @override
+  Future<ExpenseStatisticsData> getExpenseStatistics() async {
+    final response = await _client.get(ApiEndpoints.expenseStatisticsDashboard);
+    final responseBody = _asMap(response.data);
+
+    if (_isError(responseBody['error'])) {
+      throw ServerException(
+        message:
+            responseBody['message'] ?? 'failed to fetch expense statistics',
+      );
+    }
+
+    final data = responseBody['data'];
+    if (data is Map<String, dynamic>) {
+      return ExpenseStatisticsData.fromJson(data);
+    }
+
+    throw ServerException(message: 'invalid expense statistics response');
   }
 }

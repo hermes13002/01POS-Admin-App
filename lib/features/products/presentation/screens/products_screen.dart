@@ -110,13 +110,7 @@ class ProductsScreen extends HookConsumerWidget {
                     if (index == filtered.length) {
                       return const Padding(
                         padding: EdgeInsets.symmetric(vertical: 16.0),
-                        child: Center(
-                          child: SizedBox(
-                            width: 24,
-                            height: 24,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          ),
-                        ),
+                        child: Center(child: CircularProgressIndicator()),
                       );
                     }
 
@@ -152,7 +146,7 @@ class ProductsScreen extends HookConsumerWidget {
                   },
                 );
               },
-              loading: () => const Center(child: LoadingWidget()),
+              loading: () => const LoadingWidget(),
               error: (error, stack) => Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -931,8 +925,7 @@ class ViewProductDialog extends HookConsumerWidget {
                       ),
                     );
                   },
-                  loading: () =>
-                      const Center(child: CircularProgressIndicator()),
+                  loading: () => const LoadingWidget(),
                   error: (e, _) => Center(child: Text('Error: $e')),
                 ),
               ),

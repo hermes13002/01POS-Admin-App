@@ -222,8 +222,8 @@ class _ResetButton extends StatelessWidget {
           ),
           child: loading
               ? const SizedBox(
-                  width: 20,
                   height: 20,
+                  width: 20,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
                     color: Colors.white,

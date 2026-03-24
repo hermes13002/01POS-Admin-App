@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:onepos_admin_app/features/auth/presentation/screens/login_screen.dart';
+import 'package:onepos_admin_app/features/auth/presentation/screens/signup_screen.dart';
 import 'package:onepos_admin_app/features/auth/presentation/screens/reset_password_screen.dart';
 import 'package:onepos_admin_app/features/low_stock/presentation/screens/low_stock_screen.dart';
 import 'package:onepos_admin_app/features/products/presentation/screens/add_product_screen.dart';
@@ -41,6 +42,7 @@ import 'package:onepos_admin_app/features/store/presentation/screens/sub_categor
 import 'package:onepos_admin_app/features/chats/presentation/screens/chats_screen.dart';
 import 'package:onepos_admin_app/features/chats/presentation/screens/individual_chat_screen.dart';
 import 'package:onepos_admin_app/features/chats/data/models/chat_contact_model.dart';
+import 'package:onepos_admin_app/features/online_store/presentation/screens/subscription_details_screen.dart';
 
 /// centralized route configuration
 class AppRoutes {
@@ -49,6 +51,7 @@ class AppRoutes {
 
   // route names
   static const String login = '/login';
+  static const String signup = '/signup';
   static const String resetPassword = '/reset-password';
   static const String reports = '/reports';
   static const String products = '/products';
@@ -87,10 +90,12 @@ class AppRoutes {
   static const String editProfile = '/edit-profile';
   static const String chats = '/chats';
   static const String individualChat = '/individual-chat';
+  static const String subscriptionDetails = '/subscription-details';
 
   // route map
   static Map<String, WidgetBuilder> get routes => {
     login: (context) => const LoginScreen(),
+    signup: (context) => const SignupScreen(),
     resetPassword: (context) => const ResetPasswordScreen(),
     reports: (context) => const ReportsScreen(),
     products: (context) => const ProductsScreen(),
@@ -142,5 +147,6 @@ class AppRoutes {
       final contact = ModalRoute.of(context)!.settings.arguments as ChatContact;
       return IndividualChatScreen(contact: contact);
     },
+    subscriptionDetails: (context) => const SubscriptionDetailsScreen(),
   };
 }

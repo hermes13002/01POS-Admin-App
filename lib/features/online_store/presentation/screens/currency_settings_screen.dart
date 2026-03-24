@@ -261,7 +261,7 @@ class _UpdateCurrencyDialog extends HookConsumerWidget {
                   width: 16,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    color: Colors.white,
                   ),
                 )
               : Text('Update Currency', style: GoogleFonts.poppins()),

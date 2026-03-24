@@ -76,4 +76,20 @@ class AuthRepositoryImpl implements AuthRepository {
       return Left(UnknownFailure(message: e.toString()));
     }
   }
+
+  @override
+  Future<Either<Failure, void>> signUp(Map<String, dynamic> body) async {
+    try {
+      await _datasource.signUp(body);
+      return const Right(null);
+    } on AuthenticationException catch (e) {
+      return Left(AuthenticationFailure(message: e.message));
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message, statusCode: e.statusCode));
+    } on NetworkException catch (e) {
+      return Left(NetworkFailure(message: e.message));
+    } catch (e) {
+      return Left(UnknownFailure(message: e.toString()));
+    }
+  }
 }

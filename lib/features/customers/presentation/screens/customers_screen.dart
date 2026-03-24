@@ -112,7 +112,7 @@ class CustomersScreen extends HookConsumerWidget {
                     if (index >= filtered.length) {
                       return const Padding(
                         padding: EdgeInsets.symmetric(vertical: 16),
-                        child: LoadingWidget(size: 32),
+                        child: Center(child: CircularProgressIndicator()),
                       );
                     }
 

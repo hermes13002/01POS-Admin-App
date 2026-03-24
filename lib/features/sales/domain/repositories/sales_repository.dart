@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
-import 'package:onepos_admin_app/core/errors/failures.dart';
-import 'package:onepos_admin_app/features/sales/data/models/sale_model.dart';
+import '../../../../core/errors/failures.dart';
+import '../../../reports/data/models/reports_model.dart';
+import '../../data/models/sale_model.dart';
 
 abstract class SalesRepository {
   /// fetches sales list for a page
@@ -17,4 +18,23 @@ abstract class SalesRepository {
     required String from,
     required String to,
   });
+
+  /// fetch all sales for dashboard (top sales section)
+  Future<Either<Failure, List<SaleModel>>> getAllSalesDashboard();
+
+  /// fetch sales summary for dashboard
+  Future<Either<Failure, List<MonthlySalesData>>> getSalesSummaryDashboard({
+    String dateFilter = '12months',
+  });
+
+  /// fetch sales overview for dashboard
+  Future<Either<Failure, SalesOverviewData>> getSalesOverviewDashboard();
+
+  /// fetch stock level for dashboard
+  Future<Either<Failure, List<StockLevelData>>> getStockLevelDashboard({
+    String dateFilter = '12months',
+  });
+
+  /// fetch expense statistics for dashboard
+  Future<Either<Failure, ExpenseStatisticsData>> getExpenseStatistics();
 }

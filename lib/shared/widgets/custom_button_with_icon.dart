@@ -40,7 +40,8 @@ class CustomButtonWithIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final effectiveTextColor = textColor ?? 
+    final effectiveTextColor =
+        textColor ??
         (isOutlined ? theme.colorScheme.primary : theme.colorScheme.onPrimary);
     final effectiveIconColor = iconColor ?? effectiveTextColor;
 
@@ -71,7 +72,10 @@ class CustomButtonWithIcon extends StatelessWidget {
         ),
         elevation: 0,
       ),
-      child: _buildContent(textColor ?? Colors.white, iconColor ?? Colors.white),
+      child: _buildContent(
+        textColor ?? Colors.white,
+        iconColor ?? Colors.white,
+      ),
     );
   }
 
@@ -91,11 +95,7 @@ class CustomButtonWithIcon extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(
-          icon,
-          size: iconSize,
-          color: iconColor,
-        ),
+        Icon(icon, size: iconSize, color: iconColor),
         SizedBox(width: spacing),
         Text(text),
       ],

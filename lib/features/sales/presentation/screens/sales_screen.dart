@@ -323,8 +323,15 @@ class _SaleTile extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        // Text(
+                        //   'Customer name',
+                        //   style: GoogleFonts.poppins(
+                        //     fontSize: 12,
+                        //     color: AppTheme.textSecondary,
+                        //   ),
+                        // ),
                         Text(
-                          'Customer name',
+                          DateFormat('MMM d, yyyy').format(sale.date),
                           style: GoogleFonts.poppins(
                             fontSize: 12,
                             color: AppTheme.textSecondary,
@@ -387,10 +394,10 @@ class _SaleTile extends StatelessWidget {
                   const SizedBox(height: 8),
                   _DetailRow(label: 'Cashier name:', value: sale.cashierName),
                   const SizedBox(height: 8),
-                  _DetailRow(
-                    label: 'Date:',
-                    value: DateFormat('MMM d, yyyy').format(sale.date),
-                  ),
+                  // _DetailRow(
+                  //   label: 'Date:',
+                  //   value: DateFormat('MMM d, yyyy').format(sale.date),
+                  // ),
                   const SizedBox(height: AppTheme.spacingMedium),
                   CustomButtonWithIcon(
                     text: 'View Details',

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import 'package:onepos_admin_app/core/routes/app_routes.dart';
@@ -14,6 +13,7 @@ import 'package:onepos_admin_app/shared/widgets/custom_app_bar.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_button.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_button_with_icon.dart';
 import 'package:onepos_admin_app/features/auth/presentation/providers/auth_provider.dart';
+import 'package:onepos_admin_app/shared/widgets/loading_widget.dart';
 
 /// store profile screen — company details and admin profile
 class StoreProfileScreen extends HookConsumerWidget {
@@ -36,7 +36,7 @@ class StoreProfileScreen extends HookConsumerWidget {
       ),
       body: SafeArea(
         child: profileAsync.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
+          loading: () => const LoadingWidget(),
           error: (e, _) => Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -156,35 +156,42 @@ class _ProfileContent extends ConsumerWidget {
                 const SizedBox(height: 24),
 
                 // plan row
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Your current plan',
-                      style: GoogleFonts.poppins(
-                        fontSize: 12,
-                        color: AppTheme.textSecondary,
+                GestureDetector(
+                  onTap: () => Navigator.pushNamed(
+                    context,
+                    AppRoutes.subscriptionDetails,
+                  ),
+                  behavior: HitTestBehavior.opaque,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Your current plan',
+                        style: GoogleFonts.poppins(
+                          fontSize: 12,
+                          color: AppTheme.textSecondary,
+                        ),
                       ),
-                    ),
-                    Row(
-                      children: [
-                        Text(
-                          profile.plan ?? 'Standard',
-                          style: GoogleFonts.poppins(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w500,
+                      Row(
+                        children: [
+                          Text(
+                            profile.plan ?? 'Standard',
+                            style: GoogleFonts.poppins(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                              color: AppTheme.textPrimary,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          const Icon(
+                            Icons.arrow_forward_ios,
+                            size: 12,
                             color: AppTheme.textPrimary,
                           ),
-                        ),
-                        const SizedBox(width: 4),
-                        const Icon(
-                          Icons.arrow_forward_ios,
-                          size: 12,
-                          color: AppTheme.textPrimary,
-                        ),
-                      ],
-                    ),
-                  ],
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
                 const Padding(
                   padding: EdgeInsets.symmetric(vertical: 12),
@@ -253,12 +260,12 @@ class _ProfileContent extends ConsumerWidget {
             onTap: () => Navigator.pushNamed(context, AppRoutes.editAddress),
           ),
           const SizedBox(height: AppTheme.spacingMedium),
+          */
           _ProfileListItem(
             title: 'Login Settings',
             onTap: () => Navigator.pushNamed(context, AppRoutes.loginSettings),
           ),
           const SizedBox(height: AppTheme.spacingMedium),
-          */
           _ProfileListItem(
             title: 'Currency Settings',
             onTap: () =>
@@ -345,30 +352,25 @@ class _ProfileContent extends ConsumerWidget {
           ),
           const SizedBox(height: AppTheme.spacingLarge),
 
-          // profile details expandable section
-          _ExpandableProfileSection(
-            title: 'Profile Details',
-            children: [
-              _ProfileDetailField(
-                label: 'First Name',
-                value: profile.firstname,
-              ),
-              const SizedBox(height: AppTheme.spacingSmall),
-              _ProfileDetailField(label: 'Last Name', value: profile.lastname),
-              const SizedBox(height: AppTheme.spacingSmall),
-              _ProfileDetailField(label: 'Email', value: profile.email),
-              const SizedBox(height: AppTheme.spacingSmall),
-              _ProfileDetailField(
-                label: 'Phone Number',
-                value: profile.phoneno,
-              ),
-              const SizedBox(height: AppTheme.spacingSmall),
-              _ProfileDetailField(
-                label: 'Address',
-                value: profile.address ?? '—',
-              ),
-            ],
+          // profile details section
+          Text(
+            'Profile Details',
+            style: GoogleFonts.poppins(
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+              color: AppTheme.textPrimary,
+            ),
           ),
+          const SizedBox(height: AppTheme.spacingMedium),
+          _ProfileDetailField(label: 'First Name', value: profile.firstname),
+          const SizedBox(height: AppTheme.spacingSmall),
+          _ProfileDetailField(label: 'Last Name', value: profile.lastname),
+          const SizedBox(height: AppTheme.spacingSmall),
+          _ProfileDetailField(label: 'Email', value: profile.email),
+          const SizedBox(height: AppTheme.spacingSmall),
+          _ProfileDetailField(label: 'Phone Number', value: profile.phoneno),
+          const SizedBox(height: AppTheme.spacingSmall),
+          _ProfileDetailField(label: 'Address', value: profile.address ?? '—'),
           const SizedBox(height: AppTheme.spacingLarge),
           const SizedBox(height: AppTheme.spacingLarge),
           CustomButtonWithIcon(
@@ -445,6 +447,7 @@ class _ProfileListItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
+      behavior: HitTestBehavior.opaque,
       child: Container(
         padding: const EdgeInsets.symmetric(
           horizontal: AppTheme.spacingMedium,
@@ -496,72 +499,6 @@ class _ProfileListItem extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-}
-
-/// expandable section for profile details
-class _ExpandableProfileSection extends HookWidget {
-  final String title;
-  final List<Widget> children;
-
-  const _ExpandableProfileSection({
-    required this.title,
-    required this.children,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final isExpanded = useState(false);
-
-    return Column(
-      children: [
-        GestureDetector(
-          onTap: () => isExpanded.value = !isExpanded.value,
-          child: Container(
-            padding: const EdgeInsets.all(AppTheme.spacingMedium),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  title,
-                  style: GoogleFonts.poppins(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: AppTheme.textPrimary,
-                  ),
-                ),
-                Icon(
-                  isExpanded.value
-                      ? Icons.keyboard_arrow_up
-                      : Icons.keyboard_arrow_down,
-                  color: AppTheme.textPrimary,
-                ),
-              ],
-            ),
-          ),
-        ),
-        AnimatedSize(
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeInOut,
-          child: SizedBox(
-            width: double.infinity,
-            height: isExpanded.value ? null : 0,
-            child: Padding(
-              padding: const EdgeInsets.only(
-                top: AppTheme.spacingMedium,
-                left: AppTheme.spacingMedium,
-                right: AppTheme.spacingMedium,
-              ),
-              child: Column(children: children),
-            ),
-          ),
-        ),
-      ],
     );
   }
 }

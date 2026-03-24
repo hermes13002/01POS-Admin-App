@@ -10,6 +10,7 @@ import 'package:onepos_admin_app/features/users/presentation/providers/users_pro
 import 'package:onepos_admin_app/shared/widgets/custom_app_bar.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_button_with_icon.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_search_bar.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:onepos_admin_app/shared/widgets/loading_widget.dart';
 import 'package:onepos_admin_app/shared/widgets/app_snackbar.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_text_field.dart';
@@ -84,6 +85,8 @@ class UsersScreen extends HookConsumerWidget {
               ),
             ),
             const SizedBox(height: AppTheme.spacingSmall),
+            const _CashierAppBanner(),
+            const SizedBox(height: AppTheme.spacingSmall),
             Expanded(
               child: usersAsync.when(
                 loading: () => const LoadingWidget(),
@@ -150,7 +153,7 @@ class UsersScreen extends HookConsumerWidget {
                         if (index >= filteredUsers.length) {
                           return const Padding(
                             padding: EdgeInsets.symmetric(vertical: 16),
-                            child: LoadingWidget(size: 32),
+                            child: Center(child: CircularProgressIndicator()),
                           );
                         }
 
@@ -552,15 +555,14 @@ class _ViewUserDialog extends HookConsumerWidget {
               ],
             ),
             const SizedBox(height: 24),
-
-            if (isLoading.value)
+            if (isLoading.value) ...[
               const Center(
                 child: Padding(
                   padding: EdgeInsets.symmetric(vertical: 40),
                   child: CircularProgressIndicator(),
                 ),
-              )
-            else ...[
+              ),
+            ] else ...[
               // Profile Section
               Center(
                 child: Column(
@@ -1029,6 +1031,78 @@ class _EditUserDialog extends HookConsumerWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _CashierAppBanner extends StatelessWidget {
+  const _CashierAppBanner();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: AppTheme.spacingMedium),
+      padding: const EdgeInsets.all(AppTheme.spacingMedium),
+      decoration: BoxDecoration(
+        color: AppTheme.blue.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
+        border: Border.all(color: AppTheme.blue.withOpacity(0.2), width: 1),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: AppTheme.blue.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.info_outline,
+              color: AppTheme.blue,
+              size: 20,
+            ),
+          ),
+          const SizedBox(width: AppTheme.spacingMedium),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'To process sales, you need to get the cashier app from the Play Store.',
+                  style: GoogleFonts.poppins(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                    color: AppTheme.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                GestureDetector(
+                  onTap: () async {
+                    final url = Uri.parse(
+                      'https://play.google.com/store/apps/details?id=com.onetech.posapp',
+                    );
+                    if (await canLaunchUrl(url)) {
+                      await launchUrl(
+                        url,
+                        mode: LaunchMode.externalApplication,
+                      );
+                    }
+                  },
+                  child: Text(
+                    'Get it on Play Store',
+                    style: GoogleFonts.poppins(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: AppTheme.blue,
+                      decoration: TextDecoration.underline,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

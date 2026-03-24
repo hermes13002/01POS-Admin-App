@@ -7,10 +7,12 @@ class ApiEndpoints {
   static const String logout = '/auth/logout';
   static const String refreshToken = '/auth/refresh';
   static const String register = '/auth/register';
+  static const String onboarding = '/onboarding';
   static const String resetPassword = '/auth/rest-password';
 
   // Dashboard
   static const String dashboard = '/dashboard';
+  static const String adminDashboard = '/admin/dashboard';
   static const String businessPerformance = '/dashboard/performance';
 
   // Products
@@ -28,6 +30,10 @@ class ApiEndpoints {
   static const String deactivateSalesDownload =
       '/admin/orders/deactivate/'; // {id}
   static const String downloadSales = '/admin/orders/download';
+  static const String allSalesDashboard = '/admin/dashboard/all-sales';
+  static const String salesSummaryDashboard = '/admin/dashboard/sales-summary';
+  static const String adminStockLevelDashboard = '/admin/dashboard/low-stock';
+  static const String expenseStatisticsDashboard = '/admin/expenses/statistics';
 
   // Orders
   static const String orders = '/orders';

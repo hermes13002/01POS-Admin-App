@@ -337,7 +337,10 @@ class HomeScreen extends HookConsumerWidget {
                                       horizontal: 16,
                                     ),
                                   ),
-                                  onPressed: () {},
+                                  onPressed: () => Navigator.pushNamed(
+                                    context,
+                                    '/reports',
+                                  ),
                                   icon: const Icon(
                                     Icons.arrow_forward,
                                     size: 18,

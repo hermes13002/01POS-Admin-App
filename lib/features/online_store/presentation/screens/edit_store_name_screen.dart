@@ -5,6 +5,7 @@ import 'package:onepos_admin_app/core/theme/app_theme.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_app_bar.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_button.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_text_field.dart';
+import 'package:onepos_admin_app/shared/widgets/loading_widget.dart';
 import 'package:onepos_admin_app/core/utils/validators.dart';
 import 'package:onepos_admin_app/features/online_store/presentation/providers/profile_provider.dart';
 import 'package:onepos_admin_app/shared/widgets/app_snackbar.dart';
@@ -69,7 +70,7 @@ class EditStoreNameScreen extends HookConsumerWidget {
         ),
       ),
       body: profileAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const LoadingWidget(),
         error: (e, _) => Center(child: Text('Error: $e')),
         data: (profile) => SafeArea(
           child: Padding(
