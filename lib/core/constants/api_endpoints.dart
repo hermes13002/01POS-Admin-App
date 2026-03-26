@@ -105,6 +105,15 @@ class ApiEndpoints {
 
   // Bills
   static const String bills = '/bills';
+  static const String autoBills = '/v3/admin/auto-bills';
+  static const String storeAutoBill = '/v3/admin/auto-bills/store';
+  static const String updateAutoBill = '/v3/admin/auto-bills/update/';
+  static const String showAutoBill = '/v3/admin/auto-bills/show/';
+  static const String deleteAutoBill = '/v3/admin/auto-bills/delete/';
+  static const String billOptions = '/v3/admin/auto-bills/bill-option';
+  static const String activateAutoBill = '/v3/admin/auto-bills/activate/'; // {id}
+  static const String deactivateAutoBill =
+      '/v3/admin/auto-bills/deactivate/'; // {id}
 
   // Cashier
   static const String registerCashier = '/cashier/register';

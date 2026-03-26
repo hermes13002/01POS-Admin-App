@@ -28,8 +28,8 @@ class Validators {
   }
 
   /// Required field validation
-  static String? validateRequired(String? value, String fieldName) {
-    if (value == null || value.isEmpty) {
+  static String? validateRequired(dynamic value, String fieldName) {
+    if (value == null || (value is String && value.isEmpty)) {
       return '$fieldName is required';
     }
     return null;
@@ -62,7 +62,7 @@ class Validators {
   static String? validatePositiveNumber(String? value, String fieldName) {
     final numberValidation = validateNumber(value, fieldName);
     if (numberValidation != null) return numberValidation;
-    
+
     if (double.parse(value!) <= 0) {
       return '$fieldName must be greater than 0';
     }
@@ -70,7 +70,11 @@ class Validators {
   }
 
   /// Min length validation
-  static String? validateMinLength(String? value, int minLength, String fieldName) {
+  static String? validateMinLength(
+    String? value,
+    int minLength,
+    String fieldName,
+  ) {
     if (value == null || value.isEmpty) {
       return '$fieldName is required';
     }
@@ -81,7 +85,11 @@ class Validators {
   }
 
   /// Max length validation
-  static String? validateMaxLength(String? value, int maxLength, String fieldName) {
+  static String? validateMaxLength(
+    String? value,
+    int maxLength,
+    String fieldName,
+  ) {
     if (value != null && value.length > maxLength) {
       return '$fieldName must not exceed $maxLength characters';
     }

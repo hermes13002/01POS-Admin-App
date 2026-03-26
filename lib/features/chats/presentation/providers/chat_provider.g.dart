@@ -165,7 +165,7 @@ class _IndividualChatProviderElement
   int get receiverId => (origin as IndividualChatProvider).receiverId;
 }
 
-String _$chatContactsHash() => r'f5fd53a9284cd2e879b1873e756032f17145005b';
+String _$chatContactsHash() => r'0073b79884e6c3eb00ca8020fccfaca145f3b0be';
 
 /// See also [chatContacts].
 @ProviderFor(chatContacts)
@@ -200,7 +200,7 @@ final totalUnreadCountProvider = AutoDisposeProvider<int>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef TotalUnreadCountRef = AutoDisposeProviderRef<int>;
-String _$chatNotifierHash() => r'9035a890019c1efe14c8933b57cc8594d2c8d207';
+String _$chatNotifierHash() => r'059cbce8818a59e421bf71127768e03d19a44dbd';
 
 /// See also [ChatNotifier].
 @ProviderFor(ChatNotifier)

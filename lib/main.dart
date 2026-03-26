@@ -43,7 +43,6 @@ void main() async {
     }
   }
 
-  // Initialize reCAPTCHA v3
   await GRecaptchaV3.ready(
     '6LfOgo0sAAAAAADQv_G0IXOktWTeGNtRBqEcEQAW',
     showBadge: true,
@@ -54,7 +53,7 @@ void main() async {
 }
 
 Future<void> _scheduleDefaultInsights(LocalNotificationService service) async {
-  // Daily snapshot at 8:00 AM
+  // daily snapshot at 8AM
   await service.scheduleDailyNotification(
     id: 1,
     title: 'Daily Business Snapshot',
@@ -63,17 +62,17 @@ Future<void> _scheduleDefaultInsights(LocalNotificationService service) async {
     minute: 0,
   );
 
-  // Weekly recap at Mon 9:00 AM
+  // weekly recap at Mon 9AM
   await service.scheduleWeeklyNotification(
     id: 2,
     title: 'Weekly Recap',
     body: 'See how your week went.',
-    day: 1, // Monday
+    day: 1, // monday
     hour: 9,
     minute: 0,
   );
 
-  // End of day sales at 9:00 PM
+  // end of day sales at 9PM
   await service.scheduleDailyNotification(
     id: 3,
     title: 'End of Day Summary',

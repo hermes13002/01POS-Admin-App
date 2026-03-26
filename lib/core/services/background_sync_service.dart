@@ -40,7 +40,7 @@ void callbackDispatcher() {
               id: 100,
               title: 'Inventory Alert',
               body:
-                  'You might be running low on some items — check your stock. ($count items low)',
+                  'You might be running low on some items, check your stock. ($count item(s) low)',
             );
             await prefs.writeInt('last_low_stock_count', count);
           }

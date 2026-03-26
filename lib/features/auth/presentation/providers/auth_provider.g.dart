@@ -6,7 +6,7 @@ part of 'auth_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$authHash() => r'32ba56e5b2cf19b47a8ea33e18fc6f7c2d57b76f';
+String _$authHash() => r'270e2f864c8a5314c362dee0e050a34a50bff3f6';
 
 /// holds the current logged-in session
 ///

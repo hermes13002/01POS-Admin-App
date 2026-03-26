@@ -76,6 +76,8 @@ class LocalNotificationService {
           channelDescription: 'Notifications for business insights and reports',
           importance: Importance.max,
           priority: Priority.high,
+          sound: RawResourceAndroidNotificationSound('notification_sound'),
+          enableVibration: true
         );
     const NotificationDetails platformChannelSpecifics = NotificationDetails(
       android: androidPlatformChannelSpecifics,
@@ -110,6 +112,8 @@ class LocalNotificationService {
           channelDescription: 'Daily business insights and reports',
           importance: Importance.max,
           priority: Priority.high,
+          sound: RawResourceAndroidNotificationSound('notification_sound'),
+          enableVibration: true
         ),
       ),
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
@@ -138,6 +142,8 @@ class LocalNotificationService {
           channelDescription: 'Weekly business insights and reports',
           importance: Importance.max,
           priority: Priority.high,
+          sound: RawResourceAndroidNotificationSound('notification_sound'),
+          enableVibration: true
         ),
       ),
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,

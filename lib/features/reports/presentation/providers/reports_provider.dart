@@ -46,7 +46,7 @@ class Reports extends _$Reports {
   Future<void> _fetchTopSales() async {
     try {
       final result = await _salesRepo.getAllSalesDashboard();
-      final currentData = state.value ?? _getMockData();
+      final currentData = state;
 
       final updatedData = result.fold(
         (failure) => currentData.copyWith(
@@ -60,26 +60,22 @@ class Reports extends _$Reports {
         ),
       );
 
-      state = AsyncData(updatedData);
+      state = updatedData;
     } catch (e) {
-      final currentData = state.value ?? _getMockData();
-      state = AsyncData(
-        currentData.copyWith(
-          topSalesError: e.toString(),
-          isTopSalesLoading: false,
-        ),
+      final currentData = state;
+      state = currentData.copyWith(
+        topSalesError: e.toString(),
+        isTopSalesLoading: false,
       );
     }
   }
 
   /// Update sales summary filter
   Future<void> updateSalesSummaryFilter(String filter) async {
-    final currentData = state.value ?? _getMockData();
-    state = AsyncData(
-      currentData.copyWith(
-        salesSummaryFilter: filter,
-        isSalesSummaryLoading: true,
-      ),
+    final currentData = state;
+    state = currentData.copyWith(
+      salesSummaryFilter: filter,
+      isSalesSummaryLoading: true,
     );
     await _fetchSalesSummary();
   }
@@ -87,12 +83,12 @@ class Reports extends _$Reports {
   /// Fetch sales summary in background
   Future<void> _fetchSalesSummary() async {
     try {
-      final currentDataTemp = state.value ?? _getMockData();
+      final currentDataTemp = state;
       final filter = currentDataTemp.salesSummaryFilter;
       final result = await _salesRepo.getSalesSummaryDashboard(
         dateFilter: filter,
       );
-      final currentData = state.value ?? _getMockData();
+      final currentData = state;
 
       final updatedData = result.fold(
         (failure) => currentData.copyWith(
@@ -106,14 +102,12 @@ class Reports extends _$Reports {
         ),
       );
 
-      state = AsyncData(updatedData);
+      state = updatedData;
     } catch (e) {
-      final currentData = state.value ?? _getMockData();
-      state = AsyncData(
-        currentData.copyWith(
-          salesSummaryError: e.toString(),
-          isSalesSummaryLoading: false,
-        ),
+      final currentData = state;
+      state = currentData.copyWith(
+        salesSummaryError: e.toString(),
+        isSalesSummaryLoading: false,
       );
     }
   }
@@ -122,31 +116,25 @@ class Reports extends _$Reports {
   Future<void> _fetchLowStock() async {
     try {
       final result = await _productRepo.fetchLowStockProducts();
-      final currentData = state.value ?? _getMockData();
+      final currentData = state;
 
       if (result.success && result.data != null) {
-        state = AsyncData(
-          currentData.copyWith(
-            lowStockItems: result.data!,
-            clearLowStockError: true,
-            isLowStockLoading: false,
-          ),
+        state = currentData.copyWith(
+          lowStockItems: result.data!,
+          clearLowStockError: true,
+          isLowStockLoading: false,
         );
       } else {
-        state = AsyncData(
-          currentData.copyWith(
-            lowStockError: result.message ?? 'Failed to fetch low stock',
-            isLowStockLoading: false,
-          ),
+        state = currentData.copyWith(
+          lowStockError: result.message ?? 'Failed to fetch low stock',
+          isLowStockLoading: false,
         );
       }
     } catch (e) {
-      final currentData = state.value ?? _getMockData();
-      state = AsyncData(
-        currentData.copyWith(
-          lowStockError: e.toString(),
-          isLowStockLoading: false,
-        ),
+      final currentData = state;
+      state = currentData.copyWith(
+        lowStockError: e.toString(),
+        isLowStockLoading: false,
       );
     }
   }
@@ -155,7 +143,7 @@ class Reports extends _$Reports {
   Future<void> _fetchSalesOverview() async {
     try {
       final result = await _salesRepo.getSalesOverviewDashboard();
-      final currentData = state.value ?? _getMockData();
+      final currentData = state;
 
       final updatedData = result.fold(
         (failure) => currentData.copyWith(
@@ -169,30 +157,26 @@ class Reports extends _$Reports {
         ),
       );
 
-      state = AsyncData(updatedData);
+      state = updatedData;
     } catch (e) {
-      final currentData = state.value ?? _getMockData();
-      state = AsyncData(
-        currentData.copyWith(
-          salesOverviewError: e.toString(),
-          isSalesOverviewLoading: false,
-        ),
+      final currentData = state;
+      state = currentData.copyWith(
+        salesOverviewError: e.toString(),
+        isSalesOverviewLoading: false,
       );
     }
   }
 
   /// Refresh reports data
   Future<void> refreshReports() async {
-    final currentData = state.value ?? _getMockData();
-    state = AsyncData(
-      currentData.copyWith(
-        isTopSalesLoading: true,
-        isSalesSummaryLoading: true,
-        isLowStockLoading: true,
-        isSalesOverviewLoading: true,
-        isStockLevelLoading: true,
-        isExpensesLoading: true,
-      ),
+    final currentData = state;
+    state = currentData.copyWith(
+      isTopSalesLoading: true,
+      isSalesSummaryLoading: true,
+      isLowStockLoading: true,
+      isSalesOverviewLoading: true,
+      isStockLevelLoading: true,
+      isExpensesLoading: true,
     );
     await Future.wait([
       _fetchTopSales(),
@@ -209,7 +193,7 @@ class Reports extends _$Reports {
   Future<void> _fetchExpenses() async {
     try {
       final result = await _salesRepo.getExpenseStatistics();
-      final currentData = state.value ?? _getMockData();
+      final currentData = state;
 
       final updatedData = result.fold(
         (failure) => currentData.copyWith(
@@ -223,14 +207,12 @@ class Reports extends _$Reports {
         ),
       );
 
-      state = AsyncData(updatedData);
+      state = updatedData;
     } catch (e) {
-      final currentData = state.value ?? _getMockData();
-      state = AsyncData(
-        currentData.copyWith(
-          expensesError: e.toString(),
-          isExpensesLoading: false,
-        ),
+      final currentData = state;
+      state = currentData.copyWith(
+        expensesError: e.toString(),
+        isExpensesLoading: false,
       );
     }
   }
@@ -238,7 +220,7 @@ class Reports extends _$Reports {
   Future<void> _fetchStockLevel() async {
     try {
       final result = await _salesRepo.getStockLevelDashboard();
-      final currentData = state.value ?? _getMockData();
+      final currentData = state;
 
       final updatedData = result.fold(
         (failure) => currentData.copyWith(
@@ -252,14 +234,12 @@ class Reports extends _$Reports {
         ),
       );
 
-      state = AsyncData(updatedData);
+      state = updatedData;
     } catch (e) {
-      final currentData = state.value ?? _getMockData();
-      state = AsyncData(
-        currentData.copyWith(
-          stockLevelError: e.toString(),
-          isStockLevelLoading: false,
-        ),
+      final currentData = state;
+      state = currentData.copyWith(
+        stockLevelError: e.toString(),
+        isStockLevelLoading: false,
       );
     }
   }
@@ -268,7 +248,7 @@ class Reports extends _$Reports {
   Future<void> _fetchStoreHealth() async {
     try {
       final result = await _salesRepo.getSales(page: 1);
-      final currentData = state.value ?? _getMockData();
+      final currentData = state;
 
       final updatedData = result.fold(
         (failure) => currentData.copyWith(
@@ -314,7 +294,7 @@ class Reports extends _$Reports {
         },
       );
 
-      state = AsyncData(updatedData);
+      state = updatedData;
     } catch (e) {
       // In case of error, just keep the current health or set to unknown
       dev.log('Error calculating store health: $e');
@@ -325,14 +305,14 @@ class Reports extends _$Reports {
   Future<void> _fetchPerformanceStats() async {
     try {
       final result = await _salesRepo.getPerformanceStats();
-      final currentData = state.value ?? _getMockData();
+      final currentData = state;
 
       final updatedData = result.fold(
         (failure) => currentData, // Keep current on failure
         (stats) => currentData.copyWith(performanceStats: stats),
       );
 
-      state = AsyncData(updatedData);
+      state = updatedData;
     } catch (e) {
       dev.log('Error fetching performance stats: $e');
     }
@@ -391,5 +371,28 @@ class Reports extends _$Reports {
       ],
       topSales: [], // actual data will come from API
     );
+  }
+
+  /// Refresh all dashboard data
+  Future<void> refresh() async {
+    state = _getMockData().copyWith(
+      isTopSalesLoading: true,
+      isSalesSummaryLoading: true,
+      isLowStockLoading: true,
+      isSalesOverviewLoading: true,
+      isStockLevelLoading: true,
+      isExpensesLoading: true,
+    );
+
+    await Future.wait([
+      _fetchTopSales(),
+      _fetchSalesSummary(),
+      _fetchLowStock(),
+      _fetchSalesOverview(),
+      _fetchStockLevel(),
+      _fetchExpenses(),
+      _fetchStoreHealth(),
+      _fetchPerformanceStats(),
+    ]);
   }
 }

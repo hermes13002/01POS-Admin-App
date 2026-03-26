@@ -19,30 +19,11 @@ class ReportsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final reportsAsync = ref.watch(reportsProvider);
+    final reportsData = ref.watch(reportsProvider);
 
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
-      body: SafeArea(
-        child: reportsAsync.when(
-          data: (data) => _ReportsContent(data: data),
-          loading: () => const Center(child: DotsLoader()),
-          error: (error, stack) => Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text('Failed to load reports'),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () =>
-                      ref.read(reportsProvider.notifier).refreshReports(),
-                  child: const Text('Retry'),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
+      body: SafeArea(child: _ReportsContent(data: reportsData)),
     );
   }
 }

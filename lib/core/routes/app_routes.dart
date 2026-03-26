@@ -18,6 +18,7 @@ import 'package:onepos_admin_app/features/expenses/presentation/screens/expenses
 import 'package:onepos_admin_app/features/expenses/presentation/screens/add_expense_screen.dart';
 import 'package:onepos_admin_app/features/bill/presentation/screens/bills_screen.dart';
 import 'package:onepos_admin_app/features/bill/presentation/screens/add_bill_screen.dart';
+import 'package:onepos_admin_app/features/bill/data/models/auto_bill_model.dart';
 import 'package:onepos_admin_app/features/discount/presentation/screens/discount_screen.dart';
 import 'package:onepos_admin_app/features/discount/presentation/screens/add_discount_screen.dart';
 import 'package:onepos_admin_app/features/discount/data/models/discount_model.dart';
@@ -116,7 +117,10 @@ class AppRoutes {
     expenses: (context) => const ExpensesScreen(),
     addExpense: (context) => const AddExpenseScreen(),
     bills: (context) => const BillsScreen(),
-    addBill: (context) => const AddBillScreen(),
+    addBill: (context) {
+      final args = ModalRoute.of(context)!.settings.arguments as AutoBillModel?;
+      return AddBillScreen(bill: args);
+    },
     discount: (context) => const DiscountScreen(),
     addDiscount: (context) {
       final args = ModalRoute.of(context)!.settings.arguments as DiscountModel?;

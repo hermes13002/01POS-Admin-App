@@ -3,26 +3,50 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:onepos_admin_app/core/theme/app_theme.dart';
+import 'package:onepos_admin_app/features/bill/data/models/auto_bill_model.dart';
+import 'package:onepos_admin_app/features/bill/presentation/providers/bill_providers.dart';
 import 'package:onepos_admin_app/shared/widgets/app_dropdown.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_app_bar.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_button.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_text_field.dart';
 import 'package:onepos_admin_app/core/utils/validators.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_switch.dart';
+import 'package:onepos_admin_app/core/utils/extensions.dart';
 
-/// Screen for adding a new bill
+/// Screen for adding or editing a bill
 class AddBillScreen extends HookConsumerWidget {
-  const AddBillScreen({super.key});
+  final AutoBillModel? bill;
+  const AddBillScreen({super.key, this.bill});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final isEditing = bill != null;
     final formKey = useMemoized(() => GlobalKey<FormState>());
-    final nameController = useTextEditingController();
-    final percentageController = useTextEditingController();
-    final descController = useTextEditingController();
+    final nameController = useTextEditingController(text: bill?.name);
+    final percentageController = useTextEditingController(
+      text: bill?.percentage,
+    );
+    final descController = useTextEditingController(text: bill?.description);
 
-    final selectedBillType = useState<String?>('Electricity');
-    final isActive = useState<bool>(true);
+    final optionsAsync = ref.watch(billOptionsProvider);
+    final selectedOption = useState<BillOptionModel?>(null);
+    final isActive = useState<bool>(bill?.isActive == 1);
+    final isLoading = useState<bool>(false);
+
+    // Initial value for dropdown
+    useEffect(() {
+      if (isEditing && optionsAsync.hasValue) {
+        final options = optionsAsync.value!;
+        final billOptionId = bill?.billOptionId;
+        if (billOptionId != null) {
+          selectedOption.value = options.firstWhere(
+            (opt) => opt.id.toString() == billOptionId,
+            orElse: () => options.first,
+          );
+        }
+      }
+      return null;
+    }, [optionsAsync.hasValue]);
 
     return Scaffold(
       appBar: CustomAppBar(
@@ -61,33 +85,28 @@ class AddBillScreen extends HookConsumerWidget {
                 ),
                 const SizedBox(height: AppTheme.spacingMedium),
 
-                AppDropdown<String>(
-                  hint: 'Bill type',
-                  value: selectedBillType.value,
-                  items: const [
-                    DropdownMenuItem(
-                      value: 'Electricity',
-                      child: Text('Electricity'),
-                    ),
-                    DropdownMenuItem(value: 'Water', child: Text('Water')),
-                    DropdownMenuItem(
-                      value: 'Waste Management',
-                      child: Text('Waste Management'),
-                    ),
-                    DropdownMenuItem(
-                      value: 'Internet',
-                      child: Text('Internet'),
-                    ),
-                  ],
-                  onChanged: (val) {
-                    if (val != null) selectedBillType.value = val;
-                  },
-                  validator: (val) =>
-                      Validators.validateRequired(val, 'Bill type'),
+                optionsAsync.when(
+                  data: (options) => AppDropdown<BillOptionModel>(
+                    hint: 'Bill type',
+                    value: selectedOption.value,
+                    items: options.map((opt) {
+                      return DropdownMenuItem(
+                        value: opt,
+                        child: Text(opt.name),
+                      );
+                    }).toList(),
+                    onChanged: (val) {
+                      if (val != null) selectedOption.value = val;
+                    },
+                    validator: (val) =>
+                        Validators.validateRequired(val, 'Bill type'),
+                  ),
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
+                  error: (e, s) => Text('Error loading options: $e'),
                 ),
                 const SizedBox(height: AppTheme.spacingMedium),
 
-                // Active Switch Container
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: AppTheme.spacingMedium,
@@ -112,7 +131,7 @@ class AddBillScreen extends HookConsumerWidget {
                       ),
                       CustomSwitch(
                         value: isActive.value,
-                        activeColor: const Color(0xFF4CAF50), // green
+                        activeColor: const Color(0xFF4CAF50),
                         onChanged: (val) {
                           isActive.value = val;
                         },
@@ -131,11 +150,49 @@ class AddBillScreen extends HookConsumerWidget {
                 const Spacer(),
 
                 CustomButton(
-                  text: 'Add Bill',
-                  onPressed: () {
-                    if (formKey.currentState!.validate()) {
-                      // handle save logic
-                      Navigator.pop(context);
+                  text: isEditing ? 'Update Bill' : 'Add Bill',
+                  isLoading: isLoading.value,
+                  onPressed: () async {
+                    if (formKey.currentState!.validate() && !isLoading.value) {
+                      isLoading.value = true;
+
+                      final data = {
+                        'bill_option_id': selectedOption.value?.id.toString(),
+                        'name': nameController.text,
+                        'short_description': descController.text,
+                        'percentage': percentageController.text,
+                        'is_active': isActive.value ? 1 : 0,
+                      };
+
+                      final response;
+                      if (isEditing) {
+                        response = await ref
+                            .read(billsProvider.notifier)
+                            .updateBillItem(
+                              int.parse(bill!.id.toString()),
+                              data,
+                            );
+                      } else {
+                        response = await ref
+                            .read(billsProvider.notifier)
+                            .addBillItem(data);
+                      }
+
+                      isLoading.value = false;
+
+                      if (response.success) {
+                        context.showSnackBar(
+                          isEditing
+                              ? 'Bill updated successfully'
+                              : 'Bill added successfully',
+                        );
+                        Navigator.pop(context);
+                      } else {
+                        context.showSnackBar(
+                          response.message ?? 'An error occurred',
+                          isError: true,
+                        );
+                      }
                     }
                   },
                   backgroundColor: Colors.black,
