@@ -347,6 +347,12 @@ class _ProfileContent extends ConsumerWidget {
           ),
           const SizedBox(height: AppTheme.spacingMedium),
           _ProfileListItem(
+            title: 'Notification Settings',
+            onTap: () =>
+                Navigator.pushNamed(context, AppRoutes.notificationSettings),
+          ),
+          const SizedBox(height: AppTheme.spacingMedium),
+          _ProfileListItem(
             title: 'Sales Download Settings',
             onTap: () => Navigator.pushNamed(context, AppRoutes.salesSettings),
           ),

@@ -84,4 +84,10 @@ class SharedPrefsService {
   bool containsKey(String key) {
     return _prefs?.containsKey(key) ?? false;
   }
+
+  /// Helper for first login state
+  bool get isFirstLogin => readBool('isFirstLogin') ?? true;
+
+  /// Helper to record that first login popup was handled
+  Future<bool> setFirstLoginCompleted() => writeBool('isFirstLogin', false);
 }

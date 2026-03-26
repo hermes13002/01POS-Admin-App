@@ -11,6 +11,7 @@ import 'package:onepos_admin_app/shared/widgets/custom_button_with_icon.dart';
 import 'package:onepos_admin_app/shared/widgets/loading_widget.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_search_bar.dart';
 import 'package:onepos_admin_app/features/expenses/data/models/expense_model.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:onepos_admin_app/features/expenses/presentation/providers/expense_metadata_provider.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_text_field.dart';
 import 'package:onepos_admin_app/shared/widgets/app_snackbar.dart';
@@ -92,228 +93,261 @@ class ExpensesScreen extends HookConsumerWidget {
                   return RefreshIndicator(
                     onRefresh: () =>
                         ref.read(expensesProvider.notifier).refresh(),
-                    child: ListView.separated(
-                      controller: scrollController,
-                      padding: const EdgeInsets.all(
-                        AppTheme.spacingMedium,
-                      ).copyWith(bottom: 80),
-                      itemCount:
-                          state.expenses.length + (state.isLoadingMore ? 1 : 0),
-                      separatorBuilder: (context, index) =>
-                          const SizedBox(height: AppTheme.spacingMedium),
-                      itemBuilder: (context, index) {
-                        if (index >= state.expenses.length) {
-                          return const Center(
-                            child: Padding(
-                              padding: EdgeInsets.all(AppTheme.spacingSmall),
-                              child: CircularProgressIndicator(),
-                            ),
-                          );
-                        }
-
-                        final expense = state.expenses[index];
-                        final isExpanded = expandedIndex.value == index;
-
-                        return GestureDetector(
-                          onTap: () {
-                            expandedIndex.value = isExpanded ? null : index;
-                          },
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 300),
-                            padding: const EdgeInsets.all(
-                              AppTheme.spacingMedium,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(
-                                AppTheme.borderRadiusMedium,
+                    child: AnimationLimiter(
+                      child: ListView.separated(
+                        controller: scrollController,
+                        padding: const EdgeInsets.all(
+                          AppTheme.spacingMedium,
+                        ).copyWith(bottom: 80),
+                        itemCount:
+                            state.expenses.length +
+                            (state.isLoadingMore ? 1 : 0),
+                        separatorBuilder: (context, index) =>
+                            const SizedBox(height: AppTheme.spacingMedium),
+                        itemBuilder: (context, index) {
+                          if (index >= state.expenses.length) {
+                            return const Center(
+                              child: Padding(
+                                padding: EdgeInsets.all(AppTheme.spacingSmall),
+                                child: CircularProgressIndicator(),
                               ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.04),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ],
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  expense.category,
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.w500,
-                                    color: expense.categoryColor,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Expanded(
-                                      child: Text(
-                                        expense.name,
-                                        style: GoogleFonts.poppins(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w500,
-                                          color: AppTheme.textPrimary,
-                                        ),
-                                      ),
+                            );
+                          }
+
+                          final expense = state.expenses[index];
+                          final isExpanded = expandedIndex.value == index;
+
+                          return AnimationConfiguration.staggeredList(
+                            position: index,
+                            duration: const Duration(milliseconds: 375),
+                            child: SlideAnimation(
+                              verticalOffset: 50.0,
+                              child: FadeInAnimation(
+                                child: GestureDetector(
+                                  onTap: () {
+                                    expandedIndex.value = isExpanded
+                                        ? null
+                                        : index;
+                                  },
+                                  child: AnimatedContainer(
+                                    duration: const Duration(milliseconds: 300),
+                                    padding: const EdgeInsets.all(
+                                      AppTheme.spacingMedium,
                                     ),
-                                    Row(
-                                      children: [
-                                        Text(
-                                          AmountFormatter.formatCurrency(
-                                            expense.amount,
-                                            showDecimals: false,
-                                          ),
-                                          style: GoogleFonts.plusJakartaSans(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w700,
-                                            color: AppTheme.textPrimary,
-                                          ),
-                                        ),
-                                        const SizedBox(width: 8),
-                                        Icon(
-                                          isExpanded
-                                              ? Icons.keyboard_arrow_up
-                                              : Icons.keyboard_arrow_down,
-                                          color: AppTheme.textSecondary,
-                                          size: 20,
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(
+                                        AppTheme.borderRadiusMedium,
+                                      ),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withOpacity(0.04),
+                                          blurRadius: 8,
+                                          offset: const Offset(0, 2),
                                         ),
                                       ],
                                     ),
-                                  ],
-                                ),
-                                if (isExpanded) ...[
-                                  const SizedBox(height: 16),
-                                  const Divider(),
-                                  const SizedBox(height: 16),
-                                  _DetailRow(
-                                    label: 'Type',
-                                    value: expense.type,
-                                  ),
-                                  const SizedBox(height: 12),
-                                  _DetailRow(
-                                    label: 'Category',
-                                    value: expense.category,
-                                  ),
-                                  if (expense.description != null &&
-                                      expense.description!.isNotEmpty) ...[
-                                    const SizedBox(height: 12),
-                                    _DetailRow(
-                                      label: 'Description',
-                                      value: expense.description!,
-                                    ),
-                                  ],
-                                  const SizedBox(height: 20),
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child: CustomButtonWithIcon(
-                                          text: 'Edit',
-                                          icon: Icons.edit_outlined,
-                                          onPressed: () =>
-                                              _showEditExpenseDialog(
-                                                context,
-                                                ref,
-                                                expense,
-                                              ),
-                                          isOutlined: true,
-                                          textColor: AppTheme.blue,
-                                          iconColor: AppTheme.blue,
-                                          height: 44,
-                                          borderColor: AppTheme.blue,
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          expense.category,
+                                          style: GoogleFonts.poppins(
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.w500,
+                                            color: expense.categoryColor,
+                                          ),
                                         ),
-                                      ),
-                                      const SizedBox(width: 12),
-                                      Expanded(
-                                        child: CustomButtonWithIcon(
-                                          text: 'Delete',
-                                          icon: Icons.delete_outline,
-                                          onPressed: () {
-                                            showDialog(
-                                              context: context,
-                                              builder: (context) => AlertDialog(
-                                                title: Text(
-                                                  'Delete Expense',
-                                                  style: GoogleFonts.poppins(
-                                                    fontWeight: FontWeight.bold,
+                                        const SizedBox(height: 4),
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Expanded(
+                                              child: Text(
+                                                expense.name,
+                                                style: GoogleFonts.poppins(
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w500,
+                                                  color: AppTheme.textPrimary,
+                                                ),
+                                              ),
+                                            ),
+                                            Row(
+                                              children: [
+                                                Text(
+                                                  AmountFormatter.formatCurrency(
+                                                    expense.amount,
+                                                    showDecimals: false,
                                                   ),
+                                                  style:
+                                                      GoogleFonts.plusJakartaSans(
+                                                        fontSize: 14,
+                                                        fontWeight:
+                                                            FontWeight.w700,
+                                                        color: AppTheme
+                                                            .textPrimary,
+                                                      ),
                                                 ),
-                                                content: Text(
-                                                  'Are you sure you want to delete "${expense.name}"? This action cannot be undone.',
-                                                  style: GoogleFonts.poppins(),
+                                                const SizedBox(width: 8),
+                                                Icon(
+                                                  isExpanded
+                                                      ? Icons.keyboard_arrow_up
+                                                      : Icons
+                                                            .keyboard_arrow_down,
+                                                  color: AppTheme.textSecondary,
+                                                  size: 20,
                                                 ),
-                                                actions: [
-                                                  TextButton(
-                                                    onPressed: () =>
-                                                        Navigator.pop(context),
-                                                    child: Text(
-                                                      'Cancel',
-                                                      style:
-                                                          GoogleFonts.poppins(
-                                                            color: Colors.grey,
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                        if (isExpanded) ...[
+                                          const SizedBox(height: 16),
+                                          const Divider(),
+                                          const SizedBox(height: 16),
+                                          _DetailRow(
+                                            label: 'Type',
+                                            value: expense.type,
+                                          ),
+                                          const SizedBox(height: 12),
+                                          _DetailRow(
+                                            label: 'Category',
+                                            value: expense.category,
+                                          ),
+                                          if (expense.description != null &&
+                                              expense
+                                                  .description!
+                                                  .isNotEmpty) ...[
+                                            const SizedBox(height: 12),
+                                            _DetailRow(
+                                              label: 'Description',
+                                              value: expense.description!,
+                                            ),
+                                          ],
+                                          const SizedBox(height: 20),
+                                          Row(
+                                            children: [
+                                              Expanded(
+                                                child: CustomButtonWithIcon(
+                                                  text: 'Edit',
+                                                  icon: Icons.edit_outlined,
+                                                  onPressed: () =>
+                                                      _showEditExpenseDialog(
+                                                        context,
+                                                        ref,
+                                                        expense,
+                                                      ),
+                                                  isOutlined: true,
+                                                  textColor: AppTheme.blue,
+                                                  iconColor: AppTheme.blue,
+                                                  height: 44,
+                                                  borderColor: AppTheme.blue,
+                                                ),
+                                              ),
+                                              const SizedBox(width: 12),
+                                              Expanded(
+                                                child: CustomButtonWithIcon(
+                                                  text: 'Delete',
+                                                  icon: Icons.delete_outline,
+                                                  onPressed: () {
+                                                    showDialog(
+                                                      context: context,
+                                                      builder: (context) => AlertDialog(
+                                                        title: Text(
+                                                          'Delete Expense',
+                                                          style:
+                                                              GoogleFonts.poppins(
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
+                                                              ),
+                                                        ),
+                                                        content: Text(
+                                                          'Are you sure you want to delete "${expense.name}"? This action cannot be undone.',
+                                                          style:
+                                                              GoogleFonts.poppins(),
+                                                        ),
+                                                        actions: [
+                                                          TextButton(
+                                                            onPressed: () =>
+                                                                Navigator.pop(
+                                                                  context,
+                                                                ),
+                                                            child: Text(
+                                                              'Cancel',
+                                                              style:
+                                                                  GoogleFonts.poppins(
+                                                                    color: Colors
+                                                                        .grey,
+                                                                  ),
+                                                            ),
                                                           ),
-                                                    ),
-                                                  ),
-                                                  TextButton(
-                                                    onPressed: () async {
-                                                      Navigator.pop(context);
-                                                      final error = await ref
-                                                          .read(
-                                                            expensesProvider
-                                                                .notifier,
-                                                          )
-                                                          .deleteExpense(
-                                                            expense.id,
-                                                          );
+                                                          TextButton(
+                                                            onPressed: () async {
+                                                              Navigator.pop(
+                                                                context,
+                                                              );
+                                                              final error = await ref
+                                                                  .read(
+                                                                    expensesProvider
+                                                                        .notifier,
+                                                                  )
+                                                                  .deleteExpense(
+                                                                    expense.id,
+                                                                  );
 
-                                                      if (context.mounted) {
-                                                        if (error != null) {
-                                                          AppSnackbar.showError(
-                                                            context,
-                                                            error,
-                                                          );
-                                                        } else {
-                                                          AppSnackbar.showSuccess(
-                                                            context,
-                                                            'Expense deleted successfully',
-                                                          );
-                                                        }
-                                                      }
-                                                    },
-                                                    child: Text(
-                                                      'Delete',
-                                                      style:
-                                                          GoogleFonts.poppins(
-                                                            color: Colors.red,
-                                                            fontWeight:
-                                                                FontWeight.bold,
+                                                              if (context
+                                                                  .mounted) {
+                                                                if (error !=
+                                                                    null) {
+                                                                  AppSnackbar.showError(
+                                                                    context,
+                                                                    error,
+                                                                  );
+                                                                } else {
+                                                                  AppSnackbar.showSuccess(
+                                                                    context,
+                                                                    'Expense deleted successfully',
+                                                                  );
+                                                                }
+                                                              }
+                                                            },
+                                                            child: Text(
+                                                              'Delete',
+                                                              style: GoogleFonts.poppins(
+                                                                color:
+                                                                    Colors.red,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
+                                                              ),
+                                                            ),
                                                           ),
-                                                    ),
-                                                  ),
-                                                ],
+                                                        ],
+                                                      ),
+                                                    );
+                                                  },
+                                                  isOutlined: true,
+                                                  textColor: Colors.red,
+                                                  iconColor: Colors.red,
+                                                  height: 44,
+                                                  borderColor: Colors.red,
+                                                ),
                                               ),
-                                            );
-                                          },
-                                          isOutlined: true,
-                                          textColor: Colors.red,
-                                          iconColor: Colors.red,
-                                          height: 44,
-                                          borderColor: Colors.red,
-                                        ),
-                                      ),
-                                    ],
+                                            ],
+                                          ),
+                                        ],
+                                      ],
+                                    ),
                                   ),
-                                ],
-                              ],
+                                ),
+                              ),
                             ),
-                          ),
-                        );
-                      },
+                          );
+                        },
+                      ),
                     ),
                   );
                 },

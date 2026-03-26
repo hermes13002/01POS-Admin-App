@@ -1,3 +1,5 @@
+import 'dart:developer' as dev;
+import 'dart:math';
 import 'package:onepos_admin_app/core/network/dio_client.dart';
 import 'package:onepos_admin_app/features/products/domain/repositories/product_repository.dart';
 import 'package:onepos_admin_app/features/products/presentation/providers/products_provider.dart';
@@ -27,6 +29,8 @@ class Reports extends _$Reports {
       _fetchSalesOverview();
       _fetchStockLevel();
       _fetchExpenses();
+      _fetchStoreHealth();
+      _fetchPerformanceStats();
     });
     return _getMockData().copyWith(
       isTopSalesLoading: true,
@@ -197,6 +201,8 @@ class Reports extends _$Reports {
       _fetchSalesOverview(),
       _fetchStockLevel(),
       _fetchExpenses(),
+      _fetchStoreHealth(),
+      _fetchPerformanceStats(),
     ]);
   }
 
@@ -255,6 +261,80 @@ class Reports extends _$Reports {
           isStockLevelLoading: false,
         ),
       );
+    }
+  }
+
+  /// Fetch store health based on last transaction date
+  Future<void> _fetchStoreHealth() async {
+    try {
+      final result = await _salesRepo.getSales(page: 1);
+      final currentData = state.value ?? _getMockData();
+
+      final updatedData = result.fold(
+        (failure) => currentData.copyWith(
+          storeHealth: const StoreHealthData(score: 0, status: 'No Sales'),
+        ),
+        (paginatedResponse) {
+          if (paginatedResponse.sales.isEmpty) {
+            return currentData.copyWith(
+              storeHealth: const StoreHealthData(score: 0, status: 'No Sales'),
+            );
+          }
+
+          // Get the most recent sale
+          final lastSale = paginatedResponse.sales.first;
+          final lastSaleDate = lastSale.date;
+          final now = DateTime.now();
+
+          // d = days since last transaction
+          final d = now.difference(lastSaleDate).inDays.toDouble();
+
+          // k = 0.18
+          const k = 0.18;
+
+          // A = 100 * e^(-k * d)
+          final score = (100 * exp(-k * d)).round();
+
+          String status;
+          if (score >= 80) {
+            status = 'Excellent';
+          } else if (score >= 60) {
+            status = 'Good';
+          } else if (score >= 40) {
+            status = 'Average';
+          } else if (score >= 20) {
+            status = 'Poor';
+          } else {
+            status = 'Inactive';
+          }
+
+          return currentData.copyWith(
+            storeHealth: StoreHealthData(score: score, status: status),
+          );
+        },
+      );
+
+      state = AsyncData(updatedData);
+    } catch (e) {
+      // In case of error, just keep the current health or set to unknown
+      dev.log('Error calculating store health: $e');
+    }
+  }
+
+  /// Fetch performance stats for dashboard
+  Future<void> _fetchPerformanceStats() async {
+    try {
+      final result = await _salesRepo.getPerformanceStats();
+      final currentData = state.value ?? _getMockData();
+
+      final updatedData = result.fold(
+        (failure) => currentData, // Keep current on failure
+        (stats) => currentData.copyWith(performanceStats: stats),
+      );
+
+      state = AsyncData(updatedData);
+    } catch (e) {
+      dev.log('Error fetching performance stats: $e');
     }
   }
 

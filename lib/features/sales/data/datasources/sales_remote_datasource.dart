@@ -3,6 +3,7 @@ import 'package:onepos_admin_app/core/errors/exceptions.dart';
 import 'package:onepos_admin_app/core/network/dio_client.dart';
 import 'package:onepos_admin_app/features/sales/data/models/sale_model.dart';
 import 'package:onepos_admin_app/features/reports/data/models/reports_model.dart';
+import 'package:onepos_admin_app/features/reports/data/models/top_selling_model.dart';
 
 abstract class SalesRemoteDatasource {
   /// fetches sales list for a page
@@ -20,8 +21,8 @@ abstract class SalesRemoteDatasource {
     required String to,
   });
 
-  /// fetch all sales for dashboard (top sales section)
-  Future<List<SaleModel>> getAllSalesDashboard();
+  /// fetch top selling products for dashboard
+  Future<List<TopSellingProduct>> getAllSalesDashboard();
 
   /// fetch sales summary for dashboard
   Future<List<MonthlySalesData>> getSalesSummaryDashboard({
@@ -38,6 +39,9 @@ abstract class SalesRemoteDatasource {
 
   /// fetch expense statistics for dashboard
   Future<ExpenseStatisticsData> getExpenseStatistics();
+
+  /// fetch performance stats for dashboard
+  Future<PerformanceStats> getPerformanceStats();
 }
 
 class SalesRemoteDatasourceImpl implements SalesRemoteDatasource {
@@ -121,19 +125,30 @@ class SalesRemoteDatasourceImpl implements SalesRemoteDatasource {
   }
 
   @override
-  Future<List<SaleModel>> getAllSalesDashboard() async {
-    final response = await _client.get(ApiEndpoints.allSalesDashboard);
+  Future<List<TopSellingProduct>> getAllSalesDashboard() async {
+    final response = await _client.get(ApiEndpoints.topSelling);
     final responseBody = _asMap(response.data);
 
-    if (_isError(responseBody['error'])) {
+    // The API erroneously returns error: true even on success
+    // there is a bug in the API that says
+    final message = responseBody['message']?.toString() ?? '';
+    final isSuccessMessage = message.contains('found successfully');
+
+    if (_isError(responseBody['error']) && !isSuccessMessage) {
       throw ServerException(
-        message: responseBody['message'] ?? 'failed to fetch dashboard sales',
+        message:
+            responseBody['message'] ?? 'failed to fetch top selling products',
       );
     }
 
     final data = responseBody['data'];
-    if (data is List) {
-      return data.map((item) => SaleModel.fromJson(_asMap(item))).toList();
+    if (data is Map<String, dynamic>) {
+      final products = data['products'];
+      if (products is List) {
+        return products
+            .map((item) => TopSellingProduct.fromJson(_asMap(item)))
+            .toList();
+      }
     }
 
     return [];
@@ -236,5 +251,24 @@ class SalesRemoteDatasourceImpl implements SalesRemoteDatasource {
     }
 
     throw ServerException(message: 'invalid expense statistics response');
+  }
+
+  @override
+  Future<PerformanceStats> getPerformanceStats() async {
+    final response = await _client.get(ApiEndpoints.performanceStats);
+    final responseBody = _asMap(response.data);
+
+    if (_isError(responseBody['error'])) {
+      throw ServerException(
+        message: responseBody['message'] ?? 'failed to fetch performance stats',
+      );
+    }
+
+    final data = responseBody['data'];
+    if (data is Map<String, dynamic>) {
+      return PerformanceStats.fromJson(data);
+    }
+
+    throw ServerException(message: 'invalid performance stats response');
   }
 }

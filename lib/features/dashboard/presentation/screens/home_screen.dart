@@ -13,6 +13,8 @@ import 'package:onepos_admin_app/features/notifications/presentation/providers/n
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:onepos_admin_app/presentation/providers/quick_actions_provider.dart';
 import 'package:onepos_admin_app/features/chats/presentation/providers/chat_provider.dart';
+import 'package:onepos_admin_app/features/reports/presentation/providers/reports_provider.dart';
+import 'package:onepos_admin_app/core/utils/amount_formatter.dart';
 import 'package:onepos_admin_app/shared/widgets/app_snackbar.dart';
 
 const List<String> _backgroundImages = [
@@ -30,9 +32,10 @@ class HomeScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final quickActions = ref.watch(quickActionsProvider);
-    final selectedPeriod = useState<String>('This week');
+    final selectedPeriod = useState<String>('Today');
     final bgIndex = useState(0);
     final profileAsync = ref.watch(userProfileProvider);
+    final reportsAsync = ref.watch(reportsProvider);
 
     // cycle background images every 5 seconds
     useEffect(() {
@@ -246,13 +249,8 @@ class HomeScreen extends HookConsumerWidget {
                               SingleChildScrollView(
                                 scrollDirection: Axis.horizontal,
                                 child: Row(
-                                  children:
-                                      [
-                                        'Today',
-                                        'This week',
-                                        'This month',
-                                        'This year',
-                                      ].map((period) {
+                                  children: ['Today', 'Week', 'Month', 'Year']
+                                      .map((period) {
                                         final isSelected =
                                             selectedPeriod.value == period;
                                         return Padding(
@@ -268,7 +266,8 @@ class HomeScreen extends HookConsumerWidget {
                                             ),
                                           ),
                                         );
-                                      }).toList(),
+                                      })
+                                      .toList(),
                                 ),
                               ),
                               const SizedBox(height: 20),
@@ -282,41 +281,124 @@ class HomeScreen extends HookConsumerWidget {
                                 ),
                               ),
                               const SizedBox(height: 8),
-                              Text(
-                                'So far this week, your business has made',
-                                style: GoogleFonts.poppins(
-                                  color: Colors.white.withOpacity(0.9),
-                                  fontWeight: FontWeight.w400,
-                                  fontSize: 13,
-                                ),
-                              ),
-                              const SizedBox(height: 6),
-                              Text(
-                                '₦345,000',
-                                style: GoogleFonts.plusJakartaSans(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 30,
-                                ),
-                              ),
-                              const SizedBox(height: 6),
-                              Row(
-                                children: [
-                                  const Icon(
-                                    Icons.info_outline,
-                                    color: Colors.white,
-                                    size: 14,
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    'That\'s the same as last week',
-                                    style: GoogleFonts.poppins(
-                                      color: Colors.white.withOpacity(0.85),
-                                      fontSize: 12,
-                                      fontStyle: FontStyle.italic,
+                              reportsAsync.when(
+                                data: (data) {
+                                  final stats = data.performanceStats;
+                                  if (stats == null) {
+                                    return const SizedBox(height: 80);
+                                  }
+
+                                  final period = selectedPeriod.value;
+                                  String periodLabel = '';
+                                  String comparisonLabel = '';
+                                  double current = 0;
+                                  double previous = 0;
+
+                                  if (period == 'Today') {
+                                    periodLabel = 'today';
+                                    comparisonLabel = 'yesterday';
+                                    current = stats.today.current;
+                                    previous = stats.today.previous;
+                                  } else if (period == 'Week') {
+                                    periodLabel = 'this week';
+                                    comparisonLabel = 'last week';
+                                    current = stats.week.current;
+                                    previous = stats.week.previous;
+                                  } else if (period == 'Month') {
+                                    periodLabel = 'this month';
+                                    comparisonLabel = 'last month';
+                                    current = stats.month.current;
+                                    previous = stats.month.previous;
+                                  } else {
+                                    periodLabel = 'this year';
+                                    comparisonLabel = 'last year';
+                                    current = stats.year.current;
+                                    previous = stats.year.previous;
+                                  }
+
+                                  final diff = current - previous;
+                                  final percentage = previous != 0
+                                      ? (diff / previous.abs() * 100)
+                                      : (current > 0 ? 100.0 : 0.0);
+
+                                  String trendText = '';
+                                  if (diff == 0) {
+                                    trendText =
+                                        'That\'s the same as $comparisonLabel';
+                                  } else if (diff > 0) {
+                                    trendText =
+                                        '${percentage.toStringAsFixed(1)}% more than $comparisonLabel';
+                                  } else {
+                                    trendText =
+                                        '${percentage.abs().toStringAsFixed(1)}% less than $comparisonLabel';
+                                  }
+
+                                  return Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'So far $periodLabel, your business has made',
+                                        style: GoogleFonts.poppins(
+                                          color: Colors.white.withOpacity(0.9),
+                                          fontWeight: FontWeight.w400,
+                                          fontSize: 13,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 6),
+                                      Text(
+                                        AmountFormatter.formatCurrency(
+                                          current,
+                                          showDecimals: true,
+                                        ),
+                                        style: GoogleFonts.plusJakartaSans(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 30,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 6),
+                                      Row(
+                                        children: [
+                                          Icon(
+                                            diff >= 0
+                                                ? Icons.trending_up
+                                                : Icons.trending_down,
+                                            color: diff >= 0
+                                                ? Colors.greenAccent
+                                                : Colors.orangeAccent,
+                                            size: 16,
+                                          ),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            trendText,
+                                            style: GoogleFonts.poppins(
+                                              color: Colors.white.withOpacity(
+                                                0.95,
+                                              ),
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  );
+                                },
+                                loading: () => const Padding(
+                                  padding: EdgeInsets.symmetric(vertical: 20),
+                                  child: Center(
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white,
                                     ),
                                   ),
-                                ],
+                                ),
+                                error: (_, __) => Text(
+                                  'Failed to load performance data',
+                                  style: GoogleFonts.poppins(
+                                    color: Colors.white70,
+                                  ),
+                                ),
                               ),
                               const Spacer(),
                               // view report button
@@ -337,10 +419,8 @@ class HomeScreen extends HookConsumerWidget {
                                       horizontal: 16,
                                     ),
                                   ),
-                                  onPressed: () => Navigator.pushNamed(
-                                    context,
-                                    '/reports',
-                                  ),
+                                  onPressed: () =>
+                                      Navigator.pushNamed(context, '/reports'),
                                   icon: const Icon(
                                     Icons.arrow_forward,
                                     size: 18,

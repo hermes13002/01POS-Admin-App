@@ -34,6 +34,8 @@ class ApiEndpoints {
   static const String salesSummaryDashboard = '/admin/dashboard/sales-summary';
   static const String adminStockLevelDashboard = '/admin/dashboard/low-stock';
   static const String expenseStatisticsDashboard = '/admin/expenses/statistics';
+  static const String topSelling = '/admin/top-selling';
+  static const String performanceStats = '/performance/stats';
 
   // Orders
   static const String orders = '/orders';

@@ -9,6 +9,7 @@ import 'package:onepos_admin_app/shared/widgets/custom_text_field.dart';
 import 'package:onepos_admin_app/shared/widgets/app_snackbar.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_switch.dart';
 import 'package:onepos_admin_app/shared/widgets/loading_widget.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import '../../data/models/category_model.dart';
 import '../providers/store_provider.dart';
 
@@ -97,64 +98,79 @@ class MyStoreScreen extends HookConsumerWidget {
                   );
                 }
 
-                return ListView.separated(
-                  controller: scrollController,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppTheme.spacingMedium,
-                    vertical: AppTheme.spacingSmall,
-                  ),
-                  itemCount: filtered.length + (state.isLoadingMore ? 1 : 0),
-                  separatorBuilder: (_, __) =>
-                      const SizedBox(height: AppTheme.spacingSmall),
-                  itemBuilder: (context, index) {
-                    if (index == filtered.length) {
-                      return const Center(
-                        child: Padding(
-                          padding: EdgeInsets.all(AppTheme.spacingSmall),
-                          child: CircularProgressIndicator(),
+                return AnimationLimiter(
+                  child: ListView.separated(
+                    controller: scrollController,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppTheme.spacingMedium,
+                      vertical: AppTheme.spacingSmall,
+                    ),
+                    itemCount: filtered.length + (state.isLoadingMore ? 1 : 0),
+                    separatorBuilder: (_, __) =>
+                        const SizedBox(height: AppTheme.spacingSmall),
+                    itemBuilder: (context, index) {
+                      if (index == filtered.length) {
+                        return const Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(AppTheme.spacingSmall),
+                            child: CircularProgressIndicator(),
+                          ),
+                        );
+                      }
+
+                      final category = filtered[index];
+                      final isExpanded = expandedIndex.value == index;
+
+                      return AnimationConfiguration.staggeredList(
+                        position: index,
+                        duration: const Duration(milliseconds: 375),
+                        child: SlideAnimation(
+                          verticalOffset: 50.0,
+                          child: FadeInAnimation(
+                            child: _CategoryCard(
+                              category: category,
+                              isExpanded: isExpanded,
+                              onToggle: () {
+                                expandedIndex.value = isExpanded ? null : index;
+                              },
+                              onView: () {
+                                _showCategoryDetailsDialog(
+                                  context,
+                                  ref,
+                                  category,
+                                );
+                              },
+                              onEdit: () {
+                                _showEditCategoryDialog(context, ref, category);
+                              },
+                              onDelete: () {
+                                _showDeleteConfirmation(context, ref, category);
+                              },
+                              onStatusToggle: (value) async {
+                                final success = await ref
+                                    .read(storeCategoriesProvider.notifier)
+                                    .toggleCategoryStatus(category.id, value);
+
+                                if (context.mounted) {
+                                  if (success) {
+                                    AppSnackbar.showSuccess(
+                                      context,
+                                      'Category ${value ? "activated" : "deactivated"} successfully',
+                                    );
+                                  } else {
+                                    AppSnackbar.showError(
+                                      context,
+                                      'Failed to ${value ? "activate" : "deactivate"} category',
+                                    );
+                                  }
+                                }
+                              },
+                            ),
+                          ),
                         ),
                       );
-                    }
-
-                    final category = filtered[index];
-                    final isExpanded = expandedIndex.value == index;
-
-                    return _CategoryCard(
-                      category: category,
-                      isExpanded: isExpanded,
-                      onToggle: () {
-                        expandedIndex.value = isExpanded ? null : index;
-                      },
-                      onView: () {
-                        _showCategoryDetailsDialog(context, ref, category);
-                      },
-                      onEdit: () {
-                        _showEditCategoryDialog(context, ref, category);
-                      },
-                      onDelete: () {
-                        _showDeleteConfirmation(context, ref, category);
-                      },
-                      onStatusToggle: (value) async {
-                        final success = await ref
-                            .read(storeCategoriesProvider.notifier)
-                            .toggleCategoryStatus(category.id, value);
-
-                        if (context.mounted) {
-                          if (success) {
-                            AppSnackbar.showSuccess(
-                              context,
-                              'Category ${value ? "activated" : "deactivated"} successfully',
-                            );
-                          } else {
-                            AppSnackbar.showError(
-                              context,
-                              'Failed to ${value ? "activate" : "deactivate"} category',
-                            );
-                          }
-                        }
-                      },
-                    );
-                  },
+                    },
+                  ),
                 );
               },
               loading: () => const LoadingWidget(),

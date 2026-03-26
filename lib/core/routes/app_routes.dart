@@ -38,6 +38,7 @@ import 'package:onepos_admin_app/features/online_store/presentation/screens/upda
 import 'package:onepos_admin_app/features/online_store/presentation/screens/currency_settings_screen.dart';
 import 'package:onepos_admin_app/features/notifications/presentation/screens/notifications_screen.dart';
 import 'package:onepos_admin_app/features/notifications/presentation/screens/notification_detail_screen.dart';
+import 'package:onepos_admin_app/features/notifications/presentation/screens/notification_settings_screen.dart';
 import 'package:onepos_admin_app/features/store/presentation/screens/sub_categories_screen.dart';
 import 'package:onepos_admin_app/features/chats/presentation/screens/chats_screen.dart';
 import 'package:onepos_admin_app/features/chats/presentation/screens/individual_chat_screen.dart';
@@ -85,6 +86,7 @@ class AppRoutes {
   static const String updateReceiptTemplate = '/update-receipt-template';
   static const String notifications = '/notifications';
   static const String notificationDetail = '/notification-detail';
+  static const String notificationSettings = '/notification-settings';
   static const String subCategories = '/sub-categories';
   static const String salesSettings = '/sales-settings';
   static const String editProfile = '/edit-profile';
@@ -135,6 +137,7 @@ class AppRoutes {
     receiptTemplateSettings: (context) => const ReceiptTemplateScreen(),
     updateReceiptTemplate: (context) => const UpdateReceiptTemplateScreen(),
     notifications: (context) => const NotificationsScreen(),
+    notificationSettings: (context) => const NotificationSettingsScreen(),
     subCategories: (context) => const SubCategoriesScreen(),
     salesSettings: (context) => const SalesSettingsScreen(),
     editProfile: (context) => const EditProfileScreen(),

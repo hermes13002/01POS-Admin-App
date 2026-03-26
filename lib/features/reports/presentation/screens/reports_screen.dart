@@ -1,16 +1,17 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/amount_formatter.dart';
 import '../../../../core/routes/app_routes.dart';
-import '../../../sales/data/models/sale_model.dart';
 import '../../../products/data/models/product_model.dart';
 import '../../data/models/reports_model.dart';
+import '../../data/models/top_selling_model.dart';
 import '../providers/reports_provider.dart';
 import 'package:onepos_admin_app/shared/widgets/dots_loader.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 
 /// Reports screen
 class ReportsScreen extends ConsumerWidget {
@@ -82,80 +83,89 @@ class _ReportsContent extends ConsumerWidget {
 
         // scrollable content
         Expanded(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 8),
+          child: AnimationLimiter(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: AnimationConfiguration.toStaggeredList(
+                  duration: const Duration(milliseconds: 375),
+                  childAnimationBuilder: (widget) => SlideAnimation(
+                    verticalOffset: 50.0,
+                    child: FadeInAnimation(child: widget),
+                  ),
+                  children: [
+                    const SizedBox(height: 8),
 
-                // sales overview
-                _SalesOverviewSection(
-                  data: data.salesOverview,
-                  isLoading: data.isSalesOverviewLoading,
-                  errorMessage: data.salesOverviewError,
+                    // sales overview
+                    _SalesOverviewSection(
+                      data: data.salesOverview,
+                      isLoading: data.isSalesOverviewLoading,
+                      errorMessage: data.salesOverviewError,
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    // store health
+                    _StoreHealthSection(data: data.storeHealth),
+
+                    const SizedBox(height: 16),
+
+                    // ai insights
+                    _AiInsightsSection(insight: data.aiInsight),
+
+                    const SizedBox(height: 16),
+
+                    // low stock
+                    _LowStockSection(
+                      items: data.lowStockItems,
+                      isLoading: data.isLowStockLoading,
+                      errorMessage: data.lowStockError,
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    // sales summary
+                    _SalesSummarySection(
+                      data: data.salesSummary,
+                      isLoading: data.isSalesSummaryLoading,
+                      errorMessage: data.salesSummaryError,
+                      currentFilter: data.salesSummaryFilter,
+                      onFilterChanged: (filter) {
+                        ref
+                            .read(reportsProvider.notifier)
+                            .updateSalesSummaryFilter(filter);
+                      },
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    // expenses overview
+                    _ExpensesOverviewSection(
+                      data: data.expenseStatistics,
+                      isLoading: data.isExpensesLoading,
+                      errorMessage: data.expensesError,
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    // stock level
+                    _StockLevelSection(
+                      data: data.stockLevel,
+                      isLoading: data.isStockLevelLoading,
+                      errorMessage: data.stockLevelError,
+                    ),
+
+                    const SizedBox(height: AppTheme.spacingLarge),
+                    _TopSalesSection(
+                      items: data.topSales,
+                      errorMessage: data.topSalesError,
+                      isLoading: data.isTopSalesLoading,
+                    ),
+                    const SizedBox(height: AppTheme.spacingLarge),
+                  ],
                 ),
-
-                const SizedBox(height: 16),
-
-                // store health
-                _StoreHealthSection(data: data.storeHealth),
-
-                const SizedBox(height: 16),
-
-                // ai insights
-                _AiInsightsSection(insight: data.aiInsight),
-
-                const SizedBox(height: 16),
-
-                // low stock
-                _LowStockSection(
-                  items: data.lowStockItems,
-                  isLoading: data.isLowStockLoading,
-                  errorMessage: data.lowStockError,
-                ),
-
-                const SizedBox(height: 16),
-
-                // sales summary
-                _SalesSummarySection(
-                  data: data.salesSummary,
-                  isLoading: data.isSalesSummaryLoading,
-                  errorMessage: data.salesSummaryError,
-                  currentFilter: data.salesSummaryFilter,
-                  onFilterChanged: (filter) {
-                    ref
-                        .read(reportsProvider.notifier)
-                        .updateSalesSummaryFilter(filter);
-                  },
-                ),
-
-                const SizedBox(height: 16),
-
-                // expenses overview
-                _ExpensesOverviewSection(
-                  data: data.expenseStatistics,
-                  isLoading: data.isExpensesLoading,
-                  errorMessage: data.expensesError,
-                ),
-
-                const SizedBox(height: 16),
-
-                // stock level
-                _StockLevelSection(
-                  data: data.stockLevel,
-                  isLoading: data.isStockLevelLoading,
-                  errorMessage: data.stockLevelError,
-                ),
-
-                const SizedBox(height: AppTheme.spacingLarge),
-                _TopSalesSection(
-                  items: data.topSales,
-                  errorMessage: data.topSalesError,
-                  isLoading: data.isTopSalesLoading,
-                ),
-                const SizedBox(height: AppTheme.spacingLarge),
-              ],
+              ),
             ),
           ),
         ),
@@ -1696,7 +1706,7 @@ class _StockLevelPainter extends CustomPainter {
 
 /// Top sales section
 class _TopSalesSection extends StatelessWidget {
-  final List<SaleModel> items;
+  final List<TopSellingProduct> items;
   final String? errorMessage;
   final bool isLoading;
 
@@ -1770,7 +1780,7 @@ class _TopSalesSection extends StatelessWidget {
             ListView.separated(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              itemCount: items.length,
+              itemCount: items.length > 5 ? 5 : items.length,
               separatorBuilder: (context, index) => const Divider(
                 height: AppTheme.spacingLarge,
                 color: AppTheme.grey300,
@@ -1788,7 +1798,7 @@ class _TopSalesSection extends StatelessWidget {
 
 class _TopSalesRow extends StatelessWidget {
   final int rank;
-  final SaleModel item;
+  final TopSellingProduct item;
 
   const _TopSalesRow({required this.rank, required this.item});
 
@@ -1823,7 +1833,7 @@ class _TopSalesRow extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Order ${item.orderNumber}',
+                item.productName,
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   color: AppTheme.textPrimary,
@@ -1831,13 +1841,14 @@ class _TopSalesRow extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
-              Text(
-                '${item.date.day}/${item.date.month}/${item.date.year} ${item.date.hour}:${item.date.minute.toString().padLeft(2, '0')}',
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: AppTheme.textSecondary,
+              if (item.categoryName != null)
+                Text(
+                  item.categoryName!,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: AppTheme.textSecondary,
+                  ),
                 ),
-              ),
             ],
           ),
         ),
@@ -1850,16 +1861,16 @@ class _TopSalesRow extends StatelessWidget {
                 item.totalAmount,
                 showDecimals: false,
               ),
-              style: const TextStyle(
+              style: GoogleFonts.plusJakartaSans(
                 fontWeight: FontWeight.bold,
                 color: AppTheme.primaryColor,
               ),
             ),
             Text(
-              '${item.items.length} Items',
+              '${item.totalQuantity} Sold',
               style: const TextStyle(
                 fontSize: 12,
-                color: AppTheme.textSecondary,
+                color: AppTheme.successColor,
               ),
             ),
           ],

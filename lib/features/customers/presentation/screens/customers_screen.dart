@@ -12,6 +12,7 @@ import 'package:onepos_admin_app/shared/widgets/custom_search_bar.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_text_field.dart';
 import 'package:onepos_admin_app/shared/widgets/app_snackbar.dart';
 import 'package:onepos_admin_app/shared/widgets/loading_widget.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 
 /// customers screen with expandable customer tiles
 class CustomersScreen extends HookConsumerWidget {
@@ -98,41 +99,58 @@ class CustomersScreen extends HookConsumerWidget {
                   );
                 }
 
-                return ListView.separated(
-                  controller: scrollController,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppTheme.spacingMedium,
-                    vertical: AppTheme.spacingSmall,
-                  ),
-                  itemCount:
-                      filtered.length + (customersState.hasMorePages ? 1 : 0),
-                  separatorBuilder: (_, __) =>
-                      const SizedBox(height: AppTheme.spacingSmall),
-                  itemBuilder: (context, index) {
-                    if (index >= filtered.length) {
-                      return const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 16),
-                        child: Center(child: CircularProgressIndicator()),
+                return AnimationLimiter(
+                  child: ListView.separated(
+                    controller: scrollController,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppTheme.spacingMedium,
+                      vertical: AppTheme.spacingSmall,
+                    ),
+                    itemCount:
+                        filtered.length + (customersState.hasMorePages ? 1 : 0),
+                    separatorBuilder: (_, __) =>
+                        const SizedBox(height: AppTheme.spacingSmall),
+                    itemBuilder: (context, index) {
+                      if (index >= filtered.length) {
+                        return const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 16),
+                          child: Center(child: CircularProgressIndicator()),
+                        );
+                      }
+
+                      final customer = filtered[index];
+                      final isExpanded =
+                          expandedCustomerId.value == customer.id;
+
+                      return AnimationConfiguration.staggeredList(
+                        position: index,
+                        duration: const Duration(milliseconds: 375),
+                        child: SlideAnimation(
+                          verticalOffset: 50.0,
+                          child: FadeInAnimation(
+                            child: _CustomerTile(
+                              customer: customer,
+                              isExpanded: isExpanded,
+                              onToggle: () {
+                                expandedCustomerId.value = isExpanded
+                                    ? null
+                                    : customer.id;
+                              },
+                              onView: () =>
+                                  _showViewDialog(context, ref, customer.id),
+                              onEdit: () =>
+                                  _showEditDialog(context, ref, customer.id),
+                              onDelete: () => _showDeleteConfirmation(
+                                context,
+                                ref,
+                                customer,
+                              ),
+                            ),
+                          ),
+                        ),
                       );
-                    }
-
-                    final customer = filtered[index];
-                    final isExpanded = expandedCustomerId.value == customer.id;
-
-                    return _CustomerTile(
-                      customer: customer,
-                      isExpanded: isExpanded,
-                      onToggle: () {
-                        expandedCustomerId.value = isExpanded
-                            ? null
-                            : customer.id;
-                      },
-                      onView: () => _showViewDialog(context, ref, customer.id),
-                      onEdit: () => _showEditDialog(context, ref, customer.id),
-                      onDelete: () =>
-                          _showDeleteConfirmation(context, ref, customer),
-                    );
-                  },
+                    },
+                  ),
                 );
               },
               loading: () => const Center(child: LoadingWidget()),

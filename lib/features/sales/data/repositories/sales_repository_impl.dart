@@ -5,6 +5,7 @@ import 'package:onepos_admin_app/features/sales/data/datasources/sales_remote_da
 import 'package:onepos_admin_app/features/sales/data/models/sale_model.dart';
 import 'package:onepos_admin_app/features/sales/domain/repositories/sales_repository.dart';
 import 'package:onepos_admin_app/features/reports/data/models/reports_model.dart';
+import 'package:onepos_admin_app/features/reports/data/models/top_selling_model.dart';
 
 class SalesRepositoryImpl implements SalesRepository {
   final SalesRemoteDatasource _datasource;
@@ -48,7 +49,8 @@ class SalesRepositoryImpl implements SalesRepository {
   }
 
   @override
-  Future<Either<Failure, List<SaleModel>>> getAllSalesDashboard() async {
+  Future<Either<Failure, List<TopSellingProduct>>>
+  getAllSalesDashboard() async {
     return _handleException(() => _datasource.getAllSalesDashboard());
   }
 
@@ -68,7 +70,22 @@ class SalesRepositoryImpl implements SalesRepository {
 
   @override
   Future<Either<Failure, ExpenseStatisticsData>> getExpenseStatistics() async {
-    return _handleException(() => _datasource.getExpenseStatistics());
+    try {
+      final result = await _datasource.getExpenseStatistics();
+      return Right(result);
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, PerformanceStats>> getPerformanceStats() async {
+    try {
+      final result = await _datasource.getPerformanceStats();
+      return Right(result);
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
+    }
   }
 
   Future<Either<Failure, T>> _handleException<T>(

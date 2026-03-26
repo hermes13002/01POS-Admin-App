@@ -10,6 +10,7 @@ import 'package:onepos_admin_app/shared/widgets/loading_widget.dart';
 import 'package:onepos_admin_app/shared/widgets/error_widget.dart';
 import 'package:onepos_admin_app/shared/widgets/empty_state_widget.dart';
 import 'package:onepos_admin_app/shared/widgets/app_snackbar.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import '../providers/notifications_provider.dart';
 
 class NotificationsScreen extends HookConsumerWidget {
@@ -61,70 +62,82 @@ class NotificationsScreen extends HookConsumerWidget {
           return RefreshIndicator(
             onRefresh: () => ref.read(notificationsProvider.notifier).refresh(),
             color: AppTheme.blue,
-            child: ListView.separated(
-              controller: scrollController,
-              padding: const EdgeInsets.all(AppTheme.spacingMedium),
-              itemCount:
-                  state.notifications.length + (state.isLoadingMore ? 1 : 0),
-              separatorBuilder: (context, index) => const SizedBox(height: 12),
-              itemBuilder: (context, index) {
-                if (index == state.notifications.length) {
-                  return const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 20),
-                    child: Center(child: CircularProgressIndicator()),
-                  );
-                }
+            child: AnimationLimiter(
+              child: ListView.separated(
+                controller: scrollController,
+                padding: const EdgeInsets.all(AppTheme.spacingMedium),
+                itemCount:
+                    state.notifications.length + (state.isLoadingMore ? 1 : 0),
+                separatorBuilder: (context, index) =>
+                    const SizedBox(height: 12),
+                itemBuilder: (context, index) {
+                  if (index == state.notifications.length) {
+                    return const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 20),
+                      child: Center(child: CircularProgressIndicator()),
+                    );
+                  }
 
-                final item = state.notifications[index];
-                return Dismissible(
-                  key: Key('notification_${item.id}'),
-                  direction: DismissDirection.endToStart,
-                  confirmDismiss: (direction) =>
-                      _confirmDeleteSingle(context, item),
-                  onDismissed: (_) async {
-                    final error = await ref
-                        .read(notificationsProvider.notifier)
-                        .deleteNotification(item.id);
-                    if (context.mounted) {
-                      if (error != null) {
-                        AppSnackbar.showError(context, error);
-                      } else {
-                        AppSnackbar.showSuccess(
-                          context,
-                          'Notification deleted successfully',
-                        );
-                      }
-                    }
-                  },
-                  background: Container(
-                    alignment: Alignment.centerRight,
-                    padding: const EdgeInsets.only(right: 20),
-                    decoration: BoxDecoration(
-                      color: AppTheme.errorColor.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(
-                        AppTheme.borderRadiusMedium,
+                  final item = state.notifications[index];
+                  return AnimationConfiguration.staggeredList(
+                    position: index,
+                    duration: const Duration(milliseconds: 375),
+                    child: SlideAnimation(
+                      verticalOffset: 50.0,
+                      child: FadeInAnimation(
+                        child: Dismissible(
+                          key: Key('notification_${item.id}'),
+                          direction: DismissDirection.endToStart,
+                          confirmDismiss: (direction) =>
+                              _confirmDeleteSingle(context, item),
+                          onDismissed: (_) async {
+                            final error = await ref
+                                .read(notificationsProvider.notifier)
+                                .deleteNotification(item.id);
+                            if (context.mounted) {
+                              if (error != null) {
+                                AppSnackbar.showError(context, error);
+                              } else {
+                                AppSnackbar.showSuccess(
+                                  context,
+                                  'Notification deleted successfully',
+                                );
+                              }
+                            }
+                          },
+                          background: Container(
+                            alignment: Alignment.centerRight,
+                            padding: const EdgeInsets.only(right: 20),
+                            decoration: BoxDecoration(
+                              color: AppTheme.errorColor.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(
+                                AppTheme.borderRadiusMedium,
+                              ),
+                            ),
+                            child: const Icon(
+                              Icons.delete_outline,
+                              color: AppTheme.errorColor,
+                            ),
+                          ),
+                          child: GestureDetector(
+                            onTap: () {
+                              ref
+                                  .read(notificationsProvider.notifier)
+                                  .markAsRead(item.id);
+                              Navigator.pushNamed(
+                                context,
+                                AppRoutes.notificationDetail,
+                                arguments: item.notificationId,
+                              );
+                            },
+                            child: _NotificationCard(item: item),
+                          ),
+                        ),
                       ),
                     ),
-                    child: const Icon(
-                      Icons.delete_outline,
-                      color: AppTheme.errorColor,
-                    ),
-                  ),
-                  child: GestureDetector(
-                    onTap: () {
-                      ref
-                          .read(notificationsProvider.notifier)
-                          .markAsRead(item.id);
-                      Navigator.pushNamed(
-                        context,
-                        AppRoutes.notificationDetail,
-                        arguments: item.notificationId,
-                      );
-                    },
-                    child: _NotificationCard(item: item),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
           );
         },

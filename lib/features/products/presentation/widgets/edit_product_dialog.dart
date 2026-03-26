@@ -7,12 +7,149 @@ import 'package:onepos_admin_app/features/products/data/models/product_model.dar
 import 'package:onepos_admin_app/features/products/presentation/providers/products_provider.dart';
 import 'package:onepos_admin_app/shared/widgets/app_snackbar.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 import 'dart:io';
 
 class EditProductDialog extends HookConsumerWidget {
   final ProductModel product;
 
   const EditProductDialog({super.key, required this.product});
+
+  void _showBarcodeScanner(
+    BuildContext context,
+    TextEditingController controller,
+  ) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        final screenHeight = MediaQuery.of(context).size.height;
+        final screenWidth = MediaQuery.of(context).size.width;
+        final sheetHeight = screenHeight * 0.5;
+        final scanWindowHeight = 160.0;
+        final scanWindowWidth = screenWidth * 0.8;
+
+        return Container(
+          height: sheetHeight,
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(24),
+              topRight: Radius.circular(24),
+            ),
+          ),
+          child: Column(
+            children: [
+              const SizedBox(height: 12),
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: AppTheme.grey300,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Focus on Barcode',
+                style: GoogleFonts.poppins(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: AppTheme.textPrimary,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        MobileScanner(
+                          fit: BoxFit.cover,
+                          onDetect: (capture) {
+                            final List<Barcode> barcodes = capture.barcodes;
+                            if (barcodes.isNotEmpty) {
+                              final String? code = barcodes.first.rawValue;
+                              if (code != null) {
+                                controller.text = code;
+                                Navigator.pop(context);
+                              }
+                            }
+                          },
+                        ),
+                        // semi-transparent overlay
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Colors.black.withOpacity(0.4),
+                          ),
+                        ),
+                        // scan window "cutout"
+                        Container(
+                          height: scanWindowHeight,
+                          width: scanWindowWidth,
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: AppTheme.primaryColor,
+                              width: 2,
+                            ),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        // label inside cutout
+                        Positioned(
+                          top: 10,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppTheme.primaryColor,
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              'Scanning...',
+                              style: GoogleFonts.poppins(
+                                color: Colors.white,
+                                fontSize: 10,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 8,
+                ),
+                child: TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text(
+                    'Cancel',
+                    style: GoogleFonts.poppins(
+                      color: Colors.red,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+            ],
+          ),
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -283,7 +420,19 @@ class EditProductDialog extends HookConsumerWidget {
                       ),
                       _buildFieldRow(
                         _buildField('SKU', skuController),
-                        _buildField('Barcode', barcodeController),
+                        _buildField(
+                          'Barcode',
+                          barcodeController,
+                          suffixIcon: IconButton(
+                            icon: const Icon(
+                              Icons.qr_code_scanner,
+                              color: AppTheme.primaryColor,
+                              size: 20,
+                            ),
+                            onPressed: () =>
+                                _showBarcodeScanner(context, barcodeController),
+                          ),
+                        ),
                       ),
 
                       const SizedBox(height: 8),
@@ -425,6 +574,7 @@ class EditProductDialog extends HookConsumerWidget {
     int flex = 1,
     String? hintText,
     String? prefixText,
+    Widget? suffixIcon,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -455,6 +605,7 @@ class EditProductDialog extends HookConsumerWidget {
               fontSize: 14,
               color: AppTheme.textPrimary,
             ),
+            suffixIcon: suffixIcon,
             isDense: true,
             filled: true,
             fillColor: Colors.grey.shade50,

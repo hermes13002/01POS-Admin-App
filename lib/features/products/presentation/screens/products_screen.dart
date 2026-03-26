@@ -11,6 +11,7 @@ import 'package:onepos_admin_app/shared/widgets/custom_app_bar2.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_search_bar.dart';
 import 'package:onepos_admin_app/shared/widgets/loading_widget.dart';
 import 'package:onepos_admin_app/shared/widgets/app_snackbar.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 
 /// products screen with expandable product tiles
 class ProductsScreen extends HookConsumerWidget {
@@ -96,54 +97,65 @@ class ProductsScreen extends HookConsumerWidget {
                   );
                 }
 
-                return ListView.separated(
-                  controller: scrollController,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppTheme.spacingMedium,
-                    vertical: AppTheme.spacingSmall,
-                  ),
-                  itemCount:
-                      filtered.length + (productsState.hasMorePages ? 1 : 0),
-                  separatorBuilder: (_, __) =>
-                      const SizedBox(height: AppTheme.spacingSmall),
-                  itemBuilder: (context, index) {
-                    if (index == filtered.length) {
-                      return const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 16.0),
-                        child: Center(child: CircularProgressIndicator()),
+                return AnimationLimiter(
+                  child: ListView.separated(
+                    controller: scrollController,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppTheme.spacingMedium,
+                      vertical: AppTheme.spacingSmall,
+                    ),
+                    itemCount:
+                        filtered.length + (productsState.hasMorePages ? 1 : 0),
+                    separatorBuilder: (_, __) =>
+                        const SizedBox(height: AppTheme.spacingSmall),
+                    itemBuilder: (context, index) {
+                      if (index == filtered.length) {
+                        return const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 16.0),
+                          child: Center(child: CircularProgressIndicator()),
+                        );
+                      }
+
+                      final product = filtered[index];
+                      final isExpanded = expandedProductId.value == product.id;
+
+                      return AnimationConfiguration.staggeredList(
+                        position: index,
+                        duration: const Duration(milliseconds: 375),
+                        child: SlideAnimation(
+                          verticalOffset: 50.0,
+                          child: FadeInAnimation(
+                            child: _ProductTile(
+                              product: product,
+                              isExpanded: isExpanded,
+                              onToggle: () {
+                                expandedProductId.value = isExpanded
+                                    ? null
+                                    : product.id;
+                              },
+                              onView: () {
+                                showDialog(
+                                  context: context,
+                                  builder: (context) =>
+                                      ViewProductDialog(productId: product.id),
+                                );
+                              },
+                              onEdit: () {
+                                showDialog(
+                                  context: context,
+                                  builder: (context) =>
+                                      EditProductDialog(product: product),
+                                );
+                              },
+                              onDelete: () {
+                                _showDeleteDialog(context, ref, product);
+                              },
+                            ),
+                          ),
+                        ),
                       );
-                    }
-
-                    final product = filtered[index];
-                    final isExpanded = expandedProductId.value == product.id;
-
-                    return _ProductTile(
-                      product: product,
-                      isExpanded: isExpanded,
-                      onToggle: () {
-                        expandedProductId.value = isExpanded
-                            ? null
-                            : product.id;
-                      },
-                      onView: () {
-                        showDialog(
-                          context: context,
-                          builder: (context) =>
-                              ViewProductDialog(productId: product.id),
-                        );
-                      },
-                      onEdit: () {
-                        showDialog(
-                          context: context,
-                          builder: (context) =>
-                              EditProductDialog(product: product),
-                        );
-                      },
-                      onDelete: () {
-                        _showDeleteDialog(context, ref, product);
-                      },
-                    );
-                  },
+                    },
+                  ),
                 );
               },
               loading: () => const LoadingWidget(),

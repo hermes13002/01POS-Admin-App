@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../reports/data/models/reports_model.dart';
+import '../../../reports/data/models/top_selling_model.dart';
 import '../../data/models/sale_model.dart';
 
 abstract class SalesRepository {
@@ -19,8 +20,8 @@ abstract class SalesRepository {
     required String to,
   });
 
-  /// fetch all sales for dashboard (top sales section)
-  Future<Either<Failure, List<SaleModel>>> getAllSalesDashboard();
+  /// fetch top selling products for dashboard
+  Future<Either<Failure, List<TopSellingProduct>>> getAllSalesDashboard();
 
   /// fetch sales summary for dashboard
   Future<Either<Failure, List<MonthlySalesData>>> getSalesSummaryDashboard({
@@ -37,4 +38,7 @@ abstract class SalesRepository {
 
   /// fetch expense statistics for dashboard
   Future<Either<Failure, ExpenseStatisticsData>> getExpenseStatistics();
+
+  /// fetch performance stats
+  Future<Either<Failure, PerformanceStats>> getPerformanceStats();
 }

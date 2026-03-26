@@ -14,10 +14,143 @@ import 'package:onepos_admin_app/shared/widgets/custom_app_bar2.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_button.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_text_field.dart';
 import 'package:onepos_admin_app/core/utils/validators.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 
 /// screen for adding a new product (single scrollable form)
 class AddProductScreen extends HookConsumerWidget {
   const AddProductScreen({super.key});
+
+  void _showBarcodeScanner(
+    BuildContext context,
+    TextEditingController controller,
+  ) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        final screenHeight = MediaQuery.of(context).size.height;
+        final screenWidth = MediaQuery.of(context).size.width;
+        final sheetHeight = screenHeight * 0.5;
+        final scanWindowHeight = 160.0;
+        final scanWindowWidth = screenWidth * 0.8;
+
+        return Container(
+          height: sheetHeight,
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(24),
+              topRight: Radius.circular(24),
+            ),
+          ),
+          child: Column(
+            children: [
+              const SizedBox(height: 12),
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: AppTheme.grey300,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Focus on Barcode',
+                style: GoogleFonts.poppins(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: AppTheme.textPrimary,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        MobileScanner(
+                          fit: BoxFit.cover,
+                          onDetect: (capture) {
+                            final List<Barcode> barcodes = capture.barcodes;
+                            if (barcodes.isNotEmpty) {
+                              final String? code = barcodes.first.rawValue;
+                              if (code != null) {
+                                controller.text = code;
+                                Navigator.pop(context);
+                              }
+                            }
+                          },
+                        ),
+                        // semi-transparent overlay
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Colors.black.withOpacity(0.4),
+                          ),
+                        ),
+                        // scan window "cutout"
+                        Container(
+                          height: scanWindowHeight,
+                          width: scanWindowWidth,
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: AppTheme.primaryColor,
+                              width: 2,
+                            ),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        // label inside cutout
+                        Positioned(
+                          top: 10,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppTheme.primaryColor,
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              'Scanning...',
+                              style: GoogleFonts.poppins(
+                                color: Colors.white,
+                                fontSize: 10,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
+                child: CustomButton(
+                  text: 'Cancel',
+                  onPressed: () => Navigator.pop(context),
+                  isOutlined: true,
+                  textColor: AppTheme.errorColor,
+                ),
+              ),
+              const SizedBox(height: 12),
+            ],
+          ),
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -227,6 +360,15 @@ class AddProductScreen extends HookConsumerWidget {
                 label: 'Barcode',
                 hint: 'Enter barcode',
                 controller: barcodeController,
+                suffixIcon: IconButton(
+                  icon: const Icon(
+                    Icons.qr_code_scanner,
+                    color: AppTheme.blue,
+                    size: 22,
+                  ),
+                  onPressed: () =>
+                      _showBarcodeScanner(context, barcodeController),
+                ),
               ),
               const SizedBox(height: AppTheme.spacingMedium),
 

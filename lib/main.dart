@@ -11,6 +11,10 @@ import 'package:onepos_admin_app/core/network/connectivity_provider.dart';
 import 'package:onepos_admin_app/core/utils/session_manager.dart';
 import 'package:onepos_admin_app/features/auth/presentation/screens/login_screen.dart';
 import 'package:onepos_admin_app/presentation/screens/main_navigation_screen.dart';
+import 'dart:developer';
+import 'package:onepos_admin_app/core/services/local_notification_service.dart';
+import 'package:onepos_admin_app/core/services/background_sync_service.dart';
+import 'package:g_recaptcha_v3/g_recaptcha_v3.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,7 +26,61 @@ void main() async {
   final token = await SecureStorageService().read(AppConstants.keyAccessToken);
   final isLoggedIn = token != null && token.isNotEmpty;
 
+  // initialize background and notification services if user is logged in
+  if (isLoggedIn) {
+    try {
+      final localNotificationService = LocalNotificationService();
+      await localNotificationService.init();
+      await localNotificationService.requestPermissions();
+
+      final bgSyncService = BackgroundSyncService();
+      await bgSyncService.init();
+      await bgSyncService.registerPeriodicTasks();
+
+      await _scheduleDefaultInsights(localNotificationService);
+    } catch (e) {
+      log('Failed to initialize local notifications: $e');
+    }
+  }
+
+  // Initialize reCAPTCHA v3
+  await GRecaptchaV3.ready(
+    '6LfOgo0sAAAAAADQv_G0IXOktWTeGNtRBqEcEQAW',
+    showBadge: true,
+  );
+  log('reCAPTCHA v3 initialized.');
+
   runApp(ProviderScope(child: MyApp(isLoggedIn: isLoggedIn)));
+}
+
+Future<void> _scheduleDefaultInsights(LocalNotificationService service) async {
+  // Daily snapshot at 8:00 AM
+  await service.scheduleDailyNotification(
+    id: 1,
+    title: 'Daily Business Snapshot',
+    body: 'Take a quick look at how your business is doing.',
+    hour: 8,
+    minute: 0,
+  );
+
+  // Weekly recap at Mon 9:00 AM
+  await service.scheduleWeeklyNotification(
+    id: 2,
+    title: 'Weekly Recap',
+    body: 'See how your week went.',
+    day: 1, // Monday
+    hour: 9,
+    minute: 0,
+  );
+
+  // End of day sales at 9:00 PM
+  await service.scheduleDailyNotification(
+    id: 3,
+    title: 'End of Day Summary',
+    body: 'Great sales today! Check your end-of-day summary.',
+    hour: 21,
+    minute: 0,
+  );
 }
 
 class MyApp extends StatelessWidget {

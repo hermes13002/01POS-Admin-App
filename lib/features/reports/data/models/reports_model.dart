@@ -1,5 +1,5 @@
 import '../../../products/data/models/product_model.dart';
-import '../../../sales/data/models/sale_model.dart';
+import 'top_selling_model.dart';
 
 /// Model for sales overview data
 class SalesOverviewData {
@@ -180,9 +180,86 @@ class ExpenseStatisticsData {
   }
 }
 
+/// Model for performance statistics (Dashboard card)
+class PerformanceStats {
+  final PerformancePeriod today;
+  final PerformancePeriod week;
+  final PerformancePeriod month;
+  final PerformancePeriod year;
+
+  const PerformanceStats({
+    required this.today,
+    required this.week,
+    required this.month,
+    required this.year,
+  });
+
+  factory PerformanceStats.fromJson(Map<String, dynamic> json) {
+    return PerformanceStats(
+      today: PerformancePeriod.fromJson(
+        json['today'] ?? {},
+        'today_total_sales',
+        'yesterday_total_sales',
+      ),
+      week: PerformancePeriod.fromJson(
+        json['week'] ?? {},
+        'this_week_total_sales',
+        'last_week_total_sales',
+      ),
+      month: PerformancePeriod.fromJson(
+        json['month'] ?? {},
+        'this_month_total_sales',
+        'last_month_total_sales',
+      ),
+      year: PerformancePeriod.fromJson(
+        json['year'] ?? {},
+        'this_year_total_sales',
+        'last_year_total_sales',
+      ),
+    );
+  }
+
+  static PerformanceStats empty() => const PerformanceStats(
+    today: PerformancePeriod(current: 0, previous: 0),
+    week: PerformancePeriod(current: 0, previous: 0),
+    month: PerformancePeriod(current: 0, previous: 0),
+    year: PerformancePeriod(current: 0, previous: 0),
+  );
+}
+
+class PerformancePeriod {
+  final double current;
+  final double previous;
+
+  const PerformancePeriod({required this.current, required this.previous});
+
+  factory PerformancePeriod.fromJson(
+    Map<String, dynamic> json,
+    String currentKey,
+    String previousKey,
+  ) {
+    double parseCurrency(dynamic val) {
+      if (val == null) return 0.0;
+      final str = val.toString().replaceAll(RegExp(r'[^0-9.\-]'), '');
+      return double.tryParse(str) ?? 0.0;
+    }
+
+    return PerformancePeriod(
+      current: parseCurrency(json[currentKey]),
+      previous: parseCurrency(json[previousKey]),
+    );
+  }
+
+  double get percentageChange {
+    if (previous == 0) return current > 0 ? 100.0 : 0.0;
+    return ((current - previous) / previous.abs()) * 100;
+  }
+}
+
 /// Full reports data model
 class ReportsData {
   final SalesOverviewData salesOverview;
+  final PerformanceStats? performanceStats;
   final StoreHealthData storeHealth;
   final String aiInsight;
   final List<ProductModel> lowStockItems;
@@ -190,7 +267,7 @@ class ReportsData {
   final String salesSummaryFilter;
   final ExpenseStatisticsData? expenseStatistics;
   final List<StockLevelData> stockLevel;
-  final List<SaleModel> topSales;
+  final List<TopSellingProduct> topSales;
   final String? topSalesError;
   final bool isTopSalesLoading;
   final String? salesSummaryError;
@@ -214,6 +291,7 @@ class ReportsData {
     this.expenseStatistics,
     required this.stockLevel,
     required this.topSales,
+    this.performanceStats,
     this.topSalesError,
     this.isTopSalesLoading = false,
     this.salesSummaryError,
@@ -237,7 +315,8 @@ class ReportsData {
     String? salesSummaryFilter,
     ExpenseStatisticsData? expenseStatistics,
     List<StockLevelData>? stockLevel,
-    List<SaleModel>? topSales,
+    List<TopSellingProduct>? topSales,
+    PerformanceStats? performanceStats,
     String? topSalesError,
     bool? isTopSalesLoading,
     String? salesSummaryError,
@@ -267,6 +346,7 @@ class ReportsData {
       expenseStatistics: expenseStatistics ?? this.expenseStatistics,
       stockLevel: stockLevel ?? this.stockLevel,
       topSales: topSales ?? this.topSales,
+      performanceStats: performanceStats ?? this.performanceStats,
       topSalesError: clearTopSalesError
           ? null
           : (topSalesError ?? this.topSalesError),

@@ -10,6 +10,8 @@ import 'package:onepos_admin_app/core/utils/validators.dart';
 import 'package:onepos_admin_app/shared/widgets/app_dropdown.dart';
 import 'package:onepos_admin_app/shared/widgets/app_snackbar.dart';
 import 'package:onepos_admin_app/features/auth/presentation/providers/auth_provider.dart';
+import 'package:g_recaptcha_v3/g_recaptcha_v3.dart';
+import 'dart:developer' as dev;
 
 const List<String> _backgroundImages = [
   'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80',
@@ -52,6 +54,12 @@ class SignupScreen extends HookConsumerWidget {
       }
 
       isLoading.value = true;
+
+      // Fetch reCAPTCHA token
+      dev.log('Generating reCAPTCHA token for action: signup...');
+      final token = await GRecaptchaV3.execute('signup');
+      dev.log('reCAPTCHA token result: "${token ?? 'NULL'}"');
+
       final body = {
         "company_name": businessNameCtrl.text.trim(),
         "company_email": businessEmailCtrl.text.trim(),
@@ -59,6 +67,7 @@ class SignupScreen extends HookConsumerWidget {
         "company_number": whatsappCtrl.text.trim(),
         "company_type": industryType.value,
         "password": passwordCtrl.text,
+        "captcha_token": token ?? '',
       };
 
       final error = await ref.read(authProvider.notifier).signUp(body);

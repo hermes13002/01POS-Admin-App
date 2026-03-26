@@ -12,7 +12,8 @@ abstract class ReceiptTemplateRemoteDatasource {
   Future<ReceiptTemplateModel> updateReceiptTemplate(Map<String, dynamic> body);
 }
 
-class ReceiptTemplateRemoteDatasourceImpl implements ReceiptTemplateRemoteDatasource {
+class ReceiptTemplateRemoteDatasourceImpl
+    implements ReceiptTemplateRemoteDatasource {
   final DioClient _client;
 
   ReceiptTemplateRemoteDatasourceImpl(this._client);
@@ -28,7 +29,10 @@ class ReceiptTemplateRemoteDatasourceImpl implements ReceiptTemplateRemoteDataso
     final response = await _client.get(ApiEndpoints.receiptTemplate);
     final responseBody = _asMap(response.data);
 
-    log('get_receipt_template response: ${jsonEncode(responseBody)}', name: 'API');
+    log(
+      'get_receipt_template response: ${jsonEncode(responseBody)}',
+      name: 'API',
+    );
 
     if (_isError(responseBody['error'])) {
       throw ServerException(
@@ -59,10 +63,16 @@ class ReceiptTemplateRemoteDatasourceImpl implements ReceiptTemplateRemoteDataso
     log('update_receipt_template url: $url', name: 'API');
     log('update_receipt_template body: ${jsonEncode(body)}', name: 'API');
 
-    final response = await _client.put(ApiEndpoints.receiptTemplate, data: body);
+    final response = await _client.put(
+      ApiEndpoints.receiptTemplate,
+      data: body,
+    );
     final responseBody = _asMap(response.data);
 
-    log('update_receipt_template response: ${jsonEncode(responseBody)}', name: 'API');
+    log(
+      'update_receipt_template response: ${jsonEncode(responseBody)}',
+      name: 'API',
+    );
 
     if (_isError(responseBody['error'])) {
       throw ServerException(
@@ -72,7 +82,9 @@ class ReceiptTemplateRemoteDatasourceImpl implements ReceiptTemplateRemoteDataso
 
     final data = _asNullableMap(responseBody['data']);
     if (data == null) {
-      throw ServerException(message: 'invalid update receipt template response');
+      throw ServerException(
+        message: 'invalid update receipt template response',
+      );
     }
 
     return ReceiptTemplateModel.fromJson(data);
