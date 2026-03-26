@@ -224,13 +224,13 @@ class _ProfileContent extends ConsumerWidget {
           const SizedBox(height: AppTheme.spacingMedium),
 
           // Edit Profile Button
-          CustomButton(
-            text: 'Edit Profile',
-            onPressed: () =>
-                Navigator.pushNamed(context, AppRoutes.editProfile),
-            icon: Icons.edit_note_rounded,
-          ),
-          const SizedBox(height: AppTheme.spacingMedium),
+          // CustomButton(
+          //   text: 'Edit Profile',
+          //   onPressed: () =>
+          //       Navigator.pushNamed(context, AppRoutes.editProfile),
+          //   icon: Icons.edit_note_rounded,
+          // ),
+          // const SizedBox(height: AppTheme.spacingMedium),
 
           // settings list
           /*
@@ -356,6 +356,16 @@ class _ProfileContent extends ConsumerWidget {
             title: 'Sales Download Settings',
             onTap: () => Navigator.pushNamed(context, AppRoutes.salesSettings),
           ),
+
+          const SizedBox(height: AppTheme.spacingMedium),
+
+          CustomButton(
+            text: 'Edit Profile',
+            onPressed: () =>
+                Navigator.pushNamed(context, AppRoutes.editProfile),
+            icon: Icons.edit_note_rounded,
+          ),
+
           const SizedBox(height: AppTheme.spacingLarge),
 
           // profile details section

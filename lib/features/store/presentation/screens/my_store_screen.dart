@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -207,7 +208,25 @@ class MyStoreScreen extends HookConsumerWidget {
         onAddSubCategory: () {
           Navigator.pushNamed(context, '/add-sub-category');
         },
+        onGenerateStore: () => _showGenerateStoreModal(context, ref),
       ),
+    );
+  }
+
+  /// show generate store modal
+  void _showGenerateStoreModal(BuildContext context, WidgetRef ref) async {
+    final jsonStr = await DefaultAssetBundle.of(
+      context,
+    ).loadString('assets/others/generate_mystore.json');
+    final Map<String, dynamic> data = json.decode(jsonStr);
+
+    if (!context.mounted) return;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => _GenerateStoreWizard(data: data),
     );
   }
 
@@ -896,10 +915,12 @@ class _FabOption extends StatelessWidget {
 class _AddCategoryFab extends HookWidget {
   final VoidCallback onAddCategory;
   final VoidCallback onAddSubCategory;
+  final VoidCallback onGenerateStore;
 
   const _AddCategoryFab({
     required this.onAddCategory,
     required this.onAddSubCategory,
+    required this.onGenerateStore,
   });
 
   @override
@@ -911,6 +932,16 @@ class _AddCategoryFab extends HookWidget {
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
         if (isExpanded.value) ...[
+          _FabOption(
+            label: 'Generate Store',
+            color: const Color.fromARGB(255, 199, 4, 243),
+            icon: Icons.auto_awesome_outlined,
+            onTap: () {
+              isExpanded.value = false;
+              onGenerateStore();
+            },
+          ),
+          const SizedBox(height: 12),
           _FabOption(
             label: 'Add Sub-category',
             color: const Color(0xFFC2185B),
@@ -943,6 +974,317 @@ class _AddCategoryFab extends HookWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// store generation wizard modal
+class _GenerateStoreWizard extends HookWidget {
+  final Map<String, dynamic> data;
+
+  const _GenerateStoreWizard({required this.data});
+
+  @override
+  Widget build(BuildContext context) {
+    final step = useState(0);
+    final selectedStoreTypes = useState<Set<String>>({});
+    final selectedCategories = useState<Set<String>>({});
+    final selectedSubCategories = useState<Set<String>>({});
+
+    final storeTypes = data.keys.toList();
+
+    // Prepare grouped categories for Step 1
+    final groupedCategories = <String, List<String>>{};
+    for (final type in selectedStoreTypes.value) {
+      final typeData = data[type]['categories'] as Map<String, dynamic>;
+      groupedCategories[type] = typeData.keys.toList()..sort();
+    }
+
+    // Prepare grouped sub-categories for Step 2
+    final groupedSubCategories = <String, List<String>>{};
+    for (final type in selectedStoreTypes.value) {
+      final typeData = data[type]['categories'] as Map<String, dynamic>;
+      for (final cat in selectedCategories.value) {
+        if (typeData.containsKey(cat)) {
+          groupedSubCategories[cat] = List<String>.from(typeData[cat])..sort();
+        }
+      }
+    }
+
+    return Container(
+      margin: const EdgeInsets.only(top: 60),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // handle
+          Center(
+            child: Container(
+              margin: const EdgeInsets.symmetric(vertical: 12),
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: AppTheme.grey200,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+
+          // header
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    if (step.value > 0)
+                      Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: IconButton(
+                          onPressed: () => step.value--,
+                          icon: const Icon(Icons.arrow_back_ios, size: 20),
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
+                        ),
+                      ),
+                    Text(
+                      _getStepTitle(step.value),
+                      style: GoogleFonts.poppins(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const Spacer(),
+                    IconButton(
+                      onPressed: () => Navigator.pop(context),
+                      icon: const Icon(Icons.close),
+                    ),
+                  ],
+                ),
+                Text(
+                  _getStepSubtitle(
+                    step.value,
+                    selectedStoreTypes.value.length,
+                    selectedCategories.value.length,
+                  ),
+                  style: GoogleFonts.poppins(
+                    fontSize: 13,
+                    color: AppTheme.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const Divider(height: 1),
+
+          // content
+          Flexible(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(context).size.height * 0.6,
+              ),
+              child: _buildStepContent(
+                step.value,
+                storeTypes,
+                groupedCategories,
+                groupedSubCategories,
+                selectedStoreTypes,
+                selectedCategories,
+                selectedSubCategories,
+              ),
+            ),
+          ),
+
+          // footer
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed:
+                    _isNextDisabled(
+                      step.value,
+                      selectedStoreTypes.value,
+                      selectedCategories.value,
+                      selectedSubCategories.value,
+                    )
+                    ? null
+                    : () {
+                        if (step.value < 2) {
+                          step.value++;
+                        } else {
+                          Navigator.pop(context);
+                          AppSnackbar.showInfo(
+                            context,
+                            'Store generation coming soon...',
+                          );
+                        }
+                      },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.black,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: Text(
+                  _getButtonLabel(
+                    step.value,
+                    selectedStoreTypes.value.length,
+                    selectedCategories.value.length,
+                    selectedSubCategories.value.length,
+                  ),
+                  style: GoogleFonts.poppins(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 15,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          SizedBox(height: MediaQuery.of(context).padding.bottom + 16),
+        ],
+      ),
+    );
+  }
+
+  String _getStepTitle(int step) {
+    return switch (step) {
+      0 => 'Select Store Types',
+      1 => 'Select Categories',
+      _ => 'Select Sub-categories',
+    };
+  }
+
+  String _getStepSubtitle(int step, int typeCount, int catCount) {
+    return switch (step) {
+      0 => 'Choose the types of businesses you want to setup',
+      1 => 'Showing categories from $typeCount store types',
+      _ => 'Choose items from $catCount categories',
+    };
+  }
+
+  String _getButtonLabel(int step, int types, int cats, int subs) {
+    if (step == 0) return 'Next ($types selected)';
+    if (step == 1) return 'Next ($cats selected)';
+    return 'Generate ($subs items)';
+  }
+
+  bool _isNextDisabled(
+    int step,
+    Set<String> types,
+    Set<String> cats,
+    Set<String> subs,
+  ) {
+    if (step == 0) return types.isEmpty;
+    if (step == 1) return cats.isEmpty;
+    return subs.isEmpty;
+  }
+
+  Widget _buildStepContent(
+    int step,
+    List<String> storeTypes,
+    Map<String, List<String>> groupedCategories,
+    Map<String, List<String>> groupedSubCategories,
+    ValueNotifier<Set<String>> selectedStoreTypes,
+    ValueNotifier<Set<String>> selectedCategories,
+    ValueNotifier<Set<String>> selectedSubCategories,
+  ) {
+    if (step == 0) {
+      return ListView.builder(
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        itemCount: storeTypes.length,
+        itemBuilder: (context, index) {
+          final item = storeTypes[index];
+          return _buildCheckboxTile(item, selectedStoreTypes, (val) {
+            if (val == false) {
+              // Reset downstream selections if a store type is removed
+              selectedCategories.value = {};
+              selectedSubCategories.value = {};
+            }
+          });
+        },
+      );
+    }
+
+    final groupedData = step == 1 ? groupedCategories : groupedSubCategories;
+    final selectedSet = step == 1 ? selectedCategories : selectedSubCategories;
+
+    final flatList = <dynamic>[];
+    groupedData.forEach((header, items) {
+      flatList.add(header);
+      flatList.addAll(items);
+    });
+
+    return ListView.builder(
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      itemCount: flatList.length,
+      itemBuilder: (context, index) {
+        final item = flatList[index];
+
+        if (groupedData.containsKey(item)) {
+          // Header
+          return Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+            child: Text(
+              item.toString().toUpperCase(),
+              style: GoogleFonts.poppins(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: AppTheme.textSecondary,
+                letterSpacing: 1.1,
+              ),
+            ),
+          );
+        }
+
+        // Checkbox item
+        return _buildCheckboxTile(item.toString(), selectedSet, (val) {
+          if (step == 1 && val == false) {
+            // Reset sub-categories for this specific category if removed
+            selectedSubCategories.value = {};
+          }
+        });
+      },
+    );
+  }
+
+  Widget _buildCheckboxTile(
+    String title,
+    ValueNotifier<Set<String>> selectedSet,
+    Function(bool?) onChanged,
+  ) {
+    final isSelected = selectedSet.value.contains(title);
+    return CheckboxListTile(
+      title: Text(
+        title,
+        style: GoogleFonts.poppins(
+          fontSize: 14,
+          fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+        ),
+      ),
+      value: isSelected,
+      activeColor: Colors.black,
+      checkboxShape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(4),
+      ),
+      onChanged: (val) {
+        final newSet = Set<String>.from(selectedSet.value);
+        if (val == true) {
+          newSet.add(title);
+        } else {
+          newSet.remove(title);
+        }
+        selectedSet.value = newSet;
+        onChanged(val);
+      },
     );
   }
 }

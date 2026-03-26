@@ -1,0 +1,423 @@
+{
+  "Restaurant / Bukka": {
+    "categories": {
+      "Main Dishes": ["Rice", "Swallow", "Pasta", "Local Stews"],
+      "Proteins": ["Beef", "Chicken", "Fish", "Seafood"],
+      "Soups & Sides": ["Soups", "Fried Plantain", "Side Salads"],
+      "Small Chops": ["Spicy Rolls", "Puff-Puff", "Spring Rolls", "Samosa", "Meat Pie"],
+      "Breakfast": ["Akara", "Bread & Egg", "Pap", "Yam Dishes"],
+      "Drinks": ["Soft Drinks", "Bottled Water", "Fresh Juices", "Zobo", "Palm Wine"],
+      "Condiments": ["Pepper Sauce", "Shitto", "Seasoning", "Garnish"],
+      "Desserts": ["Buns", "Cake Slices", "Fruit Salad"],
+      "Combo Meals": ["Set Meals", "Family Packs", "Kids Meals"],
+      "Extras & Add-ons": ["Plantain Chips", "Extra Protein", "Packaged Sides"]
+    }
+  },
+
+  "Fast Food": {
+    "categories": {
+      "Burgers & Wraps": ["Beef Burgers", "Chicken Burgers", "Veggie", "Wraps", "Double Stack"],
+      "Fries & Sides": ["French Fries", "Loaded Fries", "Onion Rings", "Coleslaw", "Garlic Bread"],
+      "Finger Foods": ["Chicken Wings", "Nuggets", "Mozzarella Sticks", "Sausages"],
+      "Sandwiches": ["Club Sandwich", "Toasted Sandwich", "Panini"],
+      "Rice & Noodles": ["Fried Rice", "Jollof Rice", "Chow Mein"],
+      "Drinks": ["Soft Drinks", "Milkshakes", "Iced Tea", "Bottled Water"],
+      "Combos": ["Burger + Fries", "Family Combo", "Value Meals"],
+      "Sauces & Dips": ["Ketchup", "Mayonnaise", "BBQ Sauce", "Pepper Sauce"],
+      "Bakery Items": ["Hotdog", "Meat Pie", "Sausage Roll"],
+      "Desserts": ["Ice Cream", "Brownies", "Donuts"]
+    }
+  },
+
+  "Bar / Lounge": {
+    "categories": {
+      "Beers": ["Local Beers", "Imported Beers", "Craft Beers"],
+      "Spirits": ["Whisky", "Vodka", "Rum", "Gin", "Brandy"],
+      "Wines": ["Red Wine", "White Wine", "Champagne", "Rosé"],
+      "Cocktails": ["Classic Cocktails", "Signature Cocktails", "Mocktails"],
+      "Shots & Shooters": ["Shots Menu", "Single Shots", "Shot Combos"],
+      "Bar Snacks": ["Suya", "Chicken Wings", "Nuts & Crisps", "Finger Food Platters"],
+      "Non-Alcoholic": ["Soft Drinks", "Juices", "Bottled Water", "Energy Drinks"],
+      "Specials & Events": ["Happy Hour Specials", "Event Packages", "Bottle Service"],
+      "Merchandise": ["Branded Glassware", "T-Shirts", "Hats"],
+      "Extras": ["Ice", "Mixers", "Garnishes"]
+    }
+  },
+
+  "Drinks Depot": {
+    "categories": {
+      "Bottled Water": ["Small Bottles", "Large Bottles", "Sachet Water"],
+      "Soft Drinks": ["Cola", "Orange", "Lemon-Lime", "Diet Variants"],
+      "Energy Drinks": ["Local Energy", "International Brands"],
+      "Juices & Concentrates": ["Fruit Juices", "Nectar", "Concentrates"],
+      "Packed Beverages": ["Malt", "Non-Alcoholic Malt", "Iced Tea"],
+      "Alcoholic Beverages": ["Beers", "Wines", "Spirits"],
+      "Packaging & Ice": ["Crates", "Six Packs", "Ice Bags"],
+      "Bulk Sales": ["Wholesale Crates", "Business Orders", "Events Supply"],
+      "Accessories": ["Bottle Openers", "Coolers", "Kegs"],
+      "Seasonal Drinks": ["Holiday Specials", "Promotional Packs"]
+    }
+  },
+
+  "Supermarket": {
+    "categories": {
+      "Staple Foods": ["Rice", "Beans", "Yam & Tubers", "Garri", "Flour"],
+      "Beverages": ["Soft Drinks", "Juices", "Water", "Malt"],
+      "Dairy & Eggs": ["Milk", "Yogurt", "Cheese", "Eggs"],
+      "Frozen Foods": ["Frozen Chicken", "Frozen Fish", "Fries", "Vegetables"],
+      "Bakery & Bread": ["Loaves", "Pastries", "Cakes", "Buns"],
+      "Snacks & Confectionery": ["Biscuits", "Chocolates", "Chips", "Nuts"],
+      "Household & Cleaning": ["Detergents", "Bleach", "Floor Cleaners", "Garbage Bags"],
+      "Toiletries & Personal Care": ["Soap", "Shampoo", "Toothpaste", "Sanitary Pads"],
+      "Baby & Childcare": ["Diapers", "Baby Food", "Wipes"],
+      "Canned & Preserved": ["Canned Fish", "Tomato Paste", "Sardines", "Beans"],
+      "Spices & Condiments": ["Seasoning Cubes", "Pepper", "Salt", "Oil"],
+      "Stationery & Misc": ["Pens", "Notebooks", "Batteries", "Light Bulbs"],
+      "Electronics & Accessories": ["Phone Chargers", "Power Banks", "Earphones"],
+      "Fresh Produce": ["Vegetables", "Fruits", "Herbs", "Leafy Greens"]
+    }
+  },
+
+  "Provision Store": {
+    "categories": {
+      "Dry Goods": ["Rice", "Pasta", "Beans", "Cereal"],
+      "Cooking Oils & Fats": ["Vegetable Oil", "Palm Oil", "Butter", "Margarine"],
+      "Snacks": ["Biscuits", "Chips", "Local Snacks"],
+      "Drinks & Beverages": ["Powdered Drinks", "Tea", "Coffee", "Bottled Water"],
+      "Canned Goods": ["Tomato Paste", "Sardines", "Canned Beans"],
+      "Household Essentials": ["Soap", "Detergent", "Tissues"],
+      "Seasonings & Spices": ["Curry", "Pepper", "Seasoning Cubes"],
+      "Instant Foods": ["Noodles", "Instant Rice", "Sauce Mixes"],
+      "Bakery Supplies": ["Bread Loaves", "Pastries"],
+      "Smallwares": ["Plastic Containers", "Wraps", "Aluminium Foil"]
+    }
+  },
+
+  "Pharmacy & Chemist": {
+    "categories": {
+      "Prescription Medicines": ["Antibiotics", "Antimalarials", "Chronic Care Drugs"],
+      "Over The Counter (OTC)": ["Paracetamol", "Cough Syrups", "Antacids"],
+      "Supplements & Vitamins": ["Multivitamins", "Vitamin C", "Iron Supplements"],
+      "Personal Care": ["Soaps", "Skincare", "Oral Care"],
+      "Baby & Maternity": ["Infant Formula", "Maternity Products", "Baby Ointments"],
+      "Medical Devices & Supplies": ["BP Monitors", "Thermometers", "Testing Kits"],
+      "Wound Care": ["Plasters", "Antiseptics", "Bandages"],
+      "First Aid Kits": ["Travel Kits", "Home Kits", "Corporate Kits"],
+      "Dermatology": ["Acne Treatments", "Anti-fungal", "Skin Repair"],
+      "Health Foods": ["Protein Supplements", "Weight Management", "Herbal Remedies"]
+    }
+  },
+
+  "Boutique / Fashion Store": {
+    "categories": {
+      "Men's Wear": ["Shirts", "Trousers", "Traditional Wear (Senator/Agbada)", "Footwear"],
+      "Women's Wear": ["Dresses", "Tops", "Skirts", "Native Wear (Wrapper/Gele)"],
+      "Children's Wear": ["Boys", "Girls", "Baby Clothing"],
+      "Accessories": ["Bags", "Belts", "Wallets", "Hats"],
+      "Footwear": ["Sandal", "Casual Shoes", "Formal Shoes"],
+      "Bespoke & Tailoring": ["Custom Orders", "Alterations", "Measurements"],
+      "Fabrics & Materials": ["Ankara", "Lace", "Silk", "Cotton"],
+      "Jewelry & Adornments": ["Beads", "Necklaces", "Bracelets"],
+      "Outerwear": ["Jackets", "Coats", "Blazers"],
+      "Seasonal Collections": ["Festive Wear", "Summer Line", "Promotions"]
+    }
+  },
+
+  "Cosmetics & Beauty": {
+    "categories": {
+      "Makeup": ["Foundations", "Powders", "Lipsticks", "Eye Makeup"],
+      "Skin Care": ["Cleansers", "Moisturizers", "Sunscreens", "Face Masks"],
+      "Hair Care": ["Shampoos", "Conditioners", "Hair Oils", "Relaxers"],
+      "Fragrances": ["Perfumes", "Body Sprays", "Oils"],
+      "Nail Care": ["Polishes", "Nail Tools", "Manicure Sets"],
+      "Tools & Accessories": ["Makeup Brushes", "Sponges", "Tweezers"],
+      "Men's Grooming": ["Aftershaves", "Beard Oils", "Shaving Kits"],
+      "Beauty Kits & Sets": ["Starter Kits", "Gift Sets"],
+      "Professional Supplies": ["Salon-grade Products", "Styling Tools"],
+      "Natural & Organic": ["Herbal Products", "Organic Oils", "Natural Soaps"]
+    }
+  },
+
+  "Hair Salon": {
+    "categories": {
+      "Styling Services": ["Blowout", "Braids", "Weaving", "Cornrows"],
+      "Cut & Shape": ["Men's Cut", "Women's Cut", "Children's Cut"],
+      "Chemical Treatments": ["Relaxing", "Texturizing", "Perming"],
+      "Hair Care Products": ["Shampoos", "Conditioners", "Hair Oils"],
+      "Extensions & Wigs": ["Human Hair", "Synthetic", "Lace Front"],
+      "Tools & Accessories": ["Combs", "Brushes", "Hair Clips"],
+      "Scalp Treatments": ["Anti-dandruff", "Hair Growth Oils"],
+      "Coloring": ["Full Color", "Highlights", "Touch-ups"],
+      "Special Occasion": ["Bridal Styling", "Makeup & Hair Combo"],
+      "Salon Packages": ["Monthly Packages", "Group Bookings"]
+    }
+  },
+
+  "Barbing Salon": {
+    "categories": {
+      "Haircuts": ["Classic Cut", "Fade", "Buzz Cut", "Children's Cut"],
+      "Beard Services": ["Beard Trim", "Shaping", "Hot Towel Shave"],
+      "Shaving Products": ["Shaving Cream", "Razors", "Aftershave"],
+      "Hair Treatments": ["Scalp Massage", "Hair Oils", "Conditioning"],
+      "Accessories": ["Combs", "Clippers", "Towels"],
+      "Kids Services": ["Kids Cut Packages", "School Cuts"],
+      "Promotions": ["Loyalty Cards", "Combo Deals"],
+      "Hygiene & Disposables": ["Disposable Razors", "Sanitary Supplies"]
+    }
+  },
+
+  "Electronics Store": {
+    "categories": {
+      "Home Electronics": ["TVs", "Home Theaters", "DVD Players"],
+      "Audio": ["Speakers", "Bluetooth Speakers", "Soundbars"],
+      "Small Appliances": ["Microwaves", "Blenders", "Irons"],
+      "Cameras & Accessories": ["DSLR", "Point & Shoot", "Tripods"],
+      "Gaming": ["Consoles", "Games", "Controllers"],
+      "Spare Parts": ["Fuses", "Capacitors", "Power Supplies"],
+      "Cables & Connectors": ["HDMI", "AV Cables", "USB Cables"],
+      "Batteries & Power": ["Batteries", "Power Banks", "Inverters"],
+      "Warranty & Services": ["Repairs", "Installation", "Extended Warranty"],
+      "Smart Home": ["Smart Plugs", "Security Cameras", "Sensors"]
+    }
+  },
+
+  "Phone & Accessories": {
+    "categories": {
+      "Mobile Phones": ["Android Phones", "iPhones", "Feature Phones"],
+      "Chargers & Cables": ["Fast Chargers", "USB-C", "Lightning"],
+      "Audio Accessories": ["Earphones", "Headphones", "Bluetooth Earpieces"],
+      "Phone Cases & Covers": ["Silicone Cases", "Leather Cases", "Rugged Cases"],
+      "Screen Protectors": ["Tempered Glass", "Plastic Films"],
+      "Power Banks": ["Small Capacity", "High Capacity"],
+      "SIM & Top-up": ["SIM Sales", "Airtime Recharge", "Data Plans"],
+      "Repairs & Parts": ["Screens", "Batteries", "Back Covers"],
+      "Smartwatches & Wearables": ["Fitness Bands", "Smartwatches"],
+      "Accessories Bundles": ["Starter Packs", "Gifts"]
+    }
+  },
+
+  "Computer Shop": {
+    "categories": {
+      "Laptops & Notebooks": ["Windows Laptops", "MacBooks", "Chromebooks"],
+      "Desktops & All-in-One": ["Gaming PC", "Office PC", "Mini PCs"],
+      "Peripherals": ["Keyboards", "Mice", "Monitors"],
+      "Storage": ["HDD", "SSD", "External Drives"],
+      "Networking": ["Routers", "Switches", "Modems"],
+      "Consumables": ["Ink Cartridges", "Toner", "Printer Paper"],
+      "Components": ["RAM", "Motherboards", "GPUs"],
+      "Software": ["Operating Systems", "Office Suites", "Antivirus"],
+      "Accessories": ["Laptop Bags", "Cooling Pads", "Stands"],
+      "Repair Services": ["Diagnostics", "Hardware Repair", "Data Recovery"]
+    }
+  },
+
+  "Bakery": {
+    "categories": {
+      "Bread": ["Loaves", "Dinner Rolls", "Specialty Bread"],
+      "Pastries": ["Danish", "Puff Pastry", "Sausage Rolls"],
+      "Cakes": ["Birthday Cakes", "Custom Cakes", "Cupcakes"],
+      "Savory Bakes": ["Meat Pie", "Chicken Pie", "Quiches"],
+      "Breakfast Items": ["Donuts", "Muffins", "Buns"],
+      "Beverages": ["Coffee", "Tea", "Cold Drinks"],
+      "Dessert Boxes": ["Assorted Sweets", "Gift Packs"],
+      "Ingredients": ["Flour", "Sugar", "Yeast", "Butter"],
+      "Bakery Packaging": ["Boxes", "Cake Boards", "Doilies"],
+      "Special Orders": ["Wedding Cakes", "Corporate Orders"]
+    }
+  },
+
+  "Agent Shop": {
+    "categories": {
+      "Cash Services": ["Deposits", "Withdrawals", "Transfers"],
+      "Airtime & Data": ["Airtime Top-up", "Data Bundles", "Promotional Bundles"],
+      "Bills Payment": ["Electricity (PHCN) Bills", "Cable TV (DSTV/GOtv)", "Taxes"],
+      "Ticketing & Payments": ["Transport Tickets", "Event Ticketing", "School Fees"],
+      "Recharge Cards": ["Scratch Cards", "E-vouchers"],
+      "Mobile Money": ["Wallet Funding", "Merchant Payments"],
+      "Financial Services": ["Microloans", "Savings Products"],
+      "Agent Tools": ["Receipt Rolls", "POS Paper", "Cash Drawer"],
+      "KYC & Verification": ["BVN Checks", "ID Verification"],
+      "Value Added": ["Insurance Top-up", "Lottery"]
+    }
+  },
+
+  "Furniture Store": {
+    "categories": {
+      "Living Room": ["Sofas", "TV Stands", "Coffee Tables", "Bookcases"],
+      "Bedroom": ["Beds", "Wardrobes", "Mattresses", "Bedside Tables"],
+      "Dining": ["Dining Tables", "Dining Chairs", "Sideboards"],
+      "Office Furniture": ["Office Desks", "Chairs", "Filing Cabinets"],
+      "Outdoor Furniture": ["Patio Sets", "Garden Chairs", "Umbrellas"],
+      "Kids Furniture": ["Bunk Beds", "Study Tables", "Toy Storage"],
+      "Storage Solutions": ["Shelving", "Closet Organizers"],
+      "Home Decor": ["Rugs", "Curtains", "Cushions"],
+      "Upholstery & Repairs": ["Reupholstery Service", "Cushion Refills"],
+      "Custom Orders": ["Bespoke Furniture", "Measurements & Delivery"]
+    }
+  },
+
+  "Building Materials": {
+    "categories": {
+      "Cement & Aggregates": ["Portland Cement", "Fine Sand", "Gravel"],
+      "Roofing Materials": ["Corrugated Sheets", "Roof Nails", "Ridge Caps"],
+      "Timber & Plywood": ["Planks", "Boards", "Plywood Sheets"],
+      "Bricks & Blocks": ["Concrete Blocks", "Clay Bricks", "Interlocking Blocks"],
+      "Electrical Supplies": ["Cables", "Switches", "Sockets", "Bulbs"],
+      "Plumbing": ["Pipes", "Fittings", "Valves", "Taps"],
+      "Paints & Coatings": ["Interior Paint", "Exterior Paint", "Primers"],
+      "Tools & Hardware": ["Hammers", "Saws", "Drills", "Nails"],
+      "Sanitary Ware": ["Toilets", "Sinks", "Bath Tubs"],
+      "Adhesives & Sealants": ["Cement Adhesive", "Silicones", "Construction Glue"]
+    }
+  },
+
+  "Car Spare Parts": {
+    "categories": {
+      "Engine Parts": ["Filters", "Spark Plugs", "Belts", "Pistons"],
+      "Electrical Parts": ["Batteries", "Alternators", "Bulbs", "Fuses"],
+      "Brakes & Suspension": ["Brake Pads", "Discs", "Shock Absorbers"],
+      "Body Parts": ["Bumpers", "Mirrors", "Grilles", "Doors"],
+      "Transmission & Drivetrain": ["Clutch Kits", "Gearboxes", "CV Joints"],
+      "Tyres & Wheels": ["Tyres", "Rims", "Wheel Nuts"],
+      "Lubricants & Fluids": ["Engine Oil", "Brake Fluid", "Coolants"],
+      "Accessories": ["Seat Covers", "Car Mats", "Air Fresheners"],
+      "Tools & Equipment": ["Jacks", "Wrenches", "Diagnostic Tools"],
+      "Consumables": ["Cleaning Products", "Polish", "Rags"]
+    }
+  },
+
+  "Baby Shop": {
+    "categories": {
+      "Feeding": ["Infant Formula", "Feeding Bottles", "Breast Pumps"],
+      "Diapers & Wipes": ["Disposable Diapers", "Cloth Diapers", "Wipes"],
+      "Clothing": ["Newborn", "0-6 Months", "6-24 Months"],
+      "Toys & Learning": ["Soft Toys", "Educational Toys", "Rattles"],
+      "Baby Care": ["Baby Lotion", "Ointments", "Baby Soap"],
+      "Nursery Furniture": ["Cribs", "Changing Tables", "Mattress"],
+      "Strollers & Car Seats": ["Prams", "Travel Systems"],
+      "Safety & Health": ["Thermometers", "Nasal Aspirators", "Baby Gates"],
+      "Gifts & Sets": ["Gift Packs", "Welcome Kits"],
+      "Accessories": ["Pacifiers", "Bib", "Bottles Accessories"]
+    }
+  },
+
+  "Pet Shop": {
+    "categories": {
+      "Pet Food": ["Dog Food", "Cat Food", "Bird Feed", "Fish Food"],
+      "Treats & Snacks": ["Dog Treats", "Cat Treats", "Training Treats"],
+      "Accessories": ["Leads & Collars", "Bowls", "Beds", "Cages"],
+      "Grooming": ["Shampoos", "Brushes", "Nail Clippers"],
+      "Health & Supplements": ["Vitamins", "Flea & Tick Treatments", "Wormers"],
+      "Aquarium Supplies": ["Filters", "Heaters", "Decor"],
+      "Toys": ["Chew Toys", "Catnip Toys", "Interactive Toys"],
+      "Services": ["Grooming Service", "Pet Boarding", "Vaccination Support"],
+      "Small Pets": ["Hamsters", "Guinea Pigs", "Rabbits Care"],
+      "Bird Supplies": ["Perches", "Cages", "Seed Mixes"]
+    }
+  },
+
+  "Bookstore & Stationery": {
+    "categories": {
+      "School Books": ["Primary School", "Secondary School", "Exam Preparatory"],
+      "Religious Books": ["Christian", "Islamic", "Study Guides"],
+      "Novels & Fiction": ["Romance", "Thriller", "Literary"],
+      "Professional & Academic": ["Law", "Medicine", "Engineering"],
+      "Stationery": ["Notebooks", "Pens", "Folders"],
+      "Office Supplies": ["Printer Paper", "Ink", "Staplers"],
+      "Art Supplies": ["Paints", "Brushes", "Sketchbooks"],
+      "Magazines & Periodicals": ["Local Magazines", "International"],
+      "Children's Books": ["Picture Books", "Early Readers"],
+      "Gifts & Educational Toys": ["Puzzles", "Learning Games", "Flashcards"]
+    }
+  },
+
+  "Gym / Fitness": {
+    "categories": {
+      "Equipment": ["Dumbbells", "Kettlebells", "Treadmills", "Exercise Bikes"],
+      "Supplements": ["Protein Powder", "Pre-workout", "Amino Acids"],
+      "Apparel": ["Training Shirts", "Shorts", "Gym Shoes"],
+      "Accessories": ["Workout Gloves", "Belts", "Resistance Bands"],
+      "Fitness Programs": ["Personal Training", "Group Classes", "Bootcamps"],
+      "Recovery": ["Foam Rollers", "Massage Tools", "Compression Gear"],
+      "Nutrition": ["Meal Plans", "Healthy Snacks", "Shakers"],
+      "Memberships": ["Monthly", "Quarterly", "Annual"],
+      "Hygiene": ["Towels", "Sanitizers", "Shower Supplies"],
+      "Services": ["Body Composition Test", "Fitness Assessment"]
+    }
+  },
+
+  "Laundry": {
+    "categories": {
+      "Wash & Fold": ["Per Kg Wash", "Per Item Wash", "Express Service"],
+      "Dry Cleaning": ["Suits", "Delicates", "Silk Items"],
+      "Ironing & Pressing": ["Shirts Pressing", "Trousers Pressing", "Bulk Press"],
+      "Household Laundry": ["Bedsheets", "Curtains", "Rugs"],
+      "Stain Treatment": ["Grease Removal", "Wine Stain", "Ink Stain"],
+      "Special Care": ["Leather", "Suede", "Wool"],
+      "Pickup & Delivery": ["Local Delivery", "Scheduled Pickup"],
+      "Detergents & Additives": ["Laundry Soap", "Fabric Softener", "Bleach"],
+      "Memberships & Subscriptions": ["Weekly Plan", "Monthly Plan"],
+      "Packaging": ["Poly Bags", "Hangers", "Labeled Bags"]
+    }
+  },
+
+  "Cafe": {
+    "categories": {
+      "Espresso Drinks": ["Espresso", "Americano", "Macchiato", "Ristretto"],
+      "Milk-Based Drinks": ["Cappuccino", "Latte", "Flat White", "Mocha"],
+      "Cold Drinks": ["Iced Coffee", "Iced Tea", "Frappes", "Smoothies"],
+      "Tea Selection": ["Black Tea", "Green Tea", "Herbal Tea"],
+      "Bakery & Pastries": ["Croissants", "Scones", "Muffins"],
+      "Light Meals": ["Sandwiches", "Salads", "Quiches"],
+      "Desserts": ["Cheesecake", "Brownies", "Tarts"],
+      "Breakfast Sets": ["Continental", "Local Breakfast", "Combo Meals"],
+      "Merch & Beans": ["Packaged Beans", "Mugs", "Coffee Gear"],
+      "Seasonal Specials": ["Holiday Drinks", "Limited Editions"]
+    }
+  },
+
+  "Frozen Food Store": {
+    "categories": {
+      "Frozen Meats": ["Frozen Chicken", "Beef Cuts", "Goat/Sheep"],
+      "Frozen Fish & Seafood": ["Tilapia", "Catfish", "Shrimp", "Crabs"],
+      "Frozen Vegetables": ["Peas", "Mixed Veg", "Corn"],
+      "Frozen Ready Meals": ["Frozen Pizza", "Frozen Fries", "Lasagna"],
+      "Frozen Snacks": ["Spring Rolls", "Samosa", "Meat Pie"],
+      "Ice & Packaging": ["Ice Blocks", "Ice Bags", "Insulated Boxes"],
+      "Bulk Wholesale": ["Event Supplies", "Restaurant Supply"],
+      "Frozen Fruits": ["Mango", "Berries", "Pineapple"],
+      "Frozen Desserts": ["Ice Cream", "Frozen Yogurt", "Popsicles"],
+      "Storage Equipment": ["Freezer Parts", "Thermometers", "Defrosting Agents"]
+    }
+  },
+
+  "Fish & Meat Market": {
+    "categories": {
+      "Fresh Fish": ["Catfish", "Tilapia", "Mackerel", "Smoked Fish"],
+      "Fresh Meat": ["Beef", "Goat", "Poultry", "Bush Meat"],
+      "Processed Meat": ["Sausages", "Smoked Meats", "Packaged Portions"],
+      "Offals & Special Cuts": ["Liver", "Kidney", "Tripe", "Bones"],
+      "Live Fish & Poultry": ["Live Catfish", "Chicken"],
+      "Butchery Services": ["Cutting to Order", "Portioning", "Packaging"],
+      "Seasonings & Marinades": ["Pepper Mix", "Suya Spice", "Stock Cubes"],
+      "Preservation": ["Ice", "Cooling Packs", "Vacuum Bags"],
+      "Wholesale Orders": ["Bulk Slaughter Orders", "Restaurant Supply"],
+      "Hygiene Supplies": ["Gloves", "Aprons", "Sanitizers"]
+    }
+  },
+
+  "Agro Store": {
+    "categories": {
+      "Animal Feed": ["Layer Feed", "Broiler Feed", "Pig Feed", "Fish Feed"],
+      "Fertilizers": ["NPK", "Urea", "Organic Fertilizers"],
+      "Seeds & Seedlings": ["Vegetable Seeds", "Maize Seed", "Rice Seed"],
+      "Pesticides & Herbicides": ["Insecticides", "Weed Killers", "Fungicides"],
+      "Tools & Equipment": ["Sprayers", "Hand Tools", "Irrigation Supplies"],
+      "Livestock Supplies": ["Vaccines", "Dewormers", "Supplements"],
+      "Fencing & Housing": ["Netting", "Shade Nets", "Coops"],
+      "Soil Amendments": ["Lime", "Compost", "Mulch"],
+      "Packaging & Bags": ["Sacks", "Seed Bags", "Bulk Containers"],
+      "Consultancy & Services": ["Soil Testing", "Extension Services", "Farm Planning"]
+    }
+  }
+}
