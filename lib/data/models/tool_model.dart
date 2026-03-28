@@ -137,13 +137,13 @@ class AppTools {
       icon: Icons.payment_outlined,
       route: '/payment-method',
     ),
-    ToolModel(
-      id: 'online_store',
-      name: 'Online Store',
-      iconPath: 'assets/icons/online_store.png',
-      icon: Icons.language_outlined,
-      route: '/online-store',
-    ),
+    // ToolModel(
+    //   id: 'online_store',
+    //   name: 'Online Store',
+    //   iconPath: 'assets/icons/online_store.png',
+    //   icon: Icons.language_outlined,
+    //   route: '/online-store',
+    // ),
     ToolModel(
       id: 'new_product',
       name: 'New Product',

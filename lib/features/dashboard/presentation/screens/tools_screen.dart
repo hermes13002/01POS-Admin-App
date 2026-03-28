@@ -20,9 +20,7 @@ class ToolsScreen extends HookConsumerWidget {
     final searchQuery = useState('');
 
     final filteredTools = useMemoized(() {
-      final availableTools = AppTools.allTools
-          .where((tool) => !quickActions.any((q) => q.id == tool.id))
-          .toList();
+      final availableTools = AppTools.allTools;
 
       if (searchQuery.value.isEmpty) {
         return availableTools;

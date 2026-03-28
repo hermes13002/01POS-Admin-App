@@ -84,7 +84,7 @@ class EditProductDialog extends HookConsumerWidget {
                         // semi-transparent overlay
                         Container(
                           decoration: BoxDecoration(
-                            color: Colors.black.withOpacity(0.4),
+                            color: Colors.black.withValues(alpha: 0.4),
                           ),
                         ),
                         // scan window "cutout"

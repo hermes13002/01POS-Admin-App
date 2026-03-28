@@ -32,12 +32,9 @@ class SignupScreen extends HookConsumerWidget {
     final businessNameCtrl = useTextEditingController();
     final businessEmailCtrl = useTextEditingController();
     final whatsappCtrl = useTextEditingController();
-    final addressCtrl = useTextEditingController();
-    final passwordCtrl = useTextEditingController();
 
     final industryType = useState<String?>(null);
     final agreedToTerms = useState(false);
-    final obscurePassword = useState(true);
 
     Future<void> submit() async {
       if (!formKey.currentState!.validate()) return;
@@ -63,11 +60,11 @@ class SignupScreen extends HookConsumerWidget {
       final body = {
         "company_name": businessNameCtrl.text.trim(),
         "company_email": businessEmailCtrl.text.trim(),
-        "company_address": addressCtrl.text.trim(),
+        "company_address": "14, lagos", // handled by admin
         "company_number": whatsappCtrl.text.trim(),
         "company_type": industryType.value,
-        "password": passwordCtrl.text,
-        "captcha_token": token ?? '',
+        "password": "", // handled by admin
+        // "captcha_token": '',
       };
 
       final error = await ref.read(authProvider.notifier).signUp(body);
@@ -113,7 +110,7 @@ class SignupScreen extends HookConsumerWidget {
             ),
           ),
           // dark overlay
-          Container(color: Colors.black.withOpacity(0.35)),
+          Container(color: Colors.black.withValues(alpha: 0.35)),
           // card content
           SafeArea(
             child: Center(
@@ -130,7 +127,7 @@ class SignupScreen extends HookConsumerWidget {
                     borderRadius: BorderRadius.circular(20),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.15),
+                        color: Colors.black.withValues(alpha: 0.15),
                         blurRadius: 24,
                         offset: const Offset(0, 8),
                       ),
@@ -162,19 +159,14 @@ class SignupScreen extends HookConsumerWidget {
                         const SizedBox(height: 24),
 
                         // Title
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            Text(
-                              "Let's create your account",
-                              style: GoogleFonts.poppins(
-                                fontSize: 28,
-                                fontWeight: FontWeight.w600,
-                                color: AppTheme.textPrimary,
-                                height: 1.2,
-                              ),
-                            ),
-                          ],
+                        Text(
+                          "Let's create your account",
+                          style: GoogleFonts.poppins(
+                            fontSize: 28,
+                            fontWeight: FontWeight.w600,
+                            color: AppTheme.textPrimary,
+                            height: 1.2,
+                          ),
                         ),
                         const SizedBox(height: 32),
 
@@ -297,87 +289,6 @@ class SignupScreen extends HookConsumerWidget {
                         ),
                         const SizedBox(height: 16),
 
-                        // Business Address (Missing from mockup, required by API)
-                        const _FieldLabel('Business Address'),
-                        const SizedBox(height: 8),
-                        TextFormField(
-                          controller: addressCtrl,
-                          textInputAction: TextInputAction.next,
-                          validator: (val) => Validators.validateRequired(
-                            val,
-                            'Business Address',
-                          ),
-                          decoration: InputDecoration(
-                            hintText: '123 Main Street, City',
-                            hintStyle: GoogleFonts.poppins(
-                              color: AppTheme.textSecondary,
-                              fontSize: 13,
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: const BorderSide(
-                                color: AppTheme.grey300,
-                              ),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: const BorderSide(
-                                color: AppTheme.grey300,
-                              ),
-                            ),
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 14,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-
-                        // Password (Missing from mockup, required by API)
-                        const _FieldLabel('Password'),
-                        const SizedBox(height: 8),
-                        TextFormField(
-                          controller: passwordCtrl,
-                          obscureText: obscurePassword.value,
-                          textInputAction: TextInputAction.next,
-                          validator: Validators.validatePassword,
-                          decoration: InputDecoration(
-                            hintText: 'Password',
-                            hintStyle: GoogleFonts.poppins(
-                              color: AppTheme.textSecondary,
-                              fontSize: 13,
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: const BorderSide(
-                                color: AppTheme.grey300,
-                              ),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: const BorderSide(
-                                color: AppTheme.grey300,
-                              ),
-                            ),
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 14,
-                            ),
-                            suffixIcon: IconButton(
-                              icon: Icon(
-                                obscurePassword.value
-                                    ? Icons.visibility_outlined
-                                    : Icons.visibility_off_outlined,
-                                color: AppTheme.grey500,
-                                size: 20,
-                              ),
-                              onPressed: () => obscurePassword.value =
-                                  !obscurePassword.value,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-
                         // Industry Type
                         const _FieldLabel('Industry type'),
                         const SizedBox(height: 8),
@@ -474,7 +385,6 @@ class SignupScreen extends HookConsumerWidget {
                           child: ElevatedButton(
                             onPressed: isLoading.value ? null : submit,
                             style: ElevatedButton.styleFrom(
-                              // backgroundColor: const Color(0xFF2C3258),
                               backgroundColor: AppTheme.primaryColor,
                               foregroundColor: Colors.white,
                               shape: RoundedRectangleBorder(

@@ -14,7 +14,7 @@ class AppTheme {
   static const Color successColor = Color(0xFF4CAF50);
   static const Color white = Colors.white;
   static const Color blue = Color.fromRGBO(83, 157, 243, 1);
-  
+
   // grey shades
   static const Color grey50 = Color(0xFFFAFAFA);
   static const Color grey100 = Color(0xFFF5F5F5);
@@ -76,13 +76,13 @@ class AppTheme {
       ),
 
       textSelectionTheme: TextSelectionThemeData(
-        selectionColor: primaryColor.withOpacity(0.3),
+        selectionColor: primaryColor.withValues(alpha: 0.3),
         cursorColor: primaryColor,
         selectionHandleColor: primaryColor,
       ),
-      
+
       primaryTextTheme: _poppinsTextTheme,
-      
+
       // text theme
       textTheme: _poppinsTextTheme.copyWith(
         displayLarge: _poppinsTextTheme.displayLarge?.copyWith(
@@ -121,15 +121,9 @@ class AppTheme {
           color: textPrimary,
           fontWeight: FontWeight.w500,
         ),
-        bodyLarge: _poppinsTextTheme.bodyLarge?.copyWith(
-          color: textPrimary,
-        ),
-        bodyMedium: _poppinsTextTheme.bodyMedium?.copyWith(
-          color: textPrimary,
-        ),
-        bodySmall: _poppinsTextTheme.bodySmall?.copyWith(
-          color: textSecondary,
-        ),
+        bodyLarge: _poppinsTextTheme.bodyLarge?.copyWith(color: textPrimary),
+        bodyMedium: _poppinsTextTheme.bodyMedium?.copyWith(color: textPrimary),
+        bodySmall: _poppinsTextTheme.bodySmall?.copyWith(color: textSecondary),
         labelLarge: _poppinsTextTheme.labelLarge?.copyWith(
           color: textPrimary,
           fontWeight: FontWeight.w500,
@@ -137,9 +131,7 @@ class AppTheme {
         labelMedium: _poppinsTextTheme.labelMedium?.copyWith(
           color: textSecondary,
         ),
-        labelSmall: _poppinsTextTheme.labelSmall?.copyWith(
-          color: textHint,
-        ),
+        labelSmall: _poppinsTextTheme.labelSmall?.copyWith(color: textHint),
       ),
 
       // app bar theme
@@ -232,24 +224,14 @@ class AppTheme {
           borderRadius: BorderRadius.circular(borderRadiusMedium),
           borderSide: const BorderSide(color: errorColor, width: 1.5),
         ),
-        hintStyle: GoogleFonts.poppins(
-          color: textHint,
-          fontSize: 14,
-        ),
+        hintStyle: GoogleFonts.poppins(color: textHint, fontSize: 14),
       ),
 
       // icon theme
-      iconTheme: const IconThemeData(
-        color: textPrimary,
-        size: 24,
-      ),
+      iconTheme: const IconThemeData(color: textPrimary, size: 24),
 
       // divider theme
-      dividerTheme: DividerThemeData(
-        color: grey300,
-        thickness: 1,
-        space: 1,
-      ),
+      dividerTheme: DividerThemeData(color: grey300, thickness: 1, space: 1),
     );
   }
 }

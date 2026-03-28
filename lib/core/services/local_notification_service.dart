@@ -77,10 +77,11 @@ class LocalNotificationService {
           importance: Importance.max,
           priority: Priority.high,
           sound: RawResourceAndroidNotificationSound('notification_sound'),
-          enableVibration: true
+          enableVibration: true,
         );
     const NotificationDetails platformChannelSpecifics = NotificationDetails(
       android: androidPlatformChannelSpecifics,
+      iOS: DarwinNotificationDetails(),
     );
 
     await flutterLocalNotificationsPlugin.show(
@@ -113,8 +114,9 @@ class LocalNotificationService {
           importance: Importance.max,
           priority: Priority.high,
           sound: RawResourceAndroidNotificationSound('notification_sound'),
-          enableVibration: true
+          enableVibration: true,
         ),
+        iOS: DarwinNotificationDetails(),
       ),
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       matchDateTimeComponents: DateTimeComponents.time,
@@ -143,8 +145,9 @@ class LocalNotificationService {
           importance: Importance.max,
           priority: Priority.high,
           sound: RawResourceAndroidNotificationSound('notification_sound'),
-          enableVibration: true
+          enableVibration: true,
         ),
+        iOS: DarwinNotificationDetails(),
       ),
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,

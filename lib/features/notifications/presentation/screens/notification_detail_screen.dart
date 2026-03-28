@@ -54,7 +54,7 @@ class _DetailBody extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: AppTheme.blue.withOpacity(0.1),
+              color: AppTheme.blue.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
@@ -114,7 +114,7 @@ class _DetailBody extends StatelessWidget {
               child: Row(
                 children: [
                   CircleAvatar(
-                    backgroundColor: AppTheme.blue.withOpacity(0.1),
+                    backgroundColor: AppTheme.blue.withValues(alpha: 0.1),
                     child: Text(
                       detail.user!.firstname[0],
                       style: const TextStyle(color: AppTheme.blue),

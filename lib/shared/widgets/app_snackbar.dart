@@ -102,10 +102,7 @@ class _SnackbarOverlayState extends State<_SnackbarOverlay>
     _offsetAnimation = Tween<Offset>(
       begin: const Offset(0, -1),
       end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeOut,
-    ));
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
 
     _controller.forward();
 
@@ -139,7 +136,7 @@ class _SnackbarOverlayState extends State<_SnackbarOverlay>
               borderRadius: BorderRadius.circular(12),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
+                  color: Colors.black.withValues(alpha: 0.2),
                   blurRadius: 8,
                   offset: const Offset(0, 4),
                 ),
@@ -147,11 +144,7 @@ class _SnackbarOverlayState extends State<_SnackbarOverlay>
             ),
             child: Row(
               children: [
-                Icon(
-                  widget.icon,
-                  color: Colors.white,
-                  size: 24,
-                ),
+                Icon(widget.icon, color: Colors.white, size: 24),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(

@@ -54,9 +54,9 @@ class AddCustomerScreen extends HookConsumerWidget {
               // preference field
               CustomTextField(
                 controller: preferenceController,
-                hint: 'Preference',
+                hint: 'Email or Phone Number',
                 validator: (val) =>
-                    Validators.validateRequired(val, 'Preference'),
+                    Validators.validateRequired(val, 'Email or Phone Number'),
               ),
 
               const Spacer(),

@@ -73,7 +73,7 @@ class ResetPasswordScreen extends HookConsumerWidget {
             ),
           ),
           // dark overlay
-          Container(color: Colors.black.withOpacity(0.35)),
+          Container(color: Colors.black.withValues(alpha: 0.35)),
           // card content
           SafeArea(
             child: Center(
@@ -90,7 +90,7 @@ class ResetPasswordScreen extends HookConsumerWidget {
                     borderRadius: BorderRadius.circular(20),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.15),
+                        color: Colors.black.withValues(alpha: 0.15),
                         blurRadius: 24,
                         offset: const Offset(0, 8),
                       ),

@@ -123,7 +123,7 @@ class IndividualChatScreen extends HookConsumerWidget {
               color: AppTheme.white,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: Colors.black.withValues(alpha: 0.05),
                   blurRadius: 10,
                   offset: const Offset(0, -5),
                 ),
@@ -280,7 +280,7 @@ class _MessageBubble extends StatelessWidget {
               decoration: BoxDecoration(
                 color: isMe
                     ? AppTheme.primaryColor
-                    : AppTheme.primaryColor.withOpacity(0.12),
+                    : AppTheme.primaryColor.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.only(
                   topLeft: const Radius.circular(16),
                   topRight: const Radius.circular(16),

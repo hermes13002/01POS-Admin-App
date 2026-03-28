@@ -60,7 +60,7 @@ class SalesScreen extends HookConsumerWidget {
         actions: [
           IconButton(
             icon: const Icon(
-              Icons.settings_outlined,
+              Icons.download_rounded,
               color: AppTheme.textPrimary,
             ),
             onPressed: () =>
@@ -500,12 +500,33 @@ class _SalesFilterDialog extends HookWidget {
     final selectedStatus = useState<String?>(initialFilter.status);
     final startDate = useState<DateTime?>(initialFilter.startDate);
     final endDate = useState<DateTime?>(initialFilter.endDate);
+    final minPriceController = useTextEditingController(
+      text: (initialFilter.minPrice ?? 0).toStringAsFixed(0),
+    );
+    final maxPriceController = useTextEditingController(
+      text: (initialFilter.maxPrice ?? 1000000).toStringAsFixed(0),
+    );
+
     final rangeValues = useState(
       RangeValues(
         initialFilter.minPrice ?? 0,
         initialFilter.maxPrice ?? 1000000,
       ),
     );
+
+    // Sync text fields when slider moves
+    useEffect(() {
+      final minStr = rangeValues.value.start.toStringAsFixed(0);
+      final maxStr = rangeValues.value.end.toStringAsFixed(0);
+
+      if (minPriceController.text != minStr) {
+        minPriceController.text = minStr;
+      }
+      if (maxPriceController.text != maxStr) {
+        maxPriceController.text = maxStr;
+      }
+      return null;
+    }, [rangeValues.value]);
 
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -543,20 +564,123 @@ class _SalesFilterDialog extends HookWidget {
                 ),
               ),
               const SizedBox(height: 8),
-              Text(
-                '${AmountFormatter.formatCurrency(rangeValues.value.start)} - ${AmountFormatter.formatCurrency(rangeValues.value.end)}',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
+              Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Min Price',
+                          style: GoogleFonts.poppins(
+                            fontSize: 12,
+                            color: AppTheme.textSecondary,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        TextField(
+                          controller: minPriceController,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          keyboardType: TextInputType.number,
+                          decoration: InputDecoration(
+                            isDense: true,
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 10,
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            prefixText: '₦ ',
+                            prefixStyle: GoogleFonts.plusJakartaSans(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          onChanged: (val) {
+                            final v = double.tryParse(val);
+                            if (v != null &&
+                                v >= 0 &&
+                                v <= rangeValues.value.end) {
+                              rangeValues.value = RangeValues(
+                                v,
+                                rangeValues.value.end,
+                              );
+                            }
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Max Price',
+                          style: GoogleFonts.poppins(
+                            fontSize: 12,
+                            color: AppTheme.textSecondary,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        TextField(
+                          controller: maxPriceController,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          keyboardType: TextInputType.number,
+                          decoration: InputDecoration(
+                            isDense: true,
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 10,
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            prefixText: '₦ ',
+                            prefixStyle: GoogleFonts.plusJakartaSans(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          onChanged: (val) {
+                            final v = double.tryParse(val);
+                            if (v != null &&
+                                v >= rangeValues.value.start &&
+                                v <= 10000000) {
+                              // allowed up to 10M via text
+                              rangeValues.value = RangeValues(
+                                rangeValues.value.start,
+                                v,
+                              );
+                            }
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
+              const SizedBox(height: AppTheme.spacingSmall),
               RangeSlider(
-                values: rangeValues.value,
+                values: RangeValues(
+                  rangeValues.value.start.clamp(0, 1000000),
+                  rangeValues.value.end.clamp(0, 1000000),
+                ),
                 min: 0,
                 max: 1000000,
                 activeColor: AppTheme.primaryColor,
                 inactiveColor: AppTheme.grey300,
-                onChanged: (v) => rangeValues.value = v,
+                onChanged: (v) {
+                  rangeValues.value = v;
+                },
               ),
               const SizedBox(height: AppTheme.spacingMedium),
 

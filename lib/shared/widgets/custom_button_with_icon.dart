@@ -50,7 +50,7 @@ class CustomButtonWithIcon extends StatelessWidget {
         onPressed: isLoading ? null : onPressed,
         style: OutlinedButton.styleFrom(
           minimumSize: Size(width ?? double.infinity, height),
-          padding: padding ?? const EdgeInsets.symmetric(horizontal: 24),
+          padding: padding ?? const EdgeInsets.symmetric(horizontal: 12),
           shape: RoundedRectangleBorder(
             borderRadius: borderRadius ?? BorderRadius.circular(8),
           ),
@@ -66,7 +66,7 @@ class CustomButtonWithIcon extends StatelessWidget {
         backgroundColor: backgroundColor ?? Colors.black,
         foregroundColor: textColor ?? Colors.white,
         minimumSize: Size(width ?? double.infinity, height),
-        padding: padding ?? const EdgeInsets.symmetric(horizontal: 24),
+        padding: padding ?? const EdgeInsets.symmetric(horizontal: 12),
         shape: RoundedRectangleBorder(
           borderRadius: borderRadius ?? BorderRadius.circular(12),
         ),
@@ -97,7 +97,9 @@ class CustomButtonWithIcon extends StatelessWidget {
       children: [
         Icon(icon, size: iconSize, color: iconColor),
         SizedBox(width: spacing),
-        Text(text),
+        Flexible(
+          child: Text(text, overflow: TextOverflow.ellipsis, maxLines: 1),
+        ),
       ],
     );
   }

@@ -38,6 +38,11 @@ class HomeScreen extends HookConsumerWidget {
     final profileAsync = ref.watch(userProfileProvider);
     final reportsAsync = ref.watch(reportsProvider);
 
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final greetingFontSize = screenWidth < 360
+        ? 16.0
+        : (screenWidth < 400 ? 18.0 : 20.0);
+
     // cycle background images every 5 seconds
     useEffect(() {
       final timer = Timer.periodic(const Duration(seconds: 5), (_) {
@@ -72,7 +77,7 @@ class HomeScreen extends HookConsumerWidget {
             final reportsFuture = reportsNotifier.refresh();
             final profileFuture = ref.refresh(userProfileProvider.future);
             final chatFuture = ref.refresh(chatContactsProvider.future);
-            ref.refresh(quickActionsProvider);
+            final _ = ref.refresh(quickActionsProvider);
 
             await Future.wait([reportsFuture, profileFuture, chatFuture]);
           },
@@ -90,14 +95,14 @@ class HomeScreen extends HookConsumerWidget {
                   child: Row(
                     children: [
                       Expanded(
-                        child: Text(
-                          profileAsync.when(
+                        child: _MarqueeGreeting(
+                          text: profileAsync.when(
                             data: (p) => 'Welcome, ${p.firstname}',
                             loading: () => 'Welcome...',
                             error: (_, __) => 'Welcome',
                           ),
                           style: GoogleFonts.poppins(
-                            fontSize: 20,
+                            fontSize: greetingFontSize,
                             fontWeight: FontWeight.w700,
                             color: Colors.black,
                           ),
@@ -247,9 +252,7 @@ class HomeScreen extends HookConsumerWidget {
                         // dark overlay
                         Container(
                           height: 260,
-                          decoration: BoxDecoration(
-                            color: Colors.black.withOpacity(0.30),
-                          ),
+                          color: Colors.black.withValues(alpha: 0.30),
                         ),
                         // content
                         SizedBox(
@@ -382,8 +385,8 @@ class HomeScreen extends HookConsumerWidget {
                                         Text(
                                           'So far $periodLabel, your business has made',
                                           style: GoogleFonts.poppins(
-                                            color: Colors.white.withOpacity(
-                                              0.9,
+                                            color: Colors.white.withValues(
+                                              alpha: 0.9,
                                             ),
                                             fontWeight: FontWeight.w400,
                                             fontSize: 13,
@@ -417,8 +420,8 @@ class HomeScreen extends HookConsumerWidget {
                                             Text(
                                               trendText,
                                               style: GoogleFonts.poppins(
-                                                color: Colors.white.withOpacity(
-                                                  0.95,
+                                                color: Colors.white.withValues(
+                                                  alpha: 0.95,
                                                 ),
                                                 fontSize: 12,
                                                 fontWeight: FontWeight.w500,
@@ -570,7 +573,7 @@ class HomeScreen extends HookConsumerWidget {
         color: selected ? Colors.white : Colors.transparent,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: selected ? Colors.white : Colors.white.withOpacity(0.6),
+          color: selected ? Colors.white : Colors.white.withValues(alpha: 0.6),
           width: 1,
         ),
       ),
@@ -682,7 +685,7 @@ class EditQuickActionsSheet extends HookConsumerWidget {
                           crossAxisCount: 4,
                           crossAxisSpacing: AppTheme.spacingSmall,
                           mainAxisSpacing: AppTheme.spacingSmall,
-                          childAspectRatio: 0.8,
+                          mainAxisExtent: 110,
                         ),
                     itemCount: quickActions.length,
                     itemBuilder: (context, index) {
@@ -732,7 +735,7 @@ class EditQuickActionsSheet extends HookConsumerWidget {
                                 crossAxisCount: 4,
                                 crossAxisSpacing: AppTheme.spacingSmall,
                                 mainAxisSpacing: AppTheme.spacingSmall,
-                                childAspectRatio: 0.8,
+                                mainAxisExtent: 110,
                               ),
                           itemCount: availableTools.length,
                           itemBuilder: (context, index) {
@@ -937,7 +940,9 @@ void _showReplaceDialog(
                                 style: GoogleFonts.poppins(
                                   fontSize: 10,
                                   fontWeight: FontWeight.w500,
-                                  color: AppTheme.textPrimary.withOpacity(0.7),
+                                  color: AppTheme.textPrimary.withValues(
+                                    alpha: 0.7,
+                                  ),
                                 ),
                                 textAlign: TextAlign.center,
                                 maxLines: 1,
@@ -966,4 +971,70 @@ void _showReplaceDialog(
       );
     },
   );
+}
+
+class _MarqueeGreeting extends HookWidget {
+  final String text;
+  final TextStyle style;
+
+  const _MarqueeGreeting({required this.text, required this.style});
+
+  @override
+  Widget build(BuildContext context) {
+    final scrollController = useScrollController();
+
+    useEffect(() {
+      bool disposed = false;
+
+      Future<void> animate() async {
+        if (!scrollController.hasClients || disposed) return;
+
+        // Give a small delay to ensure maxScrollExtent is correctly calculated
+        await Future.delayed(const Duration(milliseconds: 500));
+        if (!scrollController.hasClients || disposed) return;
+
+        final maxScrollExtent = scrollController.position.maxScrollExtent;
+        if (maxScrollExtent <= 0) return;
+
+        // initial wait
+        await Future.delayed(const Duration(seconds: 2));
+
+        while (scrollController.hasClients && !disposed) {
+          final currentMax = scrollController.position.maxScrollExtent;
+          if (currentMax <= 0) break;
+
+          // scroll to end
+          await scrollController.animateTo(
+            currentMax,
+            duration: Duration(milliseconds: (currentMax * 40).toInt() + 1500),
+            curve: Curves.easeInOut,
+          );
+          if (disposed) break;
+          await Future.delayed(const Duration(seconds: 2));
+
+          // scroll back to start
+          await scrollController.animateTo(
+            0,
+            duration: Duration(milliseconds: (currentMax * 40).toInt() + 1500),
+            curve: Curves.easeInOut,
+          );
+          if (disposed) break;
+          await Future.delayed(const Duration(seconds: 2));
+        }
+      }
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!disposed) animate();
+      });
+
+      return () => disposed = true;
+    }, [text]);
+
+    return SingleChildScrollView(
+      controller: scrollController,
+      scrollDirection: Axis.horizontal,
+      physics: const NeverScrollableScrollPhysics(),
+      child: Text(text, style: style, maxLines: 1),
+    );
+  }
 }

@@ -92,9 +92,6 @@ class _ReportsContent extends ConsumerWidget {
 
                     const SizedBox(height: 16),
 
-                    // ai insights
-                    _AiInsightsSection(insight: data.aiInsight),
-
                     const SizedBox(height: 16),
 
                     // low stock
@@ -450,7 +447,7 @@ class _ExpensesOverviewSectionState extends State<_ExpensesOverviewSection> {
                 width: 12,
                 height: 12,
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.5),
+                  color: color.withValues(alpha: 0.5),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -633,7 +630,7 @@ class _DonutChartPainter extends CustomPainter {
       final paint = Paint()
         ..color = dataIndex == selectedIndex
             ? colors[dataIndex % colors.length]
-            : colors[dataIndex % colors.length].withOpacity(0.8)
+            : colors[dataIndex % colors.length].withValues(alpha: 0.8)
         ..style = PaintingStyle.stroke
         ..strokeWidth = dataIndex == selectedIndex
             ? strokeWidth * 1.1
@@ -664,7 +661,7 @@ class _DonutChartPainter extends CustomPainter {
       final paint = Paint()
         ..color = dataIndex == selectedIndex
             ? colors[dataIndex % colors.length]
-            : colors[dataIndex % colors.length].withOpacity(0.8)
+            : colors[dataIndex % colors.length].withValues(alpha: 0.8)
         ..style = PaintingStyle.stroke
         ..strokeWidth = dataIndex == selectedIndex
             ? strokeWidth * 1.1
@@ -914,12 +911,12 @@ class _StoreHealthSection extends StatelessWidget {
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
-                  colors: [scoreColor.withOpacity(0.6), scoreColor],
+                  colors: [scoreColor.withValues(alpha: 0.6), scoreColor],
                 ),
                 border: Border.all(color: Colors.white, width: 4),
                 boxShadow: [
                   BoxShadow(
-                    color: scoreColor.withOpacity(0.3),
+                    color: scoreColor.withValues(alpha: 0.3),
                     spreadRadius: 2,
                     blurRadius: 12,
                     offset: const Offset(0, 4),
@@ -979,72 +976,6 @@ class _HealthLegendRow extends StatelessWidget {
               fontSize: 14,
               fontWeight: FontWeight.w500,
               color: AppTheme.textPrimary,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Ai insights section
-class _AiInsightsSection extends StatelessWidget {
-  final String insight;
-
-  const _AiInsightsSection({required this.insight});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'AI Insights',
-            style: GoogleFonts.poppins(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: AppTheme.textPrimary,
-            ),
-          ),
-          const SizedBox(height: 12),
-          Container(
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: AppTheme.white,
-              borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  width: 36,
-                  height: 36,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFE3F2FD),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.home_outlined,
-                    size: 20,
-                    color: Color(0xFF2196F3),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    insight,
-                    style: GoogleFonts.poppins(
-                      fontSize: 13,
-                      color: AppTheme.textPrimary,
-                    ),
-                  ),
-                ),
-              ],
             ),
           ),
         ],
@@ -1201,6 +1132,7 @@ class _SalesSummarySection extends StatefulWidget {
 
 class _SalesSummarySectionState extends State<_SalesSummarySection> {
   final ScrollController _scrollController = ScrollController();
+  int? _selectedIndex;
 
   @override
   void dispose() {
@@ -1269,42 +1201,56 @@ class _SalesSummarySectionState extends State<_SalesSummarySection> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Sales Summary',
-                    style: GoogleFonts.poppins(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: AppTheme.textPrimary,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Sales Summary',
+                      style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: AppTheme.textPrimary,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      _legendDot(const Color(0xFF4CAF50)),
-                      const SizedBox(width: 4),
-                      Text(
-                        'Total Sales',
-                        style: GoogleFonts.poppins(
-                          fontSize: 10,
-                          color: AppTheme.textSecondary,
+                    const SizedBox(height: 4),
+                    Wrap(
+                      spacing: 12,
+                      runSpacing: 4,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            _legendDot(const Color(0xFF4CAF50)),
+                            const SizedBox(width: 4),
+                            Text(
+                              'Total Sales',
+                              style: GoogleFonts.poppins(
+                                fontSize: 10,
+                                color: AppTheme.textSecondary,
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                      const SizedBox(width: 12),
-                      _legendDot(AppTheme.grey800),
-                      const SizedBox(width: 4),
-                      Text(
-                        'Number of transactions',
-                        style: GoogleFonts.poppins(
-                          fontSize: 10,
-                          color: AppTheme.textSecondary,
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            _legendDot(AppTheme.grey800),
+                            const SizedBox(width: 4),
+                            Text(
+                              'Number of transactions',
+                              style: GoogleFonts.poppins(
+                                fontSize: 10,
+                                color: AppTheme.textSecondary,
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                    ],
-                  ),
-                ],
+                      ],
+                    ),
+                  ],
+                ),
               ),
               Container(
                 padding: const EdgeInsets.symmetric(
@@ -1389,43 +1335,53 @@ class _SalesSummarySectionState extends State<_SalesSummarySection> {
 
           // y-axis labels + bars
           SizedBox(
-            height: 180,
+            height: 220, // Increased height to accommodate numbers
             child: Row(
               children: [
                 // y-axis labels
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      '\$600',
-                      style: GoogleFonts.poppins(
-                        fontSize: 9,
-                        color: AppTheme.textSecondary,
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 24.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        AmountFormatter.formatCompact(maxSales * 1.0),
+                        style: GoogleFonts.poppins(
+                          fontSize: 9,
+                          color: AppTheme.textSecondary,
+                        ),
                       ),
-                    ),
-                    Text(
-                      '\$500',
-                      style: GoogleFonts.poppins(
-                        fontSize: 9,
-                        color: AppTheme.textSecondary,
+                      Text(
+                        AmountFormatter.formatCompact(maxSales * 0.75),
+                        style: GoogleFonts.poppins(
+                          fontSize: 9,
+                          color: AppTheme.textSecondary,
+                        ),
                       ),
-                    ),
-                    Text(
-                      '\$200',
-                      style: GoogleFonts.poppins(
-                        fontSize: 9,
-                        color: AppTheme.textSecondary,
+                      Text(
+                        AmountFormatter.formatCompact(maxSales * 0.5),
+                        style: GoogleFonts.poppins(
+                          fontSize: 9,
+                          color: AppTheme.textSecondary,
+                        ),
                       ),
-                    ),
-                    Text(
-                      '\$0',
-                      style: GoogleFonts.poppins(
-                        fontSize: 9,
-                        color: AppTheme.textSecondary,
+                      Text(
+                        AmountFormatter.formatCompact(maxSales * 0.25),
+                        style: GoogleFonts.poppins(
+                          fontSize: 9,
+                          color: AppTheme.textSecondary,
+                        ),
                       ),
-                    ),
-                  ],
+                      Text(
+                        '0',
+                        style: GoogleFonts.poppins(
+                          fontSize: 9,
+                          color: AppTheme.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
                 const SizedBox(width: 8),
 
@@ -1436,7 +1392,9 @@ class _SalesSummarySectionState extends State<_SalesSummarySection> {
                       return RawScrollbar(
                         controller: _scrollController,
                         thumbVisibility: true,
-                        thumbColor: AppTheme.primaryColor.withOpacity(0.5),
+                        thumbColor: AppTheme.primaryColor.withValues(
+                          alpha: 0.5,
+                        ),
                         radius: const Radius.circular(8),
                         thickness: 6,
                         child: SingleChildScrollView(
@@ -1449,52 +1407,122 @@ class _SalesSummarySectionState extends State<_SalesSummarySection> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               crossAxisAlignment: CrossAxisAlignment.end,
-                              children: data.map((item) {
+                              children: data.asMap().entries.map((entry) {
+                                final index = entry.key;
+                                final item = entry.value;
+                                final isSelected = _selectedIndex == index;
+
                                 final barHeight =
                                     (item.totalSales / maxSales) * 140;
                                 final txnHeight =
                                     (item.transactions / 250) * 140;
-                                return Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 8.0,
-                                  ),
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.end,
-                                    children: [
-                                      Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.end,
-                                        children: [
+
+                                return GestureDetector(
+                                  behavior: HitTestBehavior.opaque,
+                                  onTap: () {
+                                    setState(() {
+                                      _selectedIndex = isSelected
+                                          ? null
+                                          : index;
+                                    });
+                                  },
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8.0,
+                                    ),
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: [
+                                        if (isSelected)
                                           Container(
-                                            width: 10,
-                                            height: barHeight.clamp(4.0, 140.0),
-                                            decoration: BoxDecoration(
-                                              color: const Color(0xFF4CAF50),
-                                              borderRadius:
-                                                  BorderRadius.circular(2),
+                                            margin: const EdgeInsets.only(
+                                              bottom: 4,
                                             ),
-                                          ),
-                                          const SizedBox(width: 2),
-                                          Container(
-                                            width: 10,
-                                            height: txnHeight.clamp(4.0, 140.0),
-                                            decoration: BoxDecoration(
-                                              color: AppTheme.grey800,
-                                              borderRadius:
-                                                  BorderRadius.circular(2),
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 8,
+                                              vertical: 4,
                                             ),
-                                          ),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 6),
-                                      Text(
-                                        item.month,
-                                        style: GoogleFonts.poppins(
-                                          fontSize: 9,
-                                          color: AppTheme.textSecondary,
+                                            decoration: BoxDecoration(
+                                              color: Colors.black,
+                                              borderRadius:
+                                                  BorderRadius.circular(6),
+                                            ),
+                                            child: Column(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Text(
+                                                  AmountFormatter.formatAmount(
+                                                    item.totalSales,
+                                                  ),
+                                                  style: GoogleFonts.poppins(
+                                                    fontSize: 10,
+                                                    fontWeight: FontWeight.w600,
+                                                    color: Colors.white,
+                                                  ),
+                                                ),
+                                                Text(
+                                                  '${item.transactions} txns',
+                                                  style: GoogleFonts.poppins(
+                                                    fontSize: 8,
+                                                    color: Colors.white70,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          )
+                                        else
+                                          const SizedBox(
+                                            height: 38,
+                                          ), // placeholder
+                                        Row(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.end,
+                                          children: [
+                                            Container(
+                                              width: 10,
+                                              height: barHeight.clamp(
+                                                4.0,
+                                                140.0,
+                                              ),
+                                              decoration: BoxDecoration(
+                                                color: const Color(0xFF4CAF50),
+                                                borderRadius:
+                                                    BorderRadius.circular(2),
+                                              ),
+                                            ),
+                                            const SizedBox(width: 2),
+                                            Container(
+                                              width: 10,
+                                              height: txnHeight.clamp(
+                                                4.0,
+                                                140.0,
+                                              ),
+                                              decoration: BoxDecoration(
+                                                color: AppTheme.grey800,
+                                                borderRadius:
+                                                    BorderRadius.circular(2),
+                                              ),
+                                            ),
+                                          ],
                                         ),
-                                      ),
-                                    ],
+                                        const SizedBox(height: 6),
+                                        Text(
+                                          item.month,
+                                          style: GoogleFonts.poppins(
+                                            fontSize: 9,
+                                            fontWeight: isSelected
+                                                ? FontWeight.bold
+                                                : FontWeight.normal,
+                                            color: isSelected
+                                                ? AppTheme.textPrimary
+                                                : AppTheme.textSecondary,
+                                          ),
+                                        ),
+                                        const SizedBox(
+                                          height: 24,
+                                        ), // spacing for scrollbar
+                                      ],
+                                    ),
                                   ),
                                 );
                               }).toList(),
@@ -1591,7 +1619,7 @@ class _StockLevelSection extends StatelessWidget {
                 ),
                 const SizedBox(width: 4),
                 Text(
-                  'Total Sales',
+                  'Stock Count',
                   style: GoogleFonts.poppins(
                     fontSize: 10,
                     color: AppTheme.textSecondary,
@@ -1706,7 +1734,7 @@ class _TopSalesSection extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -1792,7 +1820,7 @@ class _TopSalesRow extends StatelessWidget {
           height: 30,
           decoration: BoxDecoration(
             color: rank <= 3
-                ? AppTheme.primaryColor.withOpacity(0.1)
+                ? AppTheme.primaryColor.withValues(alpha: 0.1)
                 : AppTheme.backgroundColor,
             shape: BoxShape.circle,
           ),

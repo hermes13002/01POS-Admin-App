@@ -106,7 +106,7 @@ class SalesRemoteDatasourceImpl implements SalesRemoteDatasource {
   }) async {
     final response = await _client.post(
       ApiEndpoints.downloadSales,
-      data: {'from_date': from, 'to_date': to},
+      data: {'from': from, 'to': to},
     );
     final responseBody = _asMap(response.data);
 

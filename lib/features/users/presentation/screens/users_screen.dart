@@ -571,10 +571,10 @@ class _ViewUserDialog extends HookConsumerWidget {
                       width: 80,
                       height: 80,
                       decoration: BoxDecoration(
-                        color: AppTheme.blue.withOpacity(0.1),
+                        color: AppTheme.blue.withValues(alpha: 0.1),
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color: AppTheme.blue.withOpacity(0.2),
+                          color: AppTheme.blue.withValues(alpha: 0.2),
                           width: 2,
                         ),
                       ),
@@ -725,7 +725,7 @@ class _DetailItem extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: Colors.grey.withOpacity(0.05),
+              color: Colors.grey.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(icon, size: 20, color: AppTheme.textSecondary),
@@ -765,7 +765,7 @@ class _Divider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Divider(height: 24, color: Colors.grey.withOpacity(0.1));
+    return Divider(height: 24, color: Colors.grey.withValues(alpha: 0.1));
   }
 }
 
@@ -806,7 +806,7 @@ class _EditUserDialog extends HookConsumerWidget {
               child: Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: AppTheme.blue.withOpacity(0.12),
+                  color: AppTheme.blue.withValues(alpha: 0.12),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
@@ -1045,16 +1045,19 @@ class _CashierAppBanner extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: AppTheme.spacingMedium),
       padding: const EdgeInsets.all(AppTheme.spacingMedium),
       decoration: BoxDecoration(
-        color: AppTheme.blue.withOpacity(0.08),
+        color: AppTheme.blue.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
-        border: Border.all(color: AppTheme.blue.withOpacity(0.2), width: 1),
+        border: Border.all(
+          color: AppTheme.blue.withValues(alpha: 0.2),
+          width: 1,
+        ),
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: AppTheme.blue.withOpacity(0.1),
+              color: AppTheme.blue.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: const Icon(

@@ -124,8 +124,10 @@ class SubscriptionDetailsScreen extends ConsumerWidget {
               const SizedBox(height: 80),
 
               // Bottom Section: Plans
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              Wrap(
+                spacing: 12,
+                runSpacing: 20,
+                alignment: WrapAlignment.center,
                 children: [
                   _PlanPill(
                     title: 'STANDARD',
@@ -136,14 +138,14 @@ class SubscriptionDetailsScreen extends ConsumerWidget {
                   ),
                   _PlanPill(
                     title: 'PRO',
-                    price: '₦5,000/mo',
+                    price: '₦10,000/mo',
                     bgColor: const Color(0xFFE2E4FA),
                     textColor: const Color(0xFF28287F),
                     borderColor: const Color(0xFFC7CDFA),
                   ),
                   _PlanPill(
                     title: 'AI',
-                    price: '₦6,000/mo',
+                    price: '₦16,000/mo',
                     bgColor: const Color(0xFFF3E7FE),
                     textColor: const Color(0xFF5B1194),
                     borderColor: const Color(0xFFDFBEFD),

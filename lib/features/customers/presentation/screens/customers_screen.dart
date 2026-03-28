@@ -644,7 +644,7 @@ class _ViewCustomerDialog extends HookWidget {
                 value: customer.comment ?? 'N/A',
               ),
               _DialogInfoRow(
-                label: 'Preference',
+                label: 'Email or Phone Number',
                 value: customer.preference ?? 'N/A',
               ),
               _DialogInfoRow(
@@ -753,7 +753,7 @@ class _EditCustomerDialog extends HookConsumerWidget {
                 const SizedBox(height: AppTheme.spacingMedium),
                 CustomTextField(
                   controller: preferenceController,
-                  hint: 'Preference',
+                  hint: 'Email or Phone Number',
                 ),
                 const SizedBox(height: AppTheme.spacingLarge),
                 CustomButton(
