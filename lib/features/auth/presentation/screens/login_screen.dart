@@ -12,6 +12,7 @@ import 'package:onepos_admin_app/core/utils/validators.dart';
 import 'package:onepos_admin_app/presentation/screens/main_navigation_screen.dart';
 import 'package:onepos_admin_app/shared/widgets/app_snackbar.dart';
 import 'package:onepos_admin_app/features/online_store/presentation/providers/profile_provider.dart';
+import 'package:onepos_admin_app/shared/widgets/animated_background.dart';
 import '../providers/auth_provider.dart';
 
 const List<String> _backgroundImages = [
@@ -34,17 +35,7 @@ class LoginScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final bgIndex = useState(0);
     final isLoading = useState(false);
-    // final rememberMe = useState(false);
-
-    // cycle background images every 5 seconds
-    useEffect(() {
-      final timer = Timer.periodic(const Duration(seconds: 5), (_) {
-        bgIndex.value = (bgIndex.value + 1) % _backgroundImages.length;
-      });
-      return timer.cancel;
-    }, []);
 
     final formKey = useMemoized(GlobalKey<FormState>.new);
     final emailCtrl = useTextEditingController();
@@ -119,19 +110,7 @@ class LoginScreen extends HookConsumerWidget {
         fit: StackFit.expand,
         children: [
           // cycling background
-          AnimatedSwitcher(
-            duration: const Duration(milliseconds: 800),
-            child: Image.network(
-              _backgroundImages[bgIndex.value],
-              key: ValueKey(bgIndex.value),
-              fit: BoxFit.cover,
-              width: double.infinity,
-              height: double.infinity,
-              errorBuilder: (_, __, ___) => Container(color: Colors.black87),
-            ),
-          ),
-          // dark overlay
-          Container(color: Colors.black.withValues(alpha: 0.35)),
+          AnimatedBackground(images: _backgroundImages),
           // card content
           SafeArea(
             child: Center(
