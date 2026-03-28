@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:onepos_admin_app/core/routes/app_routes.dart';
 
 /// Tool model for tools screen and quick actions
 class ToolModel {
@@ -100,7 +101,7 @@ class AppTools {
       name: 'Invoices',
       iconPath: 'assets/icons/invoices.png',
       icon: Icons.receipt_long_outlined,
-      route: '/invoices',
+      route: AppRoutes.invoices,
     ),
     ToolModel(
       id: 'expenses',

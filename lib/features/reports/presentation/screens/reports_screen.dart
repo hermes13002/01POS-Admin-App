@@ -1461,7 +1461,7 @@ class _SalesSummarySectionState extends State<_SalesSummarySection> {
                                                   ),
                                                 ),
                                                 Text(
-                                                  '${item.transactions} txns',
+                                                  '${item.transactions} trans..',
                                                   style: GoogleFonts.poppins(
                                                     fontSize: 8,
                                                     color: Colors.white70,

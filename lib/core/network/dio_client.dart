@@ -13,8 +13,12 @@ class DioClient {
     _dio = Dio(
       BaseOptions(
         baseUrl: AppConstants.baseUrl,
-        connectTimeout: const Duration(milliseconds: AppConstants.connectionTimeout),
-        receiveTimeout: const Duration(milliseconds: AppConstants.receiveTimeout),
+        connectTimeout: const Duration(
+          milliseconds: AppConstants.connectionTimeout,
+        ),
+        receiveTimeout: const Duration(
+          milliseconds: AppConstants.receiveTimeout,
+        ),
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
@@ -147,7 +151,8 @@ class DioClient {
         return NetworkException(message: 'Request cancelled');
       case DioExceptionType.connectionError:
         return NetworkException(
-          message: 'No internet connection. Please check your network settings.',
+          message:
+              'No internet connection. Please check your network settings.',
         );
       default:
         return ServerException(
@@ -158,9 +163,16 @@ class DioClient {
 
   AppException _handleResponseError(DioException error) {
     final statusCode = error.response?.statusCode;
-    final message = error.response?.data?['message'] ?? 
-                    error.response?.statusMessage ?? 
-                    'An error occurred';
+    final dynamic rawMessage = error.response?.data?['message'];
+    String message = 'An error occurred';
+
+    if (rawMessage is String) {
+      message = rawMessage;
+    } else if (rawMessage is List) {
+      message = rawMessage.join(', ');
+    } else if (error.response?.statusMessage != null) {
+      message = error.response!.statusMessage!;
+    }
 
     switch (statusCode) {
       case 401:
@@ -186,10 +198,7 @@ class DioClient {
           statusCode: statusCode,
         );
       default:
-        return ServerException(
-          message: message,
-          statusCode: statusCode,
-        );
+        return ServerException(message: message, statusCode: statusCode);
     }
   }
 }

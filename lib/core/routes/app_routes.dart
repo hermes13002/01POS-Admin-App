@@ -45,6 +45,8 @@ import 'package:onepos_admin_app/features/chats/presentation/screens/chats_scree
 import 'package:onepos_admin_app/features/chats/presentation/screens/individual_chat_screen.dart';
 import 'package:onepos_admin_app/features/chats/data/models/chat_contact_model.dart';
 import 'package:onepos_admin_app/features/online_store/presentation/screens/subscription_details_screen.dart';
+import 'package:onepos_admin_app/features/invoices/presentation/screens/invoices_screen.dart';
+import 'package:onepos_admin_app/features/invoices/presentation/screens/create_invoice_screen.dart';
 
 /// centralized route configuration
 class AppRoutes {
@@ -94,6 +96,8 @@ class AppRoutes {
   static const String chats = '/chats';
   static const String individualChat = '/individual-chat';
   static const String subscriptionDetails = '/subscription-details';
+  static const String invoices = '/invoices';
+  static const String createInvoice = '/create-invoice';
 
   // route map
   static Map<String, WidgetBuilder> get routes => {
@@ -155,5 +159,7 @@ class AppRoutes {
       return IndividualChatScreen(contact: contact);
     },
     subscriptionDetails: (context) => const SubscriptionDetailsScreen(),
+    invoices: (context) => const InvoicesScreen(),
+    createInvoice: (context) => const CreateInvoiceScreen(),
   };
 }

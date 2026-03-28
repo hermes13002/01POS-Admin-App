@@ -17,7 +17,7 @@ import 'package:onepos_admin_app/features/reports/presentation/providers/reports
 import 'package:onepos_admin_app/core/utils/amount_formatter.dart';
 import '../../../../shared/widgets/dots_loader.dart';
 import 'package:onepos_admin_app/shared/widgets/app_snackbar.dart';
-import 'package:onepos_admin_app/shared/widgets/animated_background.dart';
+
 
 const List<String> _backgroundImages = [
   'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80',
@@ -45,13 +45,14 @@ class HomeScreen extends HookConsumerWidget {
 
     final bgIndex = useState(0);
 
-    // cycle background images every 5 seconds
+    // cycle background images for performance banner every 5 seconds
     useEffect(() {
       final timer = Timer.periodic(const Duration(seconds: 5), (_) {
         bgIndex.value = (bgIndex.value + 1) % _backgroundImages.length;
       });
       return timer.cancel;
     }, []);
+
 
     // 10-second polling for chat unread badges
     useEffect(() {
@@ -72,13 +73,7 @@ class HomeScreen extends HookConsumerWidget {
 
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
-      body: Stack(
-        children: [
-          AnimatedBackground(
-            images: _backgroundImages,
-            overlayOpacity: 0.1, // lighter overlay for dashboard
-          ),
-          SafeArea(
+      body: SafeArea(
             child: RefreshIndicator(
               onRefresh: () async {
                 final reportsNotifier = ref.read(reportsProvider.notifier);
@@ -597,13 +592,10 @@ class HomeScreen extends HookConsumerWidget {
 
                     const SizedBox(height: 24),
                   ],
-                ),
               ),
             ),
           ),
-        ],
-      ),
-    );
+    ));
   }
 
   Widget _buildChip(String label, bool selected) {
