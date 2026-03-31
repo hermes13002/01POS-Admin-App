@@ -11,6 +11,8 @@ import 'package:onepos_admin_app/shared/widgets/custom_search_bar.dart';
 import 'package:onepos_admin_app/shared/widgets/loading_widget.dart';
 import 'package:onepos_admin_app/shared/widgets/empty_state_widget.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
+import 'package:onepos_admin_app/features/invoices/data/models/invoice_model.dart';
+import 'package:onepos_admin_app/features/invoices/presentation/widgets/invoice_detail_dialog.dart';
 import 'package:intl/intl.dart';
 
 class InvoicesScreen extends ConsumerWidget {
@@ -23,6 +25,7 @@ class InvoicesScreen extends ConsumerWidget {
         final invoicesAsync = ref.watch(invoicesListProvider);
         final searchController = useTextEditingController();
         final searchQuery = useState('');
+        final expandedInvoiceId = useState<String?>(null);
 
         return Scaffold(
           backgroundColor: AppTheme.backgroundColor,
@@ -80,13 +83,24 @@ class InvoicesScreen extends ConsumerWidget {
                             const SizedBox(height: AppTheme.spacingSmall),
                         itemBuilder: (context, index) {
                           final invoice = filtered[index];
+                          final isExpanded =
+                              expandedInvoiceId.value == invoice.id;
+
                           return AnimationConfiguration.staggeredList(
                             position: index,
                             duration: const Duration(milliseconds: 375),
                             child: SlideAnimation(
                               verticalOffset: 50.0,
                               child: FadeInAnimation(
-                                child: _InvoiceTile(invoice: invoice),
+                                child: _InvoiceTile(
+                                  invoice: invoice,
+                                  isExpanded: isExpanded,
+                                  onToggle: () {
+                                    expandedInvoiceId.value = isExpanded
+                                        ? null
+                                        : invoice.id;
+                                  },
+                                ),
                               ),
                             ),
                           );
@@ -131,144 +145,243 @@ class InvoicesScreen extends ConsumerWidget {
 }
 
 class _InvoiceTile extends StatelessWidget {
-  final dynamic invoice;
+  final InvoiceModel invoice;
+  final bool isExpanded;
+  final VoidCallback onToggle;
 
-  const _InvoiceTile({required this.invoice});
+  const _InvoiceTile({
+    required this.invoice,
+    required this.isExpanded,
+    required this.onToggle,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 250),
+      curve: Curves.easeInOut,
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () {
-            // show details dialog or navigate
-          },
-          borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
-          child: Padding(
-            padding: const EdgeInsets.all(AppTheme.spacingMedium),
-            child: Row(
-              children: [
-                // invoice icon
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: AppTheme.primaryColor.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(
-                      AppTheme.borderRadiusSmall,
-                    ),
-                  ),
-                  child: const Icon(
-                    Icons.receipt_outlined,
-                    color: AppTheme.primaryColor,
-                    size: 20,
-                  ),
-                ),
-                const SizedBox(width: AppTheme.spacingSmall + 4),
-
-                // invoice details
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Invoice #${invoice.invoiceNumber ?? invoice.id}',
-                        style: GoogleFonts.poppins(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w500,
-                          color: AppTheme.textPrimary,
+      child: Column(
+        children: [
+          // header row
+          Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () {
+                Navigator.pushNamed(
+                  context,
+                  AppRoutes.sales,
+                  arguments: invoice.invoiceNumber ?? invoice.id,
+                );
+              },
+              borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
+              child: Padding(
+                padding: const EdgeInsets.all(AppTheme.spacingMedium),
+                child: Row(
+                  children: [
+                    // invoice icon
+                    Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: AppTheme.primaryColor.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(
+                          AppTheme.borderRadiusSmall,
                         ),
                       ),
-                      const SizedBox(height: 2),
-                      if (invoice.customerName != null)
+                      child: const Icon(
+                        Icons.receipt_outlined,
+                        color: AppTheme.primaryColor,
+                        size: 20,
+                      ),
+                    ),
+                    const SizedBox(width: AppTheme.spacingSmall + 4),
+
+                    // invoice details
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Invoice #${invoice.invoiceNumber ?? invoice.id}',
+                            style: GoogleFonts.poppins(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w500,
+                              color: AppTheme.textPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          if (invoice.customerName != null)
+                            Text(
+                              invoice.customerName!,
+                              style: GoogleFonts.poppins(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w400,
+                                color: AppTheme.textSecondary,
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+
+                    // total amount
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
                         Text(
-                          invoice.customerName!,
-                          style: GoogleFonts.poppins(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w400,
-                            color: AppTheme.textSecondary,
+                          AmountFormatter.formatCurrency(invoice.total),
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: AppTheme.textPrimary,
                           ),
                         ),
-                      Text(
-                        invoice.createdAt != null
-                            ? DateFormat(
-                                'MMM dd, yyyy',
-                              ).format(invoice.createdAt!)
-                            : 'n/a',
-                        style: GoogleFonts.poppins(
-                          fontSize: 12,
-                          color: AppTheme.textSecondary,
+                        const SizedBox(height: 4),
+                        _StatusBadge(status: invoice.sendOption),
+                      ],
+                    ),
+                    const SizedBox(width: 8),
+                    IconButton(
+                      visualDensity: VisualDensity.compact,
+                      icon: Icon(
+                        isExpanded ? Icons.expand_less : Icons.expand_more,
+                        color: AppTheme.textSecondary,
+                        size: 24,
+                      ),
+                      onPressed: onToggle,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+          // expanded content
+          if (isExpanded) ...[
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppTheme.spacingMedium,
+              ),
+              child: Divider(color: AppTheme.grey200, height: 1),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(AppTheme.spacingMedium),
+              child: Column(
+                children: [
+                  _DetailRow(
+                    label: 'Date:',
+                    value: invoice.createdAt != null
+                        ? DateFormat('MMM dd, yyyy').format(invoice.createdAt!)
+                        : 'n/a',
+                  ),
+                  const SizedBox(height: 8),
+                  _DetailRow(
+                    label: 'Items:',
+                    value: '${invoice.items.length} items',
+                  ),
+                  const SizedBox(height: AppTheme.spacingMedium),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: () {
+                            showDialog(
+                              context: context,
+                              builder: (context) =>
+                                  InvoiceDetailDialog(invoice: invoice),
+                            );
+                          },
+                          icon: const Icon(Icons.visibility_outlined, size: 18),
+                          label: const Text('View Details'),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: AppTheme.primaryColor,
+                            side: const BorderSide(
+                              color: AppTheme.primaryColor,
+                            ),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            textStyle: GoogleFonts.poppins(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
                         ),
                       ),
                     ],
                   ),
-                ),
-
-                // total amount and status
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      AmountFormatter.formatCurrency(invoice.total),
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: AppTheme.textPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        _StatusBadge(status: invoice.sendOption),
-                        const SizedBox(width: 4),
-                        // if status exists in json, show it
-                        if (invoice
-                            .id
-                            .isNotEmpty) // dummy check to use status if we had it
-                          _StatusBadge(
-                            status: 'sent', // default for now based on log
-                            isStatus: true,
-                          ),
-                      ],
-                    ),
-                  ],
-                ),
-                const SizedBox(width: 4),
-                Icon(
-                  Icons.keyboard_arrow_right,
-                  color: AppTheme.textSecondary,
-                  size: 20,
-                ),
-              ],
+                ],
+              ),
             ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _DetailRow extends StatelessWidget {
+  final String label;
+  final String value;
+  const _DetailRow({required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: GoogleFonts.poppins(
+            fontSize: 13,
+            color: AppTheme.textSecondary,
           ),
         ),
-      ),
+        Text(
+          value,
+          style: GoogleFonts.poppins(
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+            color: AppTheme.textPrimary,
+          ),
+        ),
+      ],
     );
   }
 }
 
 class _StatusBadge extends StatelessWidget {
   final String status;
-  final bool isStatus;
 
-  const _StatusBadge({required this.status, this.isStatus = false});
+  const _StatusBadge({required this.status});
 
   @override
   Widget build(BuildContext context) {
-    final color = isStatus
-        ? (status.toLowerCase() == 'sent'
-              ? Colors.green
-              : status.toLowerCase() == 'pending'
-              ? Colors.orange
-              : AppTheme.primaryColor)
-        : AppTheme.primaryColor;
+    Color color;
+    switch (status.toLowerCase()) {
+      case 'now':
+        color = Colors.green;
+        break;
+      case 'scheduled':
+        color = Colors.orange;
+        break;
+      case 'recurring':
+        color = Colors.blue;
+        break;
+      default:
+        color = AppTheme.primaryColor;
+    }
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),

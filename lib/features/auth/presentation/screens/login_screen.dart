@@ -5,7 +5,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:google_fonts/google_fonts.dart';
 // import 'package:onepos_admin_app/core/storage/secure_storage_service.dart';
-// import 'package:onepos_admin_app/core/storage/shared_prefs_service.dart';
+import 'package:onepos_admin_app/core/storage/shared_prefs_service.dart';
 import 'package:onepos_admin_app/core/routes/app_routes.dart';
 import 'package:onepos_admin_app/core/theme/app_theme.dart';
 import 'package:onepos_admin_app/core/utils/validators.dart';
@@ -38,31 +38,11 @@ class LoginScreen extends HookConsumerWidget {
     final isLoading = useState(false);
 
     final formKey = useMemoized(GlobalKey<FormState>.new);
-    final emailCtrl = useTextEditingController();
+    final initialEmail =
+        SharedPrefsService().readString('last_login_email') ?? '';
+    final emailCtrl = useTextEditingController(text: initialEmail);
     final passwordCtrl = useTextEditingController();
     final obscure = useState(true);
-
-    /*
-    // load saved credentials on mount
-    useEffect(() {
-      Future<void> load() async {
-        final prefs = SharedPrefsService();
-        await prefs.init();
-        final saved = prefs.readBool(_keyRememberMe) ?? false;
-        if (saved) {
-          final secure = SecureStorageService();
-          final email = await secure.read(_keyRememberedEmail);
-          final password = await secure.read(_keyRememberedPassword);
-          if (email != null) emailCtrl.text = email;
-          if (password != null) passwordCtrl.text = password;
-          rememberMe.value = true;
-        }
-      }
-
-      load();
-      return null;
-    }, []);
-    */
 
     Future<void> submit() async {
       if (!formKey.currentState!.validate()) return;

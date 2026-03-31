@@ -245,36 +245,39 @@ class HomeScreen extends HookConsumerWidget {
                         child: Stack(
                           children: [
                             // animated background image
-                            AnimatedSwitcher(
-                              duration: const Duration(milliseconds: 800),
-                              child: SizedBox(
-                                key: ValueKey(bgIndex.value),
-                                height: 260,
-                                width: double.infinity,
-                                child: CachedNetworkImage(
-                                  imageUrl: _backgroundImages[bgIndex.value],
-                                  fit: BoxFit.cover,
-                                  placeholder: (_, __) =>
-                                      Container(color: const Color(0xFF2D5A27)),
-                                  errorWidget: (_, __, ___) =>
-                                      Container(color: const Color(0xFF2D5A27)),
-                                  fadeInDuration: Duration.zero,
+                            Positioned.fill(
+                              child: AnimatedSwitcher(
+                                duration: const Duration(milliseconds: 800),
+                                child: SizedBox(
+                                  key: ValueKey(bgIndex.value),
+                                  width: double.infinity,
+                                  height: double.infinity,
+                                  child: CachedNetworkImage(
+                                    imageUrl: _backgroundImages[bgIndex.value],
+                                    fit: BoxFit.cover,
+                                    placeholder: (_, __) =>
+                                        Container(color: const Color(0xFF2D5A27)),
+                                    errorWidget: (_, __, ___) =>
+                                        Container(color: const Color(0xFF2D5A27)),
+                                    fadeInDuration: Duration.zero,
+                                  ),
                                 ),
                               ),
                             ),
                             // dark overlay
-                            Container(
-                              height: 260,
-                              color: Colors.black.withValues(alpha: 0.30),
+                            Positioned.fill(
+                              child: Container(
+                                color: Colors.black.withValues(alpha: 0.30),
+                              ),
                             ),
                             // content
-                            SizedBox(
-                              height: 260,
-                              child: Padding(
-                                padding: const EdgeInsets.all(20),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
+                            Container(
+                              constraints: const BoxConstraints(minHeight: 260),
+                              width: double.infinity,
+                              padding: const EdgeInsets.all(20),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
                                     // period chips
                                     SingleChildScrollView(
                                       scrollDirection: Axis.horizontal,
@@ -457,7 +460,7 @@ class HomeScreen extends HookConsumerWidget {
                                         );
                                       },
                                     ),
-                                    const Spacer(),
+                                    const SizedBox(height: 24),
                                     // view report button
                                     SizedBox(
                                       height: 40,
@@ -500,9 +503,7 @@ class HomeScreen extends HookConsumerWidget {
                                   ],
                                 ),
                               ),
-                            ),
-                          ],
-                        ),
+                  ]),
                       ),
                     ),
 

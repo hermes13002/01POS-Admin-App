@@ -76,7 +76,22 @@ class InvoiceNotifier extends Notifier<InvoiceModel> {
   }
 
   void setSendOption(String option) {
-    state = state.copyWith(sendOption: option);
+    state = state.copyWith(
+      sendOption: option,
+      scheduledDate: option == 'now' ? null : state.scheduledDate,
+      scheduledTime: option == 'now' ? null : state.scheduledTime,
+      recurringFrequency: option == 'recurring'
+          ? state.recurringFrequency
+          : null,
+    );
+  }
+
+  void setSchedule(String date, String time) {
+    state = state.copyWith(scheduledDate: date, scheduledTime: time);
+  }
+
+  void setRecurringFrequency(String frequency) {
+    state = state.copyWith(recurringFrequency: frequency);
   }
 
   void reset() {

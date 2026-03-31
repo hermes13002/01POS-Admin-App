@@ -14,6 +14,7 @@ import 'package:onepos_admin_app/shared/widgets/app_snackbar.dart';
 import '../providers/invoice_provider.dart';
 import 'package:onepos_admin_app/features/customers/data/models/customer_model.dart';
 import '../../data/models/invoice_model.dart';
+import 'package:intl/intl.dart';
 
 class CreateInvoiceScreen extends HookConsumerWidget {
   const CreateInvoiceScreen({super.key});
@@ -196,7 +197,7 @@ class _ProductSelectionSection extends StatelessWidget {
                   padding: EdgeInsets.all(32.0),
                   child: Center(child: Text('No products found')),
                 )
-              else
+              else if (isMobile)
                 ListView.separated(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
@@ -204,172 +205,27 @@ class _ProductSelectionSection extends StatelessWidget {
                   separatorBuilder: (_, __) => const Divider(height: 1),
                   itemBuilder: (context, index) {
                     final product = products[index];
-
-                    if (isMobile) {
-                      // responsive card-like row for mobile
-                      return Padding(
-                        padding: const EdgeInsets.all(12.0),
-                        child: Row(
-                          children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(8),
-                              child: CachedNetworkImage(
-                                imageUrl: product.imageUrl ?? '',
-                                width: 50,
-                                height: 50,
-                                fit: BoxFit.cover,
-                                errorWidget: (_, __, ___) => Container(
-                                  width: 50,
-                                  height: 50,
-                                  color: AppTheme.grey200,
-                                  child: Center(
-                                    child: Text(
-                                      product.name[0].toUpperCase(),
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    product.name,
-                                    style: GoogleFonts.poppins(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    AmountFormatter.formatCurrency(
-                                      product.price,
-                                    ),
-                                    style: GoogleFonts.plusJakartaSans(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w500,
-                                      color: AppTheme.primaryColor,
-                                    ),
-                                  ),
-                                  Text(
-                                    'Stock: ${product.stock}',
-                                    style: GoogleFonts.poppins(
-                                      fontSize: 12,
-                                      color: AppTheme.textSecondary,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            ElevatedButton(
-                              onPressed: () => onAdd(product),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: AppTheme.primaryColor,
-                                foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                ),
-                                minimumSize: const Size(0, 36),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                              ),
-                              child: const Text('Add'),
-                            ),
-                          ],
-                        ),
-                      );
-                    }
-
-                    // desktop/tablet row
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 12,
-                        horizontal: 8,
-                      ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            flex: 1,
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(4),
-                              child: CachedNetworkImage(
-                                imageUrl: product.imageUrl ?? '',
-                                width: 30,
-                                height: 30,
-                                fit: BoxFit.cover,
-                                errorWidget: (_, __, ___) => Container(
-                                  color: AppTheme.grey200,
-                                  child: Center(
-                                    child: Text(
-                                      product.name[0].toUpperCase(),
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          Expanded(
-                            flex: 3,
-                            child: Text(
-                              product.name,
-                              style: GoogleFonts.poppins(fontSize: 14),
-                            ),
-                          ),
-                          Expanded(
-                            flex: 2,
-                            child: Text(
-                              AmountFormatter.formatCurrency(product.price),
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                          Expanded(
-                            flex: 1,
-                            child: Text(
-                              '${product.stock}',
-                              style: GoogleFonts.poppins(fontSize: 14),
-                            ),
-                          ),
-                          Expanded(
-                            flex: 2,
-                            child: ElevatedButton.icon(
-                              onPressed: () => onAdd(product),
-                              icon: const Icon(Icons.add, size: 14),
-                              label: const Text('Add'),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: AppTheme.primaryColor,
-                                foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                ),
-                                minimumSize: const Size(0, 32),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(6),
-                                ),
-                                textStyle: GoogleFonts.poppins(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                    return _ProductItemRow(
+                      product: product,
+                      isMobile: true,
+                      onAdd: onAdd,
                     );
                   },
+                )
+              else
+                Expanded(
+                  child: ListView.separated(
+                    itemCount: products.length,
+                    separatorBuilder: (_, __) => const Divider(height: 1),
+                    itemBuilder: (context, index) {
+                      final product = products[index];
+                      return _ProductItemRow(
+                        product: product,
+                        isMobile: false,
+                        onAdd: onAdd,
+                      );
+                    },
+                  ),
                 ),
               const SizedBox(height: 16),
               // pagination placeholder
@@ -403,6 +259,166 @@ class _ProductSelectionSection extends StatelessWidget {
   }
 }
 
+class _ProductItemRow extends StatelessWidget {
+  final dynamic product;
+  final bool isMobile;
+  final Function(dynamic) onAdd;
+
+  const _ProductItemRow({
+    required this.product,
+    required this.isMobile,
+    required this.onAdd,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (isMobile) {
+      return Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: CachedNetworkImage(
+                imageUrl: product.imageUrl ?? '',
+                width: 50,
+                height: 50,
+                fit: BoxFit.cover,
+                errorWidget: (_, __, ___) => Container(
+                  width: 50,
+                  height: 50,
+                  color: AppTheme.grey200,
+                  child: Center(
+                    child: Text(
+                      product.name[0].toUpperCase(),
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    product.name,
+                    style: GoogleFonts.poppins(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    AmountFormatter.formatCurrency(product.price),
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: AppTheme.primaryColor,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            IconButton(
+              onPressed: () => onAdd(product),
+              icon: const Icon(Icons.add_circle),
+              color: AppTheme.primaryColor,
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+      child: Row(
+        children: [
+          Expanded(
+            flex: 1,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: CachedNetworkImage(
+                imageUrl: product.imageUrl ?? '',
+                width: 40,
+                height: 40,
+                fit: BoxFit.cover,
+                errorWidget: (_, __, ___) => Container(
+                  width: 40,
+                  height: 40,
+                  color: AppTheme.grey200,
+                  child: Center(
+                    child: Text(
+                      product.name[0].toUpperCase(),
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            flex: 3,
+            child: Text(
+              product.name,
+              style: GoogleFonts.poppins(
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          Expanded(
+            flex: 2,
+            child: Text(
+              AmountFormatter.formatCurrency(product.price),
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          Expanded(
+            flex: 1,
+            child: Text(
+              '${product.stock}',
+              style: GoogleFonts.poppins(fontSize: 13),
+            ),
+          ),
+          Expanded(
+            flex: 2,
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: ElevatedButton.icon(
+                onPressed: () => onAdd(product),
+                icon: const Icon(Icons.add, size: 14),
+                label: const Text('Add'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.primaryColor,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  minimumSize: const Size(0, 32),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  textStyle: GoogleFonts.poppins(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _InvoiceSummarySidebar extends ConsumerWidget {
   final InvoiceModel invoice;
   final AsyncValue<CustomersState> customersAsync;
@@ -428,206 +444,322 @@ class _InvoiceSummarySidebar extends ConsumerWidget {
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Invoice Details',
-            style: GoogleFonts.poppins(
-              fontWeight: FontWeight.w600,
-              fontSize: 16,
-            ),
-          ),
-          const SizedBox(height: 16),
-          // customer selection
-          const _Label('Customer *'),
-          const SizedBox(height: 6),
-          customersAsync.when(
-            data: (state) => AppDropdown<int>(
-              items: state.customers
-                  .map(
-                    (c) => DropdownMenuItem(value: c.id, child: Text(c.name)),
-                  )
-                  .toList(),
-              value: int.tryParse(invoice.customerId),
-              onChanged: (v) {
-                if (v != null) {
-                  ref.read(invoiceProvider.notifier).setCustomer(v.toString());
-                }
-              },
-              hint: 'Select Customer',
-            ),
-            loading: () => const LinearProgressIndicator(),
-            error: (_, __) => const Text('Error loading customers'),
-          ),
-          const SizedBox(height: 16),
-          // selected products summary
-          const _Label('Selected Products'),
-          const SizedBox(height: 6),
-          if (invoice.items.isEmpty)
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
             Text(
-              'No products selected',
+              'Invoice Details',
               style: GoogleFonts.poppins(
-                fontSize: 13,
-                color: AppTheme.grey500,
-                fontStyle: FontStyle.italic,
+                fontWeight: FontWeight.w600,
+                fontSize: 16,
               ),
-            )
-          else
-            ...invoice.items.map(
-              (item) => Padding(
-                padding: const EdgeInsets.only(bottom: 8.0),
-                child: Row(
+            ),
+            const SizedBox(height: 16),
+            // customer selection
+            const _Label('Customer *'),
+            const SizedBox(height: 6),
+            customersAsync.when(
+              data: (state) => AppDropdown<int>(
+                items: state.customers
+                    .map(
+                      (c) => DropdownMenuItem(value: c.id, child: Text(c.name)),
+                    )
+                    .toList(),
+                value: int.tryParse(invoice.customerId),
+                onChanged: (v) {
+                  if (v != null) {
+                    ref
+                        .read(invoiceProvider.notifier)
+                        .setCustomer(v.toString());
+                  }
+                },
+                hint: 'Select Customer',
+              ),
+              loading: () => const LinearProgressIndicator(),
+              error: (_, __) => const Text('Error loading customers'),
+            ),
+            const SizedBox(height: 16),
+            // selected products summary
+            const _Label('Selected Products'),
+            const SizedBox(height: 6),
+            if (invoice.items.isEmpty)
+              Text(
+                'No products selected',
+                style: GoogleFonts.poppins(
+                  fontSize: 13,
+                  color: AppTheme.grey500,
+                  fontStyle: FontStyle.italic,
+                ),
+              )
+            else
+              ...invoice.items.map(
+                (item) => Padding(
+                  padding: const EdgeInsets.only(bottom: 8.0),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          '${item.quantity}x ${item.productName}',
+                          style: GoogleFonts.poppins(fontSize: 13),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      Text(
+                        AmountFormatter.formatCurrency(
+                          item.price * item.quantity,
+                        ),
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(
+                          Icons.remove_circle_outline,
+                          size: 16,
+                          color: Colors.red,
+                        ),
+                        onPressed: () => ref
+                            .read(invoiceProvider.notifier)
+                            .removeItem(item.productId),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            const SizedBox(height: 16),
+            const _Label('Discount (optional)'),
+            const SizedBox(height: 6),
+            AppDropdown<double>(
+              items: const [
+                DropdownMenuItem(value: 0.0, child: Text('No Discount')),
+                DropdownMenuItem(value: 5.0, child: Text('5%')),
+                DropdownMenuItem(value: 10.0, child: Text('10%')),
+                DropdownMenuItem(value: 15.0, child: Text('15%')),
+              ],
+              value: invoice.discount,
+              onChanged: (v) =>
+                  ref.read(invoiceProvider.notifier).setDiscount(v ?? 0.0),
+              hint: 'Select Discount',
+            ),
+            const SizedBox(height: 16),
+            const _Label('Tax (optional)'),
+            const SizedBox(height: 6),
+            AppDropdown<double>(
+              items: const [
+                DropdownMenuItem(value: 0.0, child: Text('No Tax')),
+                DropdownMenuItem(value: 5.0, child: Text('5%')),
+                DropdownMenuItem(value: 7.5, child: Text('7.5%')),
+                DropdownMenuItem(value: 10.0, child: Text('10%')),
+              ],
+              value: invoice.tax,
+              onChanged: (v) =>
+                  ref.read(invoiceProvider.notifier).setTax(v ?? 0.0),
+              hint: 'Select Tax',
+            ),
+            const SizedBox(height: 16),
+            const _Label('Send Invoice *'),
+            Column(
+              children:
+                  {
+                        'now': 'Send Now',
+                        'later': 'Send Later',
+                        'recurring': 'Recurring',
+                      }.entries
+                      .map(
+                        (entry) => RadioListTile<String>(
+                          title: Text(
+                            entry.value,
+                            style: GoogleFonts.poppins(fontSize: 13),
+                          ),
+                          groupValue: invoice.sendOption,
+                          value: entry.key,
+                          onChanged: (v) async {
+                            if (v == null) return;
+
+                            if (v == 'later' || v == 'recurring') {
+                              final success = await _showSchedulingPickers(
+                                context,
+                                ref,
+                                isRecurring: v == 'recurring',
+                              );
+                              if (!success) return;
+                            }
+
+                            ref.read(invoiceProvider.notifier).setSendOption(v);
+                          },
+                          contentPadding: EdgeInsets.zero,
+                          dense: true,
+                          visualDensity: VisualDensity.compact,
+                        ),
+                      )
+                      .toList(),
+            ),
+            const Divider(height: 32),
+            if (invoice.scheduledDate != null) ...[
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppTheme.primaryColor.withValues(alpha: 0.05),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: AppTheme.primaryColor.withValues(alpha: 0.1),
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                      child: Text(
-                        '${item.quantity}x ${item.productName}',
-                        style: GoogleFonts.poppins(fontSize: 13),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.event_note,
+                          size: 14,
+                          color: AppTheme.primaryColor,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          'Scheduled Strategy',
+                          style: GoogleFonts.poppins(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: AppTheme.primaryColor,
+                          ),
+                        ),
+                      ],
                     ),
+                    const SizedBox(height: 4),
                     Text(
-                      AmountFormatter.formatCurrency(
-                        item.price * item.quantity,
+                      '${invoice.sendOption == 'recurring' ? '${invoice.recurringFrequency} on ' : ''}${invoice.scheduledDate} at ${invoice.scheduledTime}',
+                      style: GoogleFonts.poppins(
+                        fontSize: 12,
+                        color: AppTheme.textPrimary,
                       ),
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    IconButton(
-                      icon: const Icon(
-                        Icons.remove_circle_outline,
-                        size: 16,
-                        color: Colors.red,
-                      ),
-                      onPressed: () => ref
-                          .read(invoiceProvider.notifier)
-                          .removeItem(item.productId),
                     ),
                   ],
                 ),
               ),
+              const SizedBox(height: 16),
+            ],
+            _SummaryRow(
+              'Subtotal:',
+              AmountFormatter.formatCurrency(invoice.subtotal),
             ),
-          const SizedBox(height: 16),
-          const _Label('Discount (optional)'),
-          const SizedBox(height: 6),
-          AppDropdown<double>(
-            items: const [
-              DropdownMenuItem(value: 0.0, child: Text('No Discount')),
-              DropdownMenuItem(value: 5.0, child: Text('5%')),
-              DropdownMenuItem(value: 10.0, child: Text('10%')),
-              DropdownMenuItem(value: 15.0, child: Text('15%')),
-            ],
-            value: invoice.discount,
-            onChanged: (v) =>
-                ref.read(invoiceProvider.notifier).setDiscount(v ?? 0.0),
-            hint: 'Select Discount',
-          ),
-          const SizedBox(height: 16),
-          const _Label('Tax (optional)'),
-          const SizedBox(height: 6),
-          AppDropdown<double>(
-            items: const [
-              DropdownMenuItem(value: 0.0, child: Text('No Tax')),
-              DropdownMenuItem(value: 5.0, child: Text('5%')),
-              DropdownMenuItem(value: 7.5, child: Text('7.5%')),
-              DropdownMenuItem(value: 10.0, child: Text('10%')),
-            ],
-            value: invoice.tax,
-            onChanged: (v) =>
-                ref.read(invoiceProvider.notifier).setTax(v ?? 0.0),
-            hint: 'Select Tax',
-          ),
-          const SizedBox(height: 16),
-          const _Label('Send Invoice *'),
-          Column(
-            children:
-                {
-                      'now': 'Send Now',
-                      'later': 'Send Later',
-                      'recurring': 'Recurring',
-                    }.entries
-                    .map(
-                      (entry) => RadioListTile<String>(
-                        title: Text(
-                          entry.value,
-                          style: GoogleFonts.poppins(fontSize: 13),
-                        ),
-                        value: entry.key,
-                        groupValue: invoice.sendOption,
-                        onChanged: (v) => ref
-                            .read(invoiceProvider.notifier)
-                            .setSendOption(v!),
-                        contentPadding: EdgeInsets.zero,
-                        dense: true,
-                        visualDensity: VisualDensity.compact,
-                      ),
-                    )
-                    .toList(),
-          ),
-          const Divider(height: 32),
-          _SummaryRow(
-            'Subtotal:',
-            AmountFormatter.formatCurrency(invoice.subtotal),
-          ),
-          const SizedBox(height: 8),
-          _SummaryRow(
-            'Total:',
-            AmountFormatter.formatCurrency(invoice.total),
-            isBold: true,
-            fontSize: 18,
-          ),
-          const SizedBox(height: 24),
-          SizedBox(
-            width: double.infinity,
-            height: 48,
-            child: ElevatedButton(
-              onPressed: (invoice.items.isEmpty || invoice.customerId.isEmpty)
-                  ? null
-                  : () async {
-                      final notifier = ref.read(invoiceProvider.notifier);
-                      final response = await notifier.createInvoice();
+            const SizedBox(height: 8),
+            _SummaryRow(
+              'Total:',
+              AmountFormatter.formatCurrency(invoice.total),
+              isBold: true,
+              fontSize: 18,
+            ),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: ElevatedButton(
+                onPressed: (invoice.items.isEmpty || invoice.customerId.isEmpty)
+                    ? null
+                    : () async {
+                        final notifier = ref.read(invoiceProvider.notifier);
+                        final response = await notifier.createInvoice();
 
-                      if (context.mounted) {
-                        if (response.success) {
-                          AppSnackbar.showSuccess(
-                            context,
-                            'Invoice created successfully',
-                          );
-                          Navigator.pop(context);
-                        } else {
-                          AppSnackbar.showError(
-                            context,
-                            response.message ?? 'Unknown error',
-                          );
+                        if (context.mounted) {
+                          if (response.success) {
+                            AppSnackbar.showSuccess(
+                              context,
+                              'Invoice created successfully',
+                            );
+                            Navigator.pop(context);
+                          } else {
+                            AppSnackbar.showError(
+                              context,
+                              response.message ?? 'Unknown error',
+                            );
+                          }
                         }
-                      }
-                    },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.primaryColor,
-                foregroundColor: Colors.white,
-                disabledBackgroundColor: AppTheme.grey300,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+                      },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.primaryColor,
+                  foregroundColor: Colors.white,
+                  disabledBackgroundColor: AppTheme.grey300,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                 ),
-              ),
-              child: Text(
-                invoice.sendOption.contains('now')
-                    ? 'Send Invoice Now'
-                    : 'Save Invoice',
-                style: GoogleFonts.poppins(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 14,
+                child: Text(
+                  invoice.sendOption.contains('now')
+                      ? 'Send Invoice Now'
+                      : 'Save Invoice',
+                  style: GoogleFonts.poppins(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
+}
+
+Future<bool> _showSchedulingPickers(
+  BuildContext context,
+  WidgetRef ref, {
+  required bool isRecurring,
+}) async {
+  final date = await showDatePicker(
+    context: context,
+    initialDate: DateTime.now().add(const Duration(days: 1)),
+    firstDate: DateTime.now(),
+    lastDate: DateTime.now().add(const Duration(days: 365)),
+    helpText: isRecurring ? 'Select Start Date' : 'Select Scheduled Date',
+  );
+  if (date == null) return false;
+
+  if (!context.mounted) return false;
+
+  final time = await showTimePicker(
+    context: context,
+    initialTime: const TimeOfDay(hour: 9, minute: 0),
+    helpText: 'Select Scheduled Time',
+  );
+  if (time == null) return false;
+
+  final formattedDate = DateFormat('yyyy-MM-dd').format(date);
+  final formattedTime =
+      '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
+
+  ref.read(invoiceProvider.notifier).setSchedule(formattedDate, formattedTime);
+
+  if (isRecurring) {
+    if (!context.mounted) return false;
+    final frequency = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(
+          'Select frequency',
+          style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: ['Daily', 'Weekly', 'Monthly', 'Yearly']
+              .map(
+                (f) => ListTile(
+                  title: Text(f, style: GoogleFonts.poppins(fontSize: 14)),
+                  onTap: () => Navigator.pop(context, f.toLowerCase()),
+                ),
+              )
+              .toList(),
+        ),
+      ),
+    );
+    if (frequency == null) return false;
+    ref.read(invoiceProvider.notifier).setRecurringFrequency(frequency);
+  }
+  return true;
 }
 
 class _HeaderCell extends StatelessWidget {

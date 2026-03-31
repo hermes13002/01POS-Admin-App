@@ -140,30 +140,76 @@ class _NotificationSettingsScreenState
             value: _lowStockAlerts,
             onChanged: (val) => _updateSetting('pref_low_stock_alerts', val),
           ),
-          if (kDebugMode) ...[
-            const SizedBox(height: 32),
-            ElevatedButton(
-              onPressed: () async {
-                await _localAuth.showNotification(
-                  id: 99,
-                  title: 'Test Notification',
-                  body: 'If you see this, local notifications are working!',
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.primaryColor,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-              ),
-              child: Text(
-                'Send Test Notification',
-                style: GoogleFonts.poppins(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
+          const SizedBox(height: 32),
+          Text(
+            'Test Notifications',
+            style: GoogleFonts.poppins(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: AppTheme.textPrimary,
             ),
-          ],
+          ),
+          const SizedBox(height: 16),
+          _buildTestButton(
+            label: 'Test Daily Snapshot',
+            onPressed: () => _localAuth.showNotification(
+              id: 11,
+              title: 'Daily Business Snapshot',
+              body: 'Take a quick look at how your business is doing.',
+            ),
+          ),
+          const SizedBox(height: 12),
+          _buildTestButton(
+            label: 'Test Weekly Recap',
+            onPressed: () => _localAuth.showNotification(
+              id: 12,
+              title: 'Weekly Recap',
+              body: 'See how your week went.',
+            ),
+          ),
+          const SizedBox(height: 12),
+          _buildTestButton(
+            label: 'Test End of Day Summary',
+            onPressed: () => _localAuth.showNotification(
+              id: 13,
+              title: 'End of Day Summary',
+              body: 'Great sales today! Check your end-of-day summary.',
+            ),
+          ),
+          const SizedBox(height: 12),
+          _buildTestButton(
+            label: 'Test Low Stock Alert',
+            onPressed: () => _localAuth.showNotification(
+              id: 14,
+              title: 'Low Stock Alert',
+              body: '3 items are running low on stock. Tap to view details.',
+            ),
+          ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildTestButton({
+    required String label,
+    required VoidCallback onPressed,
+  }) {
+    return SizedBox(
+      width: double.infinity,
+      child: OutlinedButton(
+        onPressed: onPressed,
+        style: OutlinedButton.styleFrom(
+          foregroundColor: AppTheme.primaryColor,
+          padding: const EdgeInsets.symmetric(vertical: 14),
+          side: const BorderSide(color: AppTheme.primaryColor),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
+          ),
+        ),
+        child: Text(
+          label,
+          style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+        ),
       ),
     );
   }

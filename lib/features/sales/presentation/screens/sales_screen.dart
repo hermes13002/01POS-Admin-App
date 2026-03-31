@@ -21,12 +21,13 @@ import 'package:onepos_admin_app/shared/widgets/loading_widget.dart';
 
 /// sales screen with expandable sale tiles
 class SalesScreen extends HookConsumerWidget {
-  const SalesScreen({super.key});
+  final String? initialSearch;
+  const SalesScreen({super.key, this.initialSearch});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final searchController = useTextEditingController();
-    final searchQuery = useState('');
+    final searchController = useTextEditingController(text: initialSearch);
+    final searchQuery = useState(initialSearch ?? '');
     final activeFilter = useState(SalesFilter.empty);
     final expandedSaleId = useState<String?>(null);
     final scrollController = useScrollController();

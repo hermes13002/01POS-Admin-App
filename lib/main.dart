@@ -45,7 +45,7 @@ void main() async {
 
   await GRecaptchaV3.ready(
     '6LfOgo0sAAAAAADQv_G0IXOktWTeGNtRBqEcEQAW',
-    showBadge: true,
+    showBadge: false,
   );
   log('reCAPTCHA v3 initialized.');
 
@@ -102,7 +102,6 @@ class MyApp extends StatelessWidget {
   }
 }
 
-/// app-wide offline/online banner — sits above every screen
 class ConnectivityBanner extends ConsumerStatefulWidget {
   const ConnectivityBanner({super.key, required this.child});
 

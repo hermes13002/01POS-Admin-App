@@ -132,13 +132,13 @@ class PaymentMethodScreen extends HookConsumerWidget {
                                           ),
                                         ),
                                       ),
-                                      Text(
-                                        '#${method.id}',
-                                        style: GoogleFonts.poppins(
-                                          fontSize: 12,
-                                          color: AppTheme.textSecondary,
-                                        ),
-                                      ),
+                                      // Text(
+                                      //   '#${method.id}',
+                                      //   style: GoogleFonts.poppins(
+                                      //     fontSize: 12,
+                                      //     color: AppTheme.textSecondary,
+                                      //   ),
+                                      // ),
                                       const SizedBox(width: 8),
                                       Icon(
                                         isExpanded

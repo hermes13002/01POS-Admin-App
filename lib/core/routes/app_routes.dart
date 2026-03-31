@@ -115,7 +115,10 @@ class AppRoutes {
       return AddSubCategoryScreen(subCategory: args);
     },
     lowStock: (context) => const LowStockScreen(),
-    sales: (context) => const SalesScreen(),
+    sales: (context) {
+      final args = ModalRoute.of(context)!.settings.arguments as String?;
+      return SalesScreen(initialSearch: args);
+    },
     customers: (context) => const CustomersScreen(),
     addCustomer: (context) => const AddCustomerScreen(),
     expenses: (context) => const ExpensesScreen(),

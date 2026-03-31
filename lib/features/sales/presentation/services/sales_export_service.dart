@@ -67,6 +67,8 @@ class SalesExportService {
     final pdf = pw.Document();
     final font = await PdfGoogleFonts.poppinsRegular();
     final boldFont = await PdfGoogleFonts.poppinsBold();
+    final amountFont = await PdfGoogleFonts.robotoRegular();
+    final amountBoldFont = await PdfGoogleFonts.robotoBold();
 
     pdf.addPage(
       pw.MultiPage(
@@ -91,23 +93,73 @@ class SalesExportService {
               ),
             ),
             pw.SizedBox(height: 20),
-            pw.TableHelper.fromTextArray(
-              cellStyle: pw.TextStyle(font: font),
-              headerStyle: pw.TextStyle(font: boldFont, color: PdfColors.white),
-              headerDecoration: const pw.BoxDecoration(color: PdfColors.black),
-              headers: ['Date', 'Order #', 'Customer', 'Items', 'Total'],
-              data: sales.map((sale) {
-                final itemsSummary = sale.items
-                    .map((item) => '${item.productName} (x${item.quantity})')
-                    .join('\n');
-                return [
-                  _dateFormatter.format(sale.date),
-                  sale.orderNumber,
-                  sale.customerName,
-                  itemsSummary,
-                  _currencyFormatter.format(sale.totalAmount),
-                ];
-              }).toList(),
+            pw.Table(
+              border: pw.TableBorder.all(color: PdfColors.grey300),
+              children: [
+                // Header row
+                pw.TableRow(
+                  decoration: const pw.BoxDecoration(color: PdfColors.black),
+                  children: ['Date', 'Order #', 'Customer', 'Items', 'Total']
+                      .map(
+                        (h) => pw.Padding(
+                          padding: const pw.EdgeInsets.all(6),
+                          child: pw.Text(
+                            h,
+                            style: pw.TextStyle(
+                              font: boldFont,
+                              color: PdfColors.white,
+                            ),
+                          ),
+                        ),
+                      )
+                      .toList(),
+                ),
+                // Data rows
+                ...sales.map((sale) {
+                  final itemsSummary = sale.items
+                      .map((item) => '${item.productName} (x${item.quantity})')
+                      .join('\n');
+                  return pw.TableRow(
+                    children: [
+                      pw.Padding(
+                        padding: const pw.EdgeInsets.all(6),
+                        child: pw.Text(
+                          _dateFormatter.format(sale.date),
+                          style: pw.TextStyle(font: font),
+                        ),
+                      ),
+                      pw.Padding(
+                        padding: const pw.EdgeInsets.all(6),
+                        child: pw.Text(
+                          sale.orderNumber,
+                          style: pw.TextStyle(font: font),
+                        ),
+                      ),
+                      pw.Padding(
+                        padding: const pw.EdgeInsets.all(6),
+                        child: pw.Text(
+                          sale.customerName,
+                          style: pw.TextStyle(font: font),
+                        ),
+                      ),
+                      pw.Padding(
+                        padding: const pw.EdgeInsets.all(6),
+                        child: pw.Text(
+                          itemsSummary,
+                          style: pw.TextStyle(font: font),
+                        ),
+                      ),
+                      pw.Padding(
+                        padding: const pw.EdgeInsets.all(6),
+                        child: pw.Text(
+                          _currencyFormatter.format(sale.totalAmount),
+                          style: pw.TextStyle(font: amountFont),
+                        ),
+                      ),
+                    ],
+                  );
+                }),
+              ],
             ),
             pw.SizedBox(height: 20),
             pw.Row(
@@ -115,7 +167,7 @@ class SalesExportService {
               children: [
                 pw.Text(
                   'Grand Total: ${_currencyFormatter.format(sales.fold(0.0, (sum, item) => sum + item.totalAmount))}',
-                  style: pw.TextStyle(font: boldFont, fontSize: 16),
+                  style: pw.TextStyle(font: amountBoldFont, fontSize: 16),
                 ),
               ],
             ),

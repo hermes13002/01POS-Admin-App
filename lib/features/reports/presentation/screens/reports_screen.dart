@@ -1277,53 +1277,28 @@ class _SalesSummarySectionState extends State<_SalesSummarySection> {
                     },
                     items: [
                       const DropdownMenuItem(
+                        value: 'this_week',
+                        child: Text('This Week'),
+                      ),
+                      const DropdownMenuItem(
+                        value: 'this_month',
+                        child: Text('This Month'),
+                      ),
+                      const DropdownMenuItem(
+                        value: 'this_year',
+                        child: Text('This Year'),
+                      ),
+                      const DropdownMenuItem(
+                        value: 'next_week_ai',
+                        child: Text('Next Week AI'),
+                      ),
+                      const DropdownMenuItem(
+                        value: 'next_month_ai',
+                        child: Text('Next Month AI'),
+                      ),
+                      const DropdownMenuItem(
                         value: '12months',
-                        child: Text('Year'),
-                      ),
-                      const DropdownMenuItem(
-                        value: 'january',
-                        child: Text('January'),
-                      ),
-                      const DropdownMenuItem(
-                        value: 'february',
-                        child: Text('February'),
-                      ),
-                      const DropdownMenuItem(
-                        value: 'march',
-                        child: Text('March'),
-                      ),
-                      const DropdownMenuItem(
-                        value: 'april',
-                        child: Text('April'),
-                      ),
-                      const DropdownMenuItem(value: 'may', child: Text('May')),
-                      const DropdownMenuItem(
-                        value: 'june',
-                        child: Text('June'),
-                      ),
-                      const DropdownMenuItem(
-                        value: 'july',
-                        child: Text('July'),
-                      ),
-                      const DropdownMenuItem(
-                        value: 'august',
-                        child: Text('August'),
-                      ),
-                      const DropdownMenuItem(
-                        value: 'september',
-                        child: Text('September'),
-                      ),
-                      const DropdownMenuItem(
-                        value: 'october',
-                        child: Text('October'),
-                      ),
-                      const DropdownMenuItem(
-                        value: 'november',
-                        child: Text('November'),
-                      ),
-                      const DropdownMenuItem(
-                        value: 'december',
-                        child: Text('December'),
+                        child: Text('Last 12 Months'),
                       ),
                     ],
                   ),
@@ -1335,12 +1310,12 @@ class _SalesSummarySectionState extends State<_SalesSummarySection> {
 
           // y-axis labels + bars
           SizedBox(
-            height: 220, // Increased height to accommodate numbers
+            height: 280,
             child: Row(
               children: [
                 // y-axis labels
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 24.0),
+                  padding: const EdgeInsets.only(bottom: 30.0),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.end,
@@ -1436,35 +1411,54 @@ class _SalesSummarySectionState extends State<_SalesSummarySection> {
                                         if (isSelected)
                                           Container(
                                             margin: const EdgeInsets.only(
-                                              bottom: 4,
+                                              bottom: 8,
                                             ),
                                             padding: const EdgeInsets.symmetric(
-                                              horizontal: 8,
-                                              vertical: 4,
+                                              horizontal: 12,
+                                              vertical: 10,
                                             ),
                                             decoration: BoxDecoration(
-                                              color: Colors.black,
+                                              color: Colors.white,
                                               borderRadius:
-                                                  BorderRadius.circular(6),
+                                                  BorderRadius.circular(12),
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  color: Colors.black
+                                                      .withValues(alpha: 0.15),
+                                                  blurRadius: 12,
+                                                  offset: const Offset(0, 6),
+                                                ),
+                                              ],
+                                              border: Border.all(
+                                                color: AppTheme.grey200,
+                                                width: 1,
+                                              ),
                                             ),
                                             child: Column(
                                               mainAxisSize: MainAxisSize.min,
                                               children: [
                                                 Text(
-                                                  AmountFormatter.formatAmount(
+                                                  AmountFormatter.formatCurrency(
                                                     item.totalSales,
+                                                    showDecimals: false,
                                                   ),
-                                                  style: GoogleFonts.poppins(
-                                                    fontSize: 10,
-                                                    fontWeight: FontWeight.w600,
-                                                    color: Colors.white,
-                                                  ),
+                                                  style:
+                                                      GoogleFonts.plusJakartaSans(
+                                                        fontSize: 13,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        color: const Color(
+                                                          0xFF4CAF50,
+                                                        ),
+                                                      ),
                                                 ),
+                                                const SizedBox(height: 2),
                                                 Text(
-                                                  '${item.transactions} trans..',
+                                                  '${item.transactions} transactions',
                                                   style: GoogleFonts.poppins(
-                                                    fontSize: 8,
-                                                    color: Colors.white70,
+                                                    fontSize: 11,
+                                                    fontWeight: FontWeight.w500,
+                                                    color: AppTheme.grey800,
                                                   ),
                                                 ),
                                               ],
@@ -1472,7 +1466,7 @@ class _SalesSummarySectionState extends State<_SalesSummarySection> {
                                           )
                                         else
                                           const SizedBox(
-                                            height: 38,
+                                            height: 60,
                                           ), // placeholder
                                         Row(
                                           crossAxisAlignment:

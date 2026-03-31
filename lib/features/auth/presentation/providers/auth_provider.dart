@@ -1,6 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:onepos_admin_app/core/network/dio_client.dart';
 import 'package:onepos_admin_app/core/storage/secure_storage_service.dart';
+import 'package:onepos_admin_app/core/storage/shared_prefs_service.dart';
 import 'package:onepos_admin_app/features/online_store/presentation/providers/profile_provider.dart';
 import 'package:onepos_admin_app/features/chats/presentation/providers/chat_provider.dart';
 import 'package:onepos_admin_app/features/users/presentation/providers/users_provider.dart';
@@ -31,6 +32,8 @@ class Auth extends _$Auth {
       (data) async {
         // Save password for profile update autofill
         await SecureStorageService().write('user_password', password);
+        // Save email for next login
+        await SharedPrefsService().writeString('last_login_email', email);
 
         // Trigger immediate fetch of chat data
         ref.invalidate(chatContactsProvider);
