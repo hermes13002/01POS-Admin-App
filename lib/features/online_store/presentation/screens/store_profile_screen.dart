@@ -271,12 +271,12 @@ class _ProfileContent extends ConsumerWidget {
             onTap: () =>
                 Navigator.pushNamed(context, AppRoutes.currencySettings),
           ),
-          const SizedBox(height: AppTheme.spacingMedium),
-          _ProfileListItem(
-            title: 'Receipt Template Settings',
-            onTap: () =>
-                Navigator.pushNamed(context, AppRoutes.receiptTemplateSettings),
-          ),
+          // const SizedBox(height: AppTheme.spacingMedium),
+          // _ProfileListItem(
+          //   title: 'Receipt Template Settings',
+          //   onTap: () =>
+          //       Navigator.pushNamed(context, AppRoutes.receiptTemplateSettings),
+          // ),
           const SizedBox(height: AppTheme.spacingMedium),
           _ProfileListItem(
             title: 'Low Stock Limit Settings',

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -16,40 +17,57 @@ import 'package:onepos_admin_app/core/services/local_notification_service.dart';
 import 'package:onepos_admin_app/core/services/background_sync_service.dart';
 import 'package:g_recaptcha_v3/g_recaptcha_v3.dart';
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+void main() {
+  runZoned(
+    () async {
+      WidgetsFlutterBinding.ensureInitialized();
 
-  // initialize shared preferences
-  await SharedPrefsService().init();
+      // initialize shared preferences
+      await SharedPrefsService().init();
 
-  // check for existing token to determine start screen
-  final token = await SecureStorageService().read(AppConstants.keyAccessToken);
-  final isLoggedIn = token != null && token.isNotEmpty;
+      // check for existing token to determine start screen
+      final token = await SecureStorageService().read(
+        AppConstants.keyAccessToken,
+      );
+      final isLoggedIn = token != null && token.isNotEmpty;
 
-  // initialize background and notification services if user is logged in
-  if (isLoggedIn) {
-    try {
-      final localNotificationService = LocalNotificationService();
-      await localNotificationService.init();
-      await localNotificationService.requestPermissions();
+      // initialize background and notification services if user is logged in
+      if (isLoggedIn) {
+        try {
+          final localNotificationService = LocalNotificationService();
+          await localNotificationService.init();
+          await localNotificationService.requestPermissions();
 
-      final bgSyncService = BackgroundSyncService();
-      await bgSyncService.init();
-      await bgSyncService.registerPeriodicTasks();
+          final bgSyncService = BackgroundSyncService();
+          await bgSyncService.init();
+          await bgSyncService.registerPeriodicTasks();
 
-      await _scheduleDefaultInsights(localNotificationService);
-    } catch (e) {
-      log('Failed to initialize local notifications: $e');
-    }
-  }
+          await _scheduleDefaultInsights(localNotificationService);
+        } catch (e) {
+          log('Failed to initialize local notifications: $e');
+        }
+      }
 
-  await GRecaptchaV3.ready(
-    '6LfOgo0sAAAAAADQv_G0IXOktWTeGNtRBqEcEQAW',
-    showBadge: false,
+      await GRecaptchaV3.ready(
+        '6LfOgo0sAAAAAADQv_G0IXOktWTeGNtRBqEcEQAW',
+        showBadge: false,
+      );
+      log('reCAPTCHA v3 initialized.');
+
+      if (kReleaseMode) {
+        debugPrint = (String? message, {int? wrapWidth}) {};
+      }
+
+      runApp(ProviderScope(child: MyApp(isLoggedIn: isLoggedIn)));
+    },
+    zoneSpecification: ZoneSpecification(
+      print: (self, parent, zone, line) {
+        if (!kReleaseMode) {
+          parent.print(zone, line);
+        }
+      },
+    ),
   );
-  log('reCAPTCHA v3 initialized.');
-
-  runApp(ProviderScope(child: MyApp(isLoggedIn: isLoggedIn)));
 }
 
 Future<void> _scheduleDefaultInsights(LocalNotificationService service) async {

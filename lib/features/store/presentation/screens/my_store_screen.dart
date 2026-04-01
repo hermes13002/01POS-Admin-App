@@ -932,15 +932,15 @@ class _AddCategoryFab extends HookWidget {
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
         if (isExpanded.value) ...[
-          _FabOption(
-            label: 'Generate Store',
-            color: const Color.fromARGB(255, 199, 4, 243),
-            icon: Icons.auto_awesome_outlined,
-            onTap: () {
-              isExpanded.value = false;
-              onGenerateStore();
-            },
-          ),
+          // _FabOption(
+          //   label: 'Generate Store',
+          //   color: const Color.fromARGB(255, 199, 4, 243),
+          //   icon: Icons.auto_awesome_outlined,
+          //   onTap: () {
+          //     isExpanded.value = false;
+          //     onGenerateStore();
+          //   },
+          // ),
           const SizedBox(height: 12),
           _FabOption(
             label: 'Add Sub-category',

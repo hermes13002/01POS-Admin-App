@@ -169,7 +169,9 @@ class LoginScreen extends HookConsumerWidget {
                               obscureText: obscure.value,
                               textInputAction: TextInputAction.done,
                               onFieldSubmitted: (_) => submit(),
-                              validator: Validators.validatePassword,
+                              validator: (val) => val == null || val.isEmpty
+                                  ? 'Required'
+                                  : null,
                               decoration: InputDecoration(
                                 hintText: 'Password',
                                 suffixIcon: IconButton(
