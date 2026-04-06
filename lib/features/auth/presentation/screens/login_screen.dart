@@ -3,6 +3,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:google_fonts/google_fonts.dart';
 // import 'package:onepos_admin_app/core/storage/secure_storage_service.dart';
 import 'package:onepos_admin_app/core/storage/shared_prefs_service.dart';
@@ -278,6 +279,50 @@ class LoginScreen extends HookConsumerWidget {
                                             AppRoutes.signup,
                                           );
                                         },
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            Center(
+                              child: RichText(
+                                textAlign: TextAlign.center,
+                                text: TextSpan(
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 12,
+                                    color: AppTheme.textSecondary,
+                                  ),
+                                  children: [
+                                    const TextSpan(
+                                      text: 'By logging in, you agree to ',
+                                    ),
+                                    TextSpan(
+                                      text: '01POS terms',
+                                      style: const TextStyle(
+                                        color: AppTheme.blue,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                      recognizer: TapGestureRecognizer()
+                                        ..onTap = () => launchUrl(
+                                          Uri.parse(
+                                            'https://01pos.net/ng/privacy-policy',
+                                          ),
+                                        ),
+                                    ),
+                                    const TextSpan(text: ' and '),
+                                    TextSpan(
+                                      text: 'privacy policy.',
+                                      style: const TextStyle(
+                                        color: AppTheme.blue,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                      recognizer: TapGestureRecognizer()
+                                        ..onTap = () => launchUrl(
+                                          Uri.parse(
+                                            'https://01pos.net/ng/privacy-policy',
+                                          ),
+                                        ),
                                     ),
                                   ],
                                 ),

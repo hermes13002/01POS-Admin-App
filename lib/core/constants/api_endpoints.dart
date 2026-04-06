@@ -94,6 +94,7 @@ class ApiEndpoints {
   static const String storeSettings = '/store/settings';
   static const String myStore = '/store/my-store';
   static const String receiptTemplate = '/admin/receipt-template';
+  static const String updateReceiptTemplate = '/admin/receipt-template/update';
   static const String currencySettings = '/admin/currency-settings';
   static const String currencySettingsCurrencies =
       '/admin/currency-settings/currencies';
@@ -111,7 +112,8 @@ class ApiEndpoints {
   static const String showAutoBill = '/v3/admin/auto-bills/show/';
   static const String deleteAutoBill = '/v3/admin/auto-bills/delete/';
   static const String billOptions = '/v3/admin/auto-bills/bill-option';
-  static const String activateAutoBill = '/v3/admin/auto-bills/activate/'; // {id}
+  static const String activateAutoBill =
+      '/v3/admin/auto-bills/activate/'; // {id}
   static const String deactivateAutoBill =
       '/v3/admin/auto-bills/deactivate/'; // {id}
 
@@ -144,4 +146,8 @@ class ApiEndpoints {
       '/admin/sub_categories/activate/'; // {id}
   static const String deactivateSubCategory =
       '/admin/sub_categories/deactivate/'; // {id}
+
+  // Broadcasts
+  static const String storeBroadcast = '/broadcasts/store';
+  static const String broadcastHistory = '/broadcasts/history';
 }

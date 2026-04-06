@@ -280,6 +280,7 @@ class ReportsData {
   final bool isStockLevelLoading;
   final String? expensesError;
   final bool isExpensesLoading;
+  final int fundingReadinessScore;
 
   const ReportsData({
     required this.salesOverview,
@@ -304,6 +305,7 @@ class ReportsData {
     this.isStockLevelLoading = false,
     this.expensesError,
     this.isExpensesLoading = false,
+    this.fundingReadinessScore = 0,
   });
 
   ReportsData copyWith({
@@ -329,6 +331,7 @@ class ReportsData {
     bool? isStockLevelLoading,
     String? expensesError,
     bool? isExpensesLoading,
+    int? fundingReadinessScore,
     bool clearTopSalesError = false,
     bool clearSalesSummaryError = false,
     bool clearLowStockError = false,
@@ -373,6 +376,8 @@ class ReportsData {
           ? null
           : (expensesError ?? this.expensesError),
       isExpensesLoading: isExpensesLoading ?? this.isExpensesLoading,
+      fundingReadinessScore:
+          fundingReadinessScore ?? this.fundingReadinessScore,
     );
   }
 }

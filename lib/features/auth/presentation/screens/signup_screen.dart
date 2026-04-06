@@ -12,6 +12,7 @@ import 'package:onepos_admin_app/shared/widgets/app_snackbar.dart';
 import 'package:onepos_admin_app/shared/widgets/animated_background.dart';
 import 'package:onepos_admin_app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:g_recaptcha_v3/g_recaptcha_v3.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'dart:developer' as dev;
 
 const List<String> _backgroundImages = [
@@ -94,9 +95,9 @@ class SignupScreen extends HookConsumerWidget {
           SafeArea(
             child: Center(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 32,
+                padding: const EdgeInsets.only(
+                  left: 24, right: 24,
+                  top: 32, bottom: 0
                 ),
                 child: Container(
                   width: double.infinity,
@@ -337,7 +338,11 @@ class SignupScreen extends HookConsumerWidget {
                                         fontWeight: FontWeight.w500,
                                       ),
                                       recognizer: TapGestureRecognizer()
-                                        ..onTap = () {},
+                                        ..onTap = () => launchUrl(
+                                          Uri.parse(
+                                            'https://01pos.net/ng/privacy-policy',
+                                          ),
+                                        ),
                                     ),
                                     const TextSpan(text: ' and '),
                                     TextSpan(
@@ -347,7 +352,11 @@ class SignupScreen extends HookConsumerWidget {
                                         fontWeight: FontWeight.w500,
                                       ),
                                       recognizer: TapGestureRecognizer()
-                                        ..onTap = () {},
+                                        ..onTap = () => launchUrl(
+                                          Uri.parse(
+                                            'https://01pos.net/ng/privacy-policy',
+                                          ),
+                                        ),
                                     ),
                                   ],
                                 ),
@@ -416,7 +425,11 @@ class SignupScreen extends HookConsumerWidget {
                                           color: AppTheme.blue,
                                         ),
                                         recognizer: TapGestureRecognizer()
-                                          ..onTap = () {},
+                                          ..onTap = () => launchUrl(
+                                            Uri.parse(
+                                              'https://policies.google.com/privacy',
+                                            ),
+                                          ),
                                       ),
                                       const TextSpan(text: ' and '),
                                       TextSpan(
@@ -425,7 +438,11 @@ class SignupScreen extends HookConsumerWidget {
                                           color: AppTheme.blue,
                                         ),
                                         recognizer: TapGestureRecognizer()
-                                          ..onTap = () {},
+                                          ..onTap = () => launchUrl(
+                                            Uri.parse(
+                                              'https://policies.google.com/terms',
+                                            ),
+                                          ),
                                       ),
                                       const TextSpan(text: ' apply.'),
                                     ],

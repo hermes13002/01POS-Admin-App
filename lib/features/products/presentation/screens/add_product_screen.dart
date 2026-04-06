@@ -280,7 +280,7 @@ class AddProductScreen extends HookConsumerWidget {
                 hint: 'Enter quantity',
                 controller: quantityController,
                 keyboardType: TextInputType.number,
-                validator: (val) => Validators.validateNumber(val, 'Quantity'),
+                validator: (val) => Validators.validateInteger(val, 'Quantity'),
               ),
               const SizedBox(height: AppTheme.spacingMedium),
 
@@ -303,7 +303,7 @@ class AddProductScreen extends HookConsumerWidget {
 
               // upload product image
               Text(
-                'Upload product image',
+                'Upload product image (Optional)',
                 style: GoogleFonts.poppins(
                   fontSize: 13,
                   color: AppTheme.textSecondary,
@@ -416,7 +416,8 @@ class AddProductScreen extends HookConsumerWidget {
                     'product_name': nameController.text.trim(),
                     'sku': skuController.text.trim(),
                     'barcode': barcodeController.text.trim(),
-                    'quantity': quantityController.text.trim(),
+                    'quantity':
+                        int.tryParse(quantityController.text.trim()) ?? 0,
                     'price': priceController.text.trim(),
                     'manufacturing_date': manufacturingDate.value != null
                         ? DateFormat(
@@ -474,13 +475,21 @@ class _SectionLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      label,
-      style: GoogleFonts.poppins(
-        fontSize: 16,
-        fontWeight: FontWeight.w600,
-        color: AppTheme.textPrimary,
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      spacing: 5,
+      children: [
+        Text(
+          label,
+          style: GoogleFonts.poppins(
+            fontSize: 17,
+            fontWeight: FontWeight.w600,
+            color: AppTheme.textPrimary,
+          ),
+        ),
+        Divider(),
+        SizedBox(height: 5),
+      ],
     );
   }
 }
