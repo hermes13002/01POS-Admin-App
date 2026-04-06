@@ -95,9 +95,9 @@ class SignupScreen extends HookConsumerWidget {
           SafeArea(
             child: Center(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 32,
+                padding: const EdgeInsets.only(
+                  left: 24, right: 24,
+                  top: 32, bottom: 0
                 ),
                 child: Container(
                   width: double.infinity,
