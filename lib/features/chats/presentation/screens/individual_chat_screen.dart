@@ -48,18 +48,7 @@ class IndividualChatScreen extends HookConsumerWidget {
 
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
-      appBar: CustomAppBar(
-        title: contact.fullName,
-        centerTitle: false,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.info_outline),
-            onPressed: () {
-              // Show contact info
-            },
-          ),
-        ],
-      ),
+      appBar: CustomAppBar(title: contact.fullName, centerTitle: false),
       body: Column(
         children: [
           Expanded(
@@ -115,9 +104,12 @@ class IndividualChatScreen extends HookConsumerWidget {
 
           // Message Input Field
           Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppTheme.spacingMedium,
-              vertical: AppTheme.spacingSmall,
+            padding: EdgeInsets.only(
+              left: AppTheme.spacingMedium,
+              right: AppTheme.spacingMedium,
+              top: AppTheme.spacingSmall,
+              bottom:
+                  AppTheme.spacingSmall + MediaQuery.paddingOf(context).bottom,
             ),
             decoration: BoxDecoration(
               color: AppTheme.white,
@@ -129,49 +121,47 @@ class IndividualChatScreen extends HookConsumerWidget {
                 ),
               ],
             ),
-            child: SafeArea(
-              child: Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: messageController,
-                      style: GoogleFonts.poppins(fontSize: 14),
-                      decoration: InputDecoration(
-                        hintText: 'Type a message...',
-                        hintStyle: GoogleFonts.poppins(color: AppTheme.grey400),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(24),
-                          borderSide: BorderSide.none,
-                        ),
-                        filled: true,
-                        fillColor: AppTheme.backgroundColor,
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 10,
-                        ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: messageController,
+                    style: GoogleFonts.poppins(fontSize: 14),
+                    decoration: InputDecoration(
+                      hintText: 'Type a message...',
+                      hintStyle: GoogleFonts.poppins(color: AppTheme.grey400),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(24),
+                        borderSide: BorderSide.none,
                       ),
-                      onSubmitted: (value) =>
-                          _sendMessage(context, ref, messageController),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  GestureDetector(
-                    onTap: () => _sendMessage(context, ref, messageController),
-                    child: Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: const BoxDecoration(
-                        color: AppTheme.primaryColor,
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.send,
-                        color: Colors.white,
-                        size: 20,
+                      filled: true,
+                      fillColor: AppTheme.backgroundColor,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 10,
                       ),
                     ),
+                    onSubmitted: (value) =>
+                        _sendMessage(context, ref, messageController),
                   ),
-                ],
-              ),
+                ),
+                const SizedBox(width: 8),
+                GestureDetector(
+                  onTap: () => _sendMessage(context, ref, messageController),
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: const BoxDecoration(
+                      color: AppTheme.primaryColor,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.send,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ],

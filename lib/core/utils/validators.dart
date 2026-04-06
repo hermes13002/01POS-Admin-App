@@ -52,6 +52,17 @@ class Validators {
     return null;
   }
 
+  /// Integer validation
+  static String? validateInteger(String? value, String fieldName) {
+    if (value == null || value.isEmpty) {
+      return '$fieldName is required';
+    }
+    if (int.tryParse(value) == null) {
+      return '$fieldName must be an integer';
+    }
+    return null;
+  }
+
   /// Positive number validation
   static String? validatePositiveNumber(String? value, String fieldName) {
     final numberValidation = validateNumber(value, fieldName);

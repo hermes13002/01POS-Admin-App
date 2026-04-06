@@ -92,58 +92,58 @@ class _DetailBody extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 48),
-          if (detail.user != null) ...[
-            Text(
-              'Sender Details',
-              style: GoogleFonts.poppins(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: AppTheme.textPrimary,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.all(AppTheme.spacingMedium),
-              decoration: BoxDecoration(
-                color: AppTheme.white,
-                borderRadius: BorderRadius.circular(
-                  AppTheme.borderRadiusMedium,
-                ),
-                border: Border.all(color: AppTheme.grey200),
-              ),
-              child: Row(
-                children: [
-                  CircleAvatar(
-                    backgroundColor: AppTheme.blue.withValues(alpha: 0.1),
-                    child: Text(
-                      detail.user!.firstname[0],
-                      style: const TextStyle(color: AppTheme.blue),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '${detail.user!.firstname} ${detail.user!.lastname}',
-                        style: GoogleFonts.poppins(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      Text(
-                        detail.user!.email,
-                        style: GoogleFonts.poppins(
-                          fontSize: 12,
-                          color: AppTheme.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
+          // if (detail.user != null) ...[
+          //   Text(
+          //     'Sender Details',
+          //     style: GoogleFonts.poppins(
+          //       fontSize: 14,
+          //       fontWeight: FontWeight.w600,
+          //       color: AppTheme.textPrimary,
+          //     ),
+          //   ),
+          //   const SizedBox(height: 12),
+          //   Container(
+          //     padding: const EdgeInsets.all(AppTheme.spacingMedium),
+          //     decoration: BoxDecoration(
+          //       color: AppTheme.white,
+          //       borderRadius: BorderRadius.circular(
+          //         AppTheme.borderRadiusMedium,
+          //       ),
+          //       border: Border.all(color: AppTheme.grey200),
+          //     ),
+          //     child: Row(
+          //       children: [
+          //         CircleAvatar(
+          //           backgroundColor: AppTheme.blue.withValues(alpha: 0.1),
+          //           child: Text(
+          //             detail.user!.firstname[0],
+          //             style: const TextStyle(color: AppTheme.blue),
+          //           ),
+          //         ),
+          //         const SizedBox(width: 12),
+          //         Column(
+          //           crossAxisAlignment: CrossAxisAlignment.start,
+          //           children: [
+          //             Text(
+          //               '${detail.user!.firstname} ${detail.user!.lastname}',
+          //               style: GoogleFonts.poppins(
+          //                 fontSize: 14,
+          //                 fontWeight: FontWeight.w600,
+          //               ),
+          //             ),
+          //             Text(
+          //               detail.user!.email,
+          //               style: GoogleFonts.poppins(
+          //                 fontSize: 12,
+          //                 color: AppTheme.textSecondary,
+          //               ),
+          //             ),
+          //           ],
+          //         ),
+          //       ],
+          //     ),
+          //   ),
+          // ],
         ],
       ),
     );

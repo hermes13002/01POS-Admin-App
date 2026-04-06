@@ -40,7 +40,7 @@ class ReceiptTemplateNotifier extends AsyncNotifier<ReceiptTemplateModel> {
     };
 
     try {
-      final updated = await _datasource.updateReceiptTemplate(body);
+      final updated = await _datasource.updateReceiptTemplate(current.id, body);
       state = AsyncData(updated);
       return null;
     } catch (error) {

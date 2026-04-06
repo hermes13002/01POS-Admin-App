@@ -40,8 +40,8 @@ class HomeScreen extends HookConsumerWidget {
 
     final screenWidth = MediaQuery.sizeOf(context).width;
     final greetingFontSize = screenWidth < 360
-        ? 16.0
-        : (screenWidth < 400 ? 18.0 : 20.0);
+        ? 14.0
+        : (screenWidth < 400 ? 16.0 : 18.0);
 
     final bgIndex = useState(0);
 

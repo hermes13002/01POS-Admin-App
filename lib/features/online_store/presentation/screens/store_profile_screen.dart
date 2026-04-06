@@ -134,7 +134,7 @@ class _ProfileContent extends ConsumerWidget {
                       padding: const EdgeInsets.all(4),
                       decoration: const BoxDecoration(
                         color: Color(0xFF4A90E2),
-                        shape: BoxShape.rectangle,
+                        shape: BoxShape.circle,
                       ),
                       child: const Icon(
                         Icons.edit_outlined,
@@ -271,12 +271,12 @@ class _ProfileContent extends ConsumerWidget {
             onTap: () =>
                 Navigator.pushNamed(context, AppRoutes.currencySettings),
           ),
-          // const SizedBox(height: AppTheme.spacingMedium),
-          // _ProfileListItem(
-          //   title: 'Receipt Template Settings',
-          //   onTap: () =>
-          //       Navigator.pushNamed(context, AppRoutes.receiptTemplateSettings),
-          // ),
+          const SizedBox(height: AppTheme.spacingMedium),
+          _ProfileListItem(
+            title: 'Receipt Template Settings',
+            onTap: () =>
+                Navigator.pushNamed(context, AppRoutes.receiptTemplateSettings),
+          ),
           const SizedBox(height: AppTheme.spacingMedium),
           _ProfileListItem(
             title: 'Low Stock Limit Settings',

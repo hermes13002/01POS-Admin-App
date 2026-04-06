@@ -9,7 +9,10 @@ import 'package:onepos_admin_app/features/online_store/data/models/receipt_templ
 
 abstract class ReceiptTemplateRemoteDatasource {
   Future<ReceiptTemplateModel> getReceiptTemplate();
-  Future<ReceiptTemplateModel> updateReceiptTemplate(Map<String, dynamic> body);
+  Future<ReceiptTemplateModel> updateReceiptTemplate(
+    int templateId,
+    Map<String, dynamic> body,
+  );
 }
 
 class ReceiptTemplateRemoteDatasourceImpl
@@ -56,17 +59,16 @@ class ReceiptTemplateRemoteDatasourceImpl
 
   @override
   Future<ReceiptTemplateModel> updateReceiptTemplate(
+    int templateId,
     Map<String, dynamic> body,
   ) async {
-    final url = '${AppConstants.baseUrl}${ApiEndpoints.receiptTemplate}';
+    final endpoint = '${ApiEndpoints.updateReceiptTemplate}/$templateId';
+    final url = '${AppConstants.baseUrl}$endpoint';
 
     log('update_receipt_template url: $url', name: 'API');
     log('update_receipt_template body: ${jsonEncode(body)}', name: 'API');
 
-    final response = await _client.put(
-      ApiEndpoints.receiptTemplate,
-      data: body,
-    );
+    final response = await _client.put(endpoint, data: body);
     final responseBody = _asMap(response.data);
 
     log(

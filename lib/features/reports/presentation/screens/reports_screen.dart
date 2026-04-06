@@ -790,7 +790,7 @@ class _StoreHealthSection extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "Store Health reflects your business's\nfinancial fitness from 0 to 100.",
+                  "Store Health shows how your business is doing on a scale from 0 to 100. It combines:",
                   style: GoogleFonts.poppins(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
@@ -799,14 +799,14 @@ class _StoreHealthSection extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  "We calculate a health score based on your sales vs. expenses for the month.\n"
-                  "100 means excellent profits; 0 means significant loss. Aim for green!",
+                  "1.	Activity – How often you make sales\n"
+                  "2.	Profitability – How much money you keep after expenses",
                   style: GoogleFonts.poppins(
-                    fontSize: 13,
+                    fontSize: 14,
                     color: AppTheme.textSecondary,
                   ),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 16),
                 const _HealthLegendRow(
                   color: Color(0xFF1DD1A1),
                   label: 'Excellent (81-100)',
@@ -827,6 +827,15 @@ class _StoreHealthSection extends StatelessWidget {
                   color: Color(0xFFFF4757),
                   label: 'Critical (0-20)',
                 ),
+                const SizedBox(height: 16),
+                Text(
+                  "Tip: Aim for green! Keep making sales and staying profitable to maintain a healthy score.",
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: AppTheme.textPrimary,
+                  ),
+                ),
                 const SizedBox(height: 32),
                 SizedBox(
                   width: double.infinity,
@@ -836,7 +845,7 @@ class _StoreHealthSection extends StatelessWidget {
                       backgroundColor: const Color(0xFF3B82F6),
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(16),
                       ),
                       elevation: 0,
                     ),
