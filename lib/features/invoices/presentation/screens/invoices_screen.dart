@@ -13,6 +13,7 @@ import 'package:onepos_admin_app/shared/widgets/empty_state_widget.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:onepos_admin_app/features/invoices/data/models/invoice_model.dart';
 import 'package:onepos_admin_app/features/invoices/presentation/widgets/invoice_detail_dialog.dart';
+import 'package:onepos_admin_app/features/sales/presentation/providers/sales_provider.dart';
 import 'package:intl/intl.dart';
 
 class InvoicesScreen extends ConsumerWidget {
@@ -26,6 +27,9 @@ class InvoicesScreen extends ConsumerWidget {
         final searchController = useTextEditingController();
         final searchQuery = useState('');
         final expandedInvoiceId = useState<String?>(null);
+
+        // watch sales to sync items if missing
+        final salesAsync = ref.watch(salesProvider);
 
         return Scaffold(
           backgroundColor: AppTheme.backgroundColor,
@@ -100,6 +104,14 @@ class InvoicesScreen extends ConsumerWidget {
                                         ? null
                                         : invoice.id;
                                   },
+                                  matchingSale: salesAsync.valueOrNull?.sales
+                                      .where(
+                                        (s) =>
+                                            s.orderNumber ==
+                                                invoice.invoiceNumber ||
+                                            s.id == invoice.id,
+                                      )
+                                      .firstOrNull,
                                 ),
                               ),
                             ),
@@ -148,11 +160,13 @@ class _InvoiceTile extends StatelessWidget {
   final InvoiceModel invoice;
   final bool isExpanded;
   final VoidCallback onToggle;
+  final dynamic matchingSale;
 
   const _InvoiceTile({
     required this.invoice,
     required this.isExpanded,
     required this.onToggle,
+    this.matchingSale,
   });
 
   @override
@@ -211,9 +225,12 @@ class _InvoiceTile extends StatelessWidget {
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.start,
                         children: [
                           Text(
                             'Invoice #${invoice.invoiceNumber ?? invoice.id}',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                             style: GoogleFonts.poppins(
                               fontSize: 15,
                               fontWeight: FontWeight.w500,
@@ -287,7 +304,8 @@ class _InvoiceTile extends StatelessWidget {
                   const SizedBox(height: 8),
                   _DetailRow(
                     label: 'Items:',
-                    value: '${invoice.items.length} items',
+                    value:
+                        '${matchingSale?.items.length ?? invoice.items.length} items',
                   ),
                   const SizedBox(height: AppTheme.spacingMedium),
                   Row(
@@ -295,10 +313,21 @@ class _InvoiceTile extends StatelessWidget {
                       Expanded(
                         child: OutlinedButton.icon(
                           onPressed: () {
+                            final displayInvoice = matchingSale != null
+                                ? invoice.copyWith(
+                                    items: (matchingSale.items as List)
+                                        .map(
+                                          (i) =>
+                                              InvoiceItemModel.fromSaleItem(i),
+                                        )
+                                        .toList(),
+                                  )
+                                : invoice;
+
                             showDialog(
                               context: context,
                               builder: (context) =>
-                                  InvoiceDetailDialog(invoice: invoice),
+                                  InvoiceDetailDialog(invoice: displayInvoice),
                             );
                           },
                           icon: const Icon(Icons.visibility_outlined, size: 18),

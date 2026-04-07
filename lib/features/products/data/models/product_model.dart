@@ -81,7 +81,11 @@ class ProductModel {
       price: double.tryParse(json['price']?.toString() ?? '0') ?? 0.0,
       category: catName,
       subCategory: subCatName,
-      stock: int.tryParse(json['available_quantity']?.toString() ?? '0') ?? 0,
+      stock:
+          double.tryParse(
+            json['available_quantity']?.toString() ?? '0',
+          )?.toInt() ??
+          0,
       imageUrl: json['product_image']?.toString(),
       store: json['store']?.toString(),
       warehouse: json['warehouse']?.toString(),
@@ -94,8 +98,12 @@ class ProductModel {
       catId: parsedCatId,
       subCatId: parsedSubCatId,
       quantityPurchased:
-          int.tryParse(json['quantity_purchased']?.toString() ?? '0') ?? 0,
-      inStock: int.tryParse(json['in_stock']?.toString() ?? '0') ?? 0,
+          double.tryParse(
+            json['quantity_purchased']?.toString() ?? '0',
+          )?.toInt() ??
+          0,
+      inStock:
+          double.tryParse(json['in_stock']?.toString() ?? '0')?.toInt() ?? 0,
       isActive: int.tryParse(json['is_active']?.toString() ?? '0') ?? 0,
     );
   }

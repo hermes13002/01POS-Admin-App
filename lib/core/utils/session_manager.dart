@@ -26,7 +26,19 @@ class SessionManager {
     await SecureStorageService().deleteAll();
 
     final context = navigatorKey.currentContext;
-    if (context == null) {
+    if (context == null || !context.mounted) {
+      _isShowingExpiry = false;
+      return;
+    }
+
+    // skip if we are already on the login screen to avoid redundant/confusing dialogs
+    final currentRoute = ModalRoute.of(context)?.settings.name;
+    if (currentRoute == AppRoutes.login) {
+      _isShowingExpiry = false;
+      return;
+    }
+
+    if (!context.mounted) {
       _isShowingExpiry = false;
       return;
     }

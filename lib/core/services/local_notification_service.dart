@@ -48,17 +48,44 @@ class LocalNotificationService {
 
   Future<void> requestPermissions() async {
     await init();
-    await flutterLocalNotificationsPlugin
+
+    // Notifications permission
+    final androidImplementation = flutterLocalNotificationsPlugin
         .resolvePlatformSpecificImplementation<
           AndroidFlutterLocalNotificationsPlugin
-        >()
-        ?.requestNotificationsPermission();
+        >();
+
+    await androidImplementation?.requestNotificationsPermission();
+
+    // Exact alarms permission (Android 13+)
+    try {
+      await androidImplementation?.requestExactAlarmsPermission();
+    } catch (e) {
+      log('Exact alarms permission request failed: $e');
+      // this might fail on older versions or if already granted/denied
+      // where the method isn't supported, but zonedSchedule will
+      // catch it later if it's truly required and missing.
+    }
 
     await flutterLocalNotificationsPlugin
         .resolvePlatformSpecificImplementation<
           IOSFlutterLocalNotificationsPlugin
         >()
         ?.requestPermissions(alert: true, badge: true, sound: true);
+  }
+
+  Future<bool> hasPermissions() async {
+    final androidImplementation = flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >();
+
+    final notificationsGranted =
+        await androidImplementation?.areNotificationsEnabled() ?? false;
+    // for exact alarms, the plugin doesn't have a direct check for "is granted"
+    // but the requestExactAlarmsPermission won't throw if we just call it.
+
+    return notificationsGranted;
   }
 
   Future<void> showNotification({

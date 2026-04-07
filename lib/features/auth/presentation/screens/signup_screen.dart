@@ -11,9 +11,7 @@ import 'package:onepos_admin_app/shared/widgets/app_dropdown.dart';
 import 'package:onepos_admin_app/shared/widgets/app_snackbar.dart';
 import 'package:onepos_admin_app/shared/widgets/animated_background.dart';
 import 'package:onepos_admin_app/features/auth/presentation/providers/auth_provider.dart';
-import 'package:g_recaptcha_v3/g_recaptcha_v3.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'dart:developer' as dev;
 
 const List<String> _backgroundImages = [
   'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80',
@@ -54,11 +52,6 @@ class SignupScreen extends HookConsumerWidget {
 
       isLoading.value = true;
 
-      // Fetch reCAPTCHA token
-      dev.log('Generating reCAPTCHA token for action: signup...');
-      final token = await GRecaptchaV3.execute('signup');
-      dev.log('reCAPTCHA token result: "${token ?? 'NULL'}"');
-
       final body = {
         "company_name": businessNameCtrl.text.trim(),
         "company_email": businessEmailCtrl.text.trim(),
@@ -96,8 +89,10 @@ class SignupScreen extends HookConsumerWidget {
             child: Center(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.only(
-                  left: 24, right: 24,
-                  top: 32, bottom: 0
+                  left: 24,
+                  right: 24,
+                  top: 32,
+                  bottom: 0,
                 ),
                 child: Container(
                   width: double.infinity,
@@ -399,85 +394,33 @@ class SignupScreen extends HookConsumerWidget {
                         ),
                         const SizedBox(height: 24),
 
-                        // reCAPTCHA and Login
                         Center(
-                          child: Column(
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                ),
-                                child: RichText(
-                                  textAlign: TextAlign.center,
-                                  text: TextSpan(
-                                    style: GoogleFonts.poppins(
-                                      fontSize: 11,
-                                      color: AppTheme.textSecondary,
-                                    ),
-                                    children: [
-                                      const TextSpan(
-                                        text:
-                                            'This site is protected by reCAPTCHA Enterprise and the Google\n',
-                                      ),
-                                      TextSpan(
-                                        text: 'Privacy Policy',
-                                        style: const TextStyle(
-                                          color: AppTheme.blue,
-                                        ),
-                                        recognizer: TapGestureRecognizer()
-                                          ..onTap = () => launchUrl(
-                                            Uri.parse(
-                                              'https://policies.google.com/privacy',
-                                            ),
-                                          ),
-                                      ),
-                                      const TextSpan(text: ' and '),
-                                      TextSpan(
-                                        text: 'Terms of Service',
-                                        style: const TextStyle(
-                                          color: AppTheme.blue,
-                                        ),
-                                        recognizer: TapGestureRecognizer()
-                                          ..onTap = () => launchUrl(
-                                            Uri.parse(
-                                              'https://policies.google.com/terms',
-                                            ),
-                                          ),
-                                      ),
-                                      const TextSpan(text: ' apply.'),
-                                    ],
-                                  ),
-                                ),
+                          child: RichText(
+                            text: TextSpan(
+                              style: GoogleFonts.poppins(
+                                fontSize: 13,
+                                color: AppTheme.textSecondary,
                               ),
-                              const SizedBox(height: 16),
-                              RichText(
-                                text: TextSpan(
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 13,
-                                    color: AppTheme.textSecondary,
-                                  ),
-                                  children: [
-                                    const TextSpan(
-                                      text: 'Already have an account? ',
-                                    ),
-                                    TextSpan(
-                                      text: 'Login',
-                                      style: const TextStyle(
-                                        color: AppTheme.blue,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                      recognizer: TapGestureRecognizer()
-                                        ..onTap = () {
-                                          Navigator.pushNamed(
-                                            context,
-                                            AppRoutes.login,
-                                          );
-                                        },
-                                    ),
-                                  ],
+                              children: [
+                                const TextSpan(
+                                  text: 'Already have an account? ',
                                 ),
-                              ),
-                            ],
+                                TextSpan(
+                                  text: 'Login',
+                                  style: const TextStyle(
+                                    color: AppTheme.blue,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                  recognizer: TapGestureRecognizer()
+                                    ..onTap = () {
+                                      Navigator.pushNamed(
+                                        context,
+                                        AppRoutes.login,
+                                      );
+                                    },
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                         const SizedBox(height: 16),

@@ -1072,40 +1072,79 @@ class _CashierAppBanner extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'To process sales, you need to get the cashier app from the Play Store.',
+                  'To process sales, sign in with your cashier credentials.',
                   style: GoogleFonts.poppins(
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
                     color: AppTheme.textPrimary,
                   ),
                 ),
-                const SizedBox(height: 4),
-                GestureDetector(
-                  onTap: () async {
-                    final url = Uri.parse(
-                      'https://play.google.com/store/apps/details?id=com.onetech.posapp',
-                    );
-                    if (await canLaunchUrl(url)) {
-                      await launchUrl(
-                        url,
-                        mode: LaunchMode.externalApplication,
-                      );
-                    }
-                  },
-                  child: Text(
-                    'Get it on Play Store',
-                    style: GoogleFonts.poppins(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: AppTheme.blue,
-                      decoration: TextDecoration.underline,
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    _BannerButton(
+                      label: 'Download Checkout App',
+                      onTap: () async {
+                        final url = Uri.parse(
+                          'https://play.google.com/store/apps/details?id=com.onetech.posapp',
+                        );
+                        if (await canLaunchUrl(url)) {
+                          await launchUrl(
+                            url,
+                            mode: LaunchMode.externalApplication,
+                          );
+                        }
+                      },
                     ),
-                  ),
+                    _BannerButton(
+                      label: 'Open Desktop Web',
+                      onTap: () async {
+                        final url = Uri.parse('https://app.01pos.net/login');
+                        if (await canLaunchUrl(url)) {
+                          await launchUrl(
+                            url,
+                            mode: LaunchMode.externalApplication,
+                          );
+                        }
+                      },
+                    ),
+                  ],
                 ),
               ],
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _BannerButton extends StatelessWidget {
+  final String label;
+  final VoidCallback onTap;
+
+  const _BannerButton({required this.label, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: AppTheme.blue,
+          borderRadius: BorderRadius.circular(6),
+        ),
+        child: Text(
+          label,
+          style: GoogleFonts.poppins(
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
+          ),
+        ),
       ),
     );
   }

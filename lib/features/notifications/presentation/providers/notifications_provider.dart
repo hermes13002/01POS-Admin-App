@@ -119,16 +119,15 @@ class Notifications extends _$Notifications {
     state = await AsyncValue.guard(() => _fetchPage(1));
   }
 
-  /// marks a notification as read and updates local state
-  Future<void> markAsRead(int id) async {
-    final result = await _repo.markAsRead(id);
+  Future<void> markAsRead(int notificationId) async {
+    final result = await _repo.markAsRead(notificationId);
     result.fold(
       (failure) => null, // silenty fail or handle as needed
       (_) {
         final current = state.valueOrNull;
         if (current != null) {
           final updatedList = current.notifications.map((n) {
-            if (n.id == id) {
+            if (n.notificationId == notificationId) {
               return n.copyWithRead(1);
             }
             return n;

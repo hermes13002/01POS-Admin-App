@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -8,13 +9,21 @@ import 'package:onepos_admin_app/shared/widgets/loading_widget.dart';
 import 'package:onepos_admin_app/shared/widgets/error_widget.dart';
 import '../providers/notifications_provider.dart';
 
-class NotificationDetailScreen extends ConsumerWidget {
+class NotificationDetailScreen extends HookConsumerWidget {
   final int notificationId;
 
   const NotificationDetailScreen({super.key, required this.notificationId});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // mark as read when viewed
+    useEffect(() {
+      Future.microtask(() {
+        ref.read(notificationsProvider.notifier).markAsRead(notificationId);
+      });
+      return null;
+    }, [notificationId]);
+
     final detailAsync = ref.watch(notificationDetailProvider(notificationId));
 
     return Scaffold(

@@ -12,10 +12,6 @@ import 'package:onepos_admin_app/core/network/connectivity_provider.dart';
 import 'package:onepos_admin_app/core/utils/session_manager.dart';
 import 'package:onepos_admin_app/features/auth/presentation/screens/login_screen.dart';
 import 'package:onepos_admin_app/presentation/screens/main_navigation_screen.dart';
-import 'dart:developer';
-import 'package:onepos_admin_app/core/services/local_notification_service.dart';
-import 'package:onepos_admin_app/core/services/background_sync_service.dart';
-import 'package:g_recaptcha_v3/g_recaptcha_v3.dart';
 
 void main() {
   runZoned(
@@ -31,29 +27,6 @@ void main() {
       );
       final isLoggedIn = token != null && token.isNotEmpty;
 
-      // initialize background and notification services if user is logged in
-      if (isLoggedIn) {
-        try {
-          final localNotificationService = LocalNotificationService();
-          await localNotificationService.init();
-          await localNotificationService.requestPermissions();
-
-          final bgSyncService = BackgroundSyncService();
-          await bgSyncService.init();
-          await bgSyncService.registerPeriodicTasks();
-
-          await _scheduleDefaultInsights(localNotificationService);
-        } catch (e) {
-          log('Failed to initialize local notifications: $e');
-        }
-      }
-
-      await GRecaptchaV3.ready(
-        '6LfOgo0sAAAAAADQv_G0IXOktWTeGNtRBqEcEQAW',
-        showBadge: false,
-      );
-      log('reCAPTCHA v3 initialized.');
-
       if (kReleaseMode) {
         debugPrint = (String? message, {int? wrapWidth}) {};
       }
@@ -67,36 +40,6 @@ void main() {
         }
       },
     ),
-  );
-}
-
-Future<void> _scheduleDefaultInsights(LocalNotificationService service) async {
-  // daily snapshot at 8AM
-  await service.scheduleDailyNotification(
-    id: 1,
-    title: 'Daily Business Snapshot',
-    body: 'Take a quick look at how your business is doing.',
-    hour: 8,
-    minute: 0,
-  );
-
-  // weekly recap at Mon 9AM
-  await service.scheduleWeeklyNotification(
-    id: 2,
-    title: 'Weekly Recap',
-    body: 'See how your week went.',
-    day: 1, // monday
-    hour: 9,
-    minute: 0,
-  );
-
-  // end of day sales at 9PM
-  await service.scheduleDailyNotification(
-    id: 3,
-    title: 'End of Day Summary',
-    body: 'Great sales today! Check your end-of-day summary.',
-    hour: 21,
-    minute: 0,
   );
 }
 

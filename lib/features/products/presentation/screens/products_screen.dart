@@ -386,7 +386,7 @@ class _ProductTile extends StatelessWidget {
                   const SizedBox(height: AppTheme.spacingSmall),
 
                   // stock row
-                  _DetailRow(label: 'Stock:', value: '${product.stock}'),
+                  // _DetailRow(label: 'Stock:', value: '${product.stock}'),
                 ],
               ),
             ),

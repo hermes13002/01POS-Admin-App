@@ -123,7 +123,7 @@ class NotificationsScreen extends HookConsumerWidget {
                             onTap: () {
                               ref
                                   .read(notificationsProvider.notifier)
-                                  .markAsRead(item.id);
+                                  .markAsRead(item.notificationId);
                               Navigator.pushNamed(
                                 context,
                                 AppRoutes.notificationDetail,

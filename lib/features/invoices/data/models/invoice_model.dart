@@ -187,4 +187,16 @@ class InvoiceItemModel {
       imageUrl: json['product_image'] ?? json['imageUrl'],
     );
   }
+
+  factory InvoiceItemModel.fromSaleItem(dynamic saleItem) {
+    // using dynamic to avoid direct dependency on SaleItem model if possible,
+    // or we can import it if it's cleaner.
+    // since both are in different features, i'll use their properties.
+    return InvoiceItemModel(
+      productId: '', // sale item doesn't always have product id
+      productName: saleItem.productName,
+      price: saleItem.unitPrice,
+      quantity: saleItem.quantity,
+    );
+  }
 }

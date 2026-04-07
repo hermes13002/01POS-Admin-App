@@ -26,9 +26,10 @@ class AuthInterceptor extends Interceptor {
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
     if (err.response?.statusCode == 401) {
-      // skip session-expiry handling for the login endpoint itself
+      // skip session-expiry handling for login and logout endpoints
       final path = err.requestOptions.path;
-      if (!path.contains(ApiEndpoints.login)) {
+      if (!path.contains(ApiEndpoints.login) &&
+          !path.contains(ApiEndpoints.logout)) {
         SessionManager.handleSessionExpired();
       }
     }

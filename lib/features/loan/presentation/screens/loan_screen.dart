@@ -8,7 +8,8 @@ import 'package:onepos_admin_app/shared/widgets/custom_button.dart';
 import 'package:onepos_admin_app/shared/widgets/app_snackbar.dart';
 
 class LoanScreen extends HookConsumerWidget {
-  const LoanScreen({super.key});
+  final bool isActive;
+  const LoanScreen({super.key, this.isActive = false});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -65,7 +66,7 @@ class LoanScreen extends HookConsumerWidget {
                     ),
                   ),
                   const SizedBox(height: 32),
-                  _FundingBatteryIndicator(score: score),
+                  _FundingBatteryIndicator(score: score, isActive: isActive),
                   const SizedBox(height: 32),
                   Text(
                     _getStatusText(score),
@@ -167,8 +168,9 @@ class LoanScreen extends HookConsumerWidget {
 
 class _FundingBatteryIndicator extends HookWidget {
   final int score;
+  final bool isActive;
 
-  const _FundingBatteryIndicator({required this.score});
+  const _FundingBatteryIndicator({required this.score, this.isActive = false});
 
   @override
   Widget build(BuildContext context) {
@@ -177,17 +179,17 @@ class _FundingBatteryIndicator extends HookWidget {
     );
 
     final curvedAnimation = useMemoized(
-      () => CurvedAnimation(
-        parent: animationController,
-        curve: Curves.easeInOut,
-      ),
+      () =>
+          CurvedAnimation(parent: animationController, curve: Curves.easeInOut),
       [animationController],
     );
 
     useEffect(() {
-      animationController.forward(from: 0.0);
+      if (isActive) {
+        animationController.forward(from: 0.0);
+      }
       return null;
-    }, [score]);
+    }, [score, isActive]);
 
     return AnimatedBuilder(
       animation: curvedAnimation,

@@ -95,9 +95,7 @@ class NotificationRemoteDatasourceImpl implements NotificationRemoteDatasource {
 
   @override
   Future<ApiResponse<void>> markAsRead(int id) async {
-    final response = await _client.delete(
-      '${ApiEndpoints.readNotification}$id',
-    );
+    final response = await _client.post('${ApiEndpoints.readNotification}$id');
     final responseBody = response.data as Map<String, dynamic>;
 
     if (responseBody['error'] == true) {
