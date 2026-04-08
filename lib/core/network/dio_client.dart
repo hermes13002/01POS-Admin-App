@@ -4,6 +4,8 @@ import 'package:onepos_admin_app/core/constants/app_constants.dart';
 import 'package:onepos_admin_app/core/errors/exceptions.dart';
 import 'package:onepos_admin_app/core/network/interceptors/auth_interceptor.dart';
 import 'package:onepos_admin_app/core/network/interceptors/logging_interceptor.dart';
+import 'package:onepos_admin_app/core/network/interceptors/performance_interceptor.dart';
+import 'package:onepos_admin_app/core/services/firebase_service.dart';
 
 /// Dio client for making HTTP requests
 class DioClient {
@@ -30,6 +32,7 @@ class DioClient {
     // Add interceptors
     _dio.interceptors.addAll([
       AuthInterceptor(),
+      PerformanceInterceptor(),
       if (kDebugMode) LoggingInterceptor(),
     ]);
   }
@@ -156,9 +159,15 @@ class DioClient {
               'No internet connection. Please check your network settings.',
         );
       default:
-        return ServerException(
+        final exception = ServerException(
           message: error.message ?? 'An unexpected error occurred',
         );
+        FirebaseService().logError(
+          exception,
+          error.stackTrace,
+          reason: 'Dio unexpected error',
+        );
+        return exception;
     }
   }
 
@@ -199,7 +208,16 @@ class DioClient {
           statusCode: statusCode,
         );
       default:
-        return ServerException(message: message, statusCode: statusCode);
+        final exception = ServerException(
+          message: message,
+          statusCode: statusCode,
+        );
+        FirebaseService().logError(
+          exception,
+          StackTrace.current,
+          reason: 'Dio response error: $statusCode',
+        );
+        return exception;
     }
   }
 }

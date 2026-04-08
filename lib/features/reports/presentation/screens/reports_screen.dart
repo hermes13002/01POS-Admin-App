@@ -13,12 +13,18 @@ import '../providers/reports_provider.dart';
 import 'package:onepos_admin_app/shared/widgets/dots_loader.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 
-/// Reports screen
-class ReportsScreen extends ConsumerWidget {
+import 'package:flutter_hooks/flutter_hooks.dart';
+
+class ReportsScreen extends HookConsumerWidget {
   const ReportsScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    useEffect(() {
+      Future.microtask(() => ref.read(reportsProvider.notifier).refresh());
+      return null;
+    }, []);
+
     final reportsData = ref.watch(reportsProvider);
 
     return Scaffold(
@@ -37,7 +43,6 @@ class _ReportsContent extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Column(
       children: [
-        // app bar
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
           child: Row(
@@ -62,7 +67,6 @@ class _ReportsContent extends ConsumerWidget {
           ),
         ),
 
-        // scrollable content
         Expanded(
           child: AnimationLimiter(
             child: SingleChildScrollView(
@@ -78,7 +82,6 @@ class _ReportsContent extends ConsumerWidget {
                   children: [
                     const SizedBox(height: 8),
 
-                    // sales overview
                     _SalesOverviewSection(
                       data: data.salesOverview,
                       isLoading: data.isSalesOverviewLoading,
@@ -87,14 +90,12 @@ class _ReportsContent extends ConsumerWidget {
 
                     const SizedBox(height: 16),
 
-                    // store health
                     _StoreHealthSection(data: data.storeHealth),
 
                     const SizedBox(height: 16),
 
                     const SizedBox(height: 16),
 
-                    // low stock
                     _LowStockSection(
                       items: data.lowStockItems,
                       isLoading: data.isLowStockLoading,
@@ -103,7 +104,6 @@ class _ReportsContent extends ConsumerWidget {
 
                     const SizedBox(height: 16),
 
-                    // sales summary
                     _SalesSummarySection(
                       data: data.salesSummary,
                       isLoading: data.isSalesSummaryLoading,
@@ -118,7 +118,6 @@ class _ReportsContent extends ConsumerWidget {
 
                     const SizedBox(height: 16),
 
-                    // expenses overview
                     _ExpensesOverviewSection(
                       data: data.expenseStatistics,
                       isLoading: data.isExpensesLoading,
@@ -127,7 +126,6 @@ class _ReportsContent extends ConsumerWidget {
 
                     const SizedBox(height: 16),
 
-                    // stock level
                     _StockLevelSection(
                       data: data.stockLevel,
                       isLoading: data.isStockLevelLoading,
@@ -152,7 +150,6 @@ class _ReportsContent extends ConsumerWidget {
   }
 }
 
-/// Sales overview section
 class _SalesOverviewSection extends StatelessWidget {
   final SalesOverviewData data;
   final bool isLoading;
@@ -351,7 +348,6 @@ class _ExpensesOverviewSectionState extends State<_ExpensesOverviewSection> {
               ),
             ),
             const SizedBox(height: 20),
-            // Legend
             Wrap(
               spacing: 16,
               runSpacing: 8,
@@ -619,7 +615,7 @@ class _DonutChartPainter extends CustomPainter {
     final total = activeEntries.fold(0.0, (sum, e) => sum + e.value);
     if (total == 0) return;
 
-    final double visualGap = 6.0; // Fixed white space between segments
+    final double visualGap = 6.0;
     final rectRadius = radius - strokeWidth / 2;
     final double paddingAngle = (visualGap + strokeWidth) / 2 / rectRadius;
     final double gapPerSegment = paddingAngle * 2;
@@ -642,7 +638,6 @@ class _DonutChartPainter extends CustomPainter {
 
     double availableAngle = (2 * pi) - (activeEntries.length * gapPerSegment);
 
-    // Fallback if segments overlap even with no data represented
     if (availableAngle <= 0) {
       availableAngle = 0;
     }
@@ -765,7 +760,6 @@ class _OverviewCard extends StatelessWidget {
   }
 }
 
-/// Store health section
 class _StoreHealthSection extends StatelessWidget {
   final StoreHealthData data;
 
@@ -1286,29 +1280,25 @@ class _SalesSummarySectionState extends State<_SalesSummarySection> {
                     },
                     items: [
                       const DropdownMenuItem(
-                        value: 'this_week',
-                        child: Text('This Week'),
+                        value: '7days',
+                        child: Text('This week'),
                       ),
                       const DropdownMenuItem(
-                        value: 'this_month',
-                        child: Text('This Month'),
-                      ),
-                      const DropdownMenuItem(
-                        value: 'this_year',
-                        child: Text('This Year'),
-                      ),
-                      const DropdownMenuItem(
-                        value: 'next_week_ai',
-                        child: Text('Next Week AI'),
-                      ),
-                      const DropdownMenuItem(
-                        value: 'next_month_ai',
-                        child: Text('Next Month AI'),
+                        value: '30days',
+                        child: Text('This month'),
                       ),
                       const DropdownMenuItem(
                         value: '12months',
-                        child: Text('Last 12 Months'),
+                        child: Text('This year'),
                       ),
+                      // const DropdownMenuItem(
+                      //   value: 'next_week_ai',
+                      //   child: Text('Next week (AI)'),
+                      // ),
+                      // const DropdownMenuItem(
+                      //   value: 'next_month_ai',
+                      //   child: Text('Next month (AI)'),
+                      // ),
                     ],
                   ),
                 ),

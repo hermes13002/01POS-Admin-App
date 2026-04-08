@@ -180,16 +180,23 @@ class UsersScreen extends HookConsumerWidget {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          final created = await Navigator.pushNamed(context, AppRoutes.addUser);
-          if (created == true) {
-            await ref.read(allUsersProvider.notifier).refresh();
-          }
-        },
-        backgroundColor: Colors.black,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-        child: const Icon(Icons.add, color: Colors.white),
+      floatingActionButton: usersAsync.whenOrNull(
+        data: (_) => FloatingActionButton(
+          onPressed: () async {
+            final created = await Navigator.pushNamed(
+              context,
+              AppRoutes.addUser,
+            );
+            if (created == true) {
+              await ref.read(allUsersProvider.notifier).refresh();
+            }
+          },
+          backgroundColor: Colors.black,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(30),
+          ),
+          child: const Icon(Icons.add, color: Colors.white),
+        ),
       ),
     );
   }

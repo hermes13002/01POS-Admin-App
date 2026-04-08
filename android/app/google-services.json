@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "344664326871",
+    "project_id": "onepos-admin-app",
+    "storage_bucket": "onepos-admin-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:344664326871:android:5061ff9f90a6d8e810a692",
+        "android_client_info": {
+          "package_name": "net.onepos.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBOWEI41D2M-lmB4CLyu5eQZB1Wun8YCWY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

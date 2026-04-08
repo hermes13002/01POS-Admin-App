@@ -184,16 +184,18 @@ class ProductsScreen extends HookConsumerWidget {
       ),
 
       // floating action button with expandable speed dial
-      floatingActionButton: _AddProductFab(
-        onAddProduct: () {
-          Navigator.pushNamed(context, '/add-product');
-        },
-        onAddCategory: () {
-          Navigator.pushNamed(context, '/add-category');
-        },
-        onAddSubCategory: () {
-          Navigator.pushNamed(context, '/add-sub-category');
-        },
+      floatingActionButton: productsAsync.whenOrNull(
+        data: (_) => _AddProductFab(
+          onAddProduct: () {
+            Navigator.pushNamed(context, '/add-product');
+          },
+          onAddCategory: () {
+            Navigator.pushNamed(context, '/add-category');
+          },
+          onAddSubCategory: () {
+            Navigator.pushNamed(context, '/add-sub-category');
+          },
+        ),
       ),
     );
   }

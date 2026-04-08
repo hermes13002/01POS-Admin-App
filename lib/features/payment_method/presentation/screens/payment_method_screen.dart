@@ -238,133 +238,137 @@ class PaymentMethodScreen extends HookConsumerWidget {
           ],
         ),
       ),
-      floatingActionButton: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          if (isFabExpanded.value) ...[
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'Connect Bank Account',
-                  style: GoogleFonts.poppins(
-                    color: Colors.white,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                InkWell(
-                  onTap: () async {
-                    isFabExpanded.value = false;
-                    await showGeneralDialog<void>(
-                      context: context,
-                      barrierDismissible: true,
-                      barrierLabel: 'Connect Bank Account',
-                      barrierColor: Colors.black.withValues(alpha: 0.5),
-                      transitionDuration: const Duration(milliseconds: 260),
-                      pageBuilder: (_, __, ___) =>
-                          const ConnectBankAccountDialog(),
-                      transitionBuilder:
-                          (
-                            dialogContext,
-                            animation,
-                            secondaryAnimation,
-                            child,
-                          ) {
-                            final curvedAnimation = CurvedAnimation(
-                              parent: animation,
-                              curve: Curves.easeOutCubic,
-                              reverseCurve: Curves.easeInCubic,
-                            );
-
-                            return FadeTransition(
-                              opacity: curvedAnimation,
-                              child: ScaleTransition(
-                                scale: Tween<double>(
-                                  begin: 0.94,
-                                  end: 1,
-                                ).animate(curvedAnimation),
-                                child: child,
-                              ),
-                            );
-                          },
-                    );
-                  },
-                  child: Container(
-                    width: 48,
-                    height: 48,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFF9013FE), // purple from design
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.account_balance,
+      floatingActionButton: methodsAsync.whenOrNull(
+        data: (_) => Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            if (isFabExpanded.value) ...[
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Connect Bank Account',
+                    style: GoogleFonts.poppins(
                       color: Colors.white,
-                      size: 24,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
+                  const SizedBox(width: 12),
+                  InkWell(
+                    onTap: () async {
+                      isFabExpanded.value = false;
+                      await showGeneralDialog<void>(
+                        context: context,
+                        barrierDismissible: true,
+                        barrierLabel: 'Connect Bank Account',
+                        barrierColor: Colors.black.withValues(alpha: 0.5),
+                        transitionDuration: const Duration(milliseconds: 260),
+                        pageBuilder: (_, __, ___) =>
+                            const ConnectBankAccountDialog(),
+                        transitionBuilder:
+                            (
+                              dialogContext,
+                              animation,
+                              secondaryAnimation,
+                              child,
+                            ) {
+                              final curvedAnimation = CurvedAnimation(
+                                parent: animation,
+                                curve: Curves.easeOutCubic,
+                                reverseCurve: Curves.easeInCubic,
+                              );
 
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'Add Payment Method',
-                  style: GoogleFonts.poppins(
-                    color: Colors.white,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                InkWell(
-                  onTap: () async {
-                    isFabExpanded.value = false;
-                    final created = await Navigator.pushNamed(
-                      context,
-                      AppRoutes.addPaymentMethod,
-                    );
-                    if (created == true) {
-                      await ref
-                          .read(paymentMethodsProvider.notifier)
-                          .refreshPaymentMethods();
-                    }
-                  },
-                  child: Container(
-                    width: 48,
-                    height: 48,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFF4A90E2), // blue from design
-                      shape: BoxShape.circle,
+                              return FadeTransition(
+                                opacity: curvedAnimation,
+                                child: ScaleTransition(
+                                  scale: Tween<double>(
+                                    begin: 0.94,
+                                    end: 1,
+                                  ).animate(curvedAnimation),
+                                  child: child,
+                                ),
+                              );
+                            },
+                      );
+                    },
+                    child: Container(
+                      width: 48,
+                      height: 48,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFF9013FE), // purple from design
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.account_balance,
+                        color: Colors.white,
+                        size: 24,
+                      ),
                     ),
-                    child: const Icon(
-                      Icons.account_balance_wallet,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Add Payment Method',
+                    style: GoogleFonts.poppins(
                       color: Colors.white,
-                      size: 24,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
-                ),
-              ],
+                  const SizedBox(width: 12),
+                  InkWell(
+                    onTap: () async {
+                      isFabExpanded.value = false;
+                      final created = await Navigator.pushNamed(
+                        context,
+                        AppRoutes.addPaymentMethod,
+                      );
+                      if (created == true) {
+                        await ref
+                            .read(paymentMethodsProvider.notifier)
+                            .refreshPaymentMethods();
+                      }
+                    },
+                    child: Container(
+                      width: 48,
+                      height: 48,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFF4A90E2), // blue from design
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.account_balance_wallet,
+                        color: Colors.white,
+                        size: 24,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+            ],
+
+            FloatingActionButton(
+              backgroundColor: isFabExpanded.value
+                  ? Colors.white
+                  : Colors.black,
+              onPressed: () {
+                isFabExpanded.value = !isFabExpanded.value;
+              },
+              child: Icon(
+                isFabExpanded.value ? Icons.close : Icons.add,
+                color: isFabExpanded.value ? Colors.black : Colors.white,
+              ),
             ),
-            const SizedBox(height: 16),
           ],
-
-          FloatingActionButton(
-            backgroundColor: isFabExpanded.value ? Colors.white : Colors.black,
-            onPressed: () {
-              isFabExpanded.value = !isFabExpanded.value;
-            },
-            child: Icon(
-              isFabExpanded.value ? Icons.close : Icons.add,
-              color: isFabExpanded.value ? Colors.black : Colors.white,
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }

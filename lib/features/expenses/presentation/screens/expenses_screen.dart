@@ -376,13 +376,17 @@ class ExpensesScreen extends HookConsumerWidget {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.pushNamed(context, AppRoutes.addExpense);
-        },
-        backgroundColor: Colors.black,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-        child: const Icon(Icons.add, color: Colors.white),
+      floatingActionButton: expensesState.whenOrNull(
+        data: (_) => FloatingActionButton(
+          onPressed: () {
+            Navigator.pushNamed(context, AppRoutes.addExpense);
+          },
+          backgroundColor: Colors.black,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(30),
+          ),
+          child: const Icon(Icons.add, color: Colors.white),
+        ),
       ),
     );
   }

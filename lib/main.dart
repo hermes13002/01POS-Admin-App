@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:onepos_admin_app/core/routes/app_routes.dart';
@@ -12,11 +13,15 @@ import 'package:onepos_admin_app/core/network/connectivity_provider.dart';
 import 'package:onepos_admin_app/core/utils/session_manager.dart';
 import 'package:onepos_admin_app/features/auth/presentation/screens/login_screen.dart';
 import 'package:onepos_admin_app/presentation/screens/main_navigation_screen.dart';
+import 'package:onepos_admin_app/core/services/firebase_service.dart';
 
 void main() {
   runZoned(
     () async {
       WidgetsFlutterBinding.ensureInitialized();
+
+      // enable edge-to-edge support for Android 15+
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
       // initialize shared preferences
       await SharedPrefsService().init();
@@ -26,6 +31,15 @@ void main() {
         AppConstants.keyAccessToken,
       );
       final isLoggedIn = token != null && token.isNotEmpty;
+
+      // initialize firebase
+      await FirebaseService().init();
+
+      // report uncaught asynchronous errors that aren't handled by Flutter
+      PlatformDispatcher.instance.onError = (error, stack) {
+        FirebaseService().logError(error, stack, reason: 'asynchronous error');
+        return true;
+      };
 
       if (kReleaseMode) {
         debugPrint = (String? message, {int? wrapWidth}) {};

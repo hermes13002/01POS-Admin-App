@@ -12,7 +12,6 @@ import 'package:onepos_admin_app/shared/widgets/custom_search_bar.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_text_field.dart';
 import 'package:onepos_admin_app/shared/widgets/app_snackbar.dart';
 import 'package:onepos_admin_app/shared/widgets/loading_widget.dart';
-import 'package:onepos_admin_app/features/broadcasts/presentation/widgets/broadcast_modal.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 
 /// customers screen with expandable customer tiles
@@ -182,16 +181,18 @@ class CustomersScreen extends HookConsumerWidget {
       ),
 
       // fab with add customer option
-      floatingActionButton: _AddCustomerFab(
-        onAddCustomer: () async {
-          final created = await Navigator.pushNamed(
-            context,
-            AppRoutes.addCustomer,
-          );
-          if (created == true) {
-            await ref.read(customersProvider.notifier).refreshCustomers();
-          }
-        },
+      floatingActionButton: customersAsync.whenOrNull(
+        data: (_) => _AddCustomerFab(
+          onAddCustomer: () async {
+            final created = await Navigator.pushNamed(
+              context,
+              AppRoutes.addCustomer,
+            );
+            if (created == true) {
+              await ref.read(customersProvider.notifier).refreshCustomers();
+            }
+          },
+        ),
       ),
     );
   }
@@ -502,19 +503,19 @@ class _AddCustomerFab extends HookWidget {
             },
           ),
           const SizedBox(height: AppTheme.spacingSmall + 4),
-          _FabOption(
-            label: 'Send Broadcast',
-            color: const Color(0xFF9C27B0), // Purple matching the radio buttons
-            icon: Icons.broadcast_on_personal_outlined,
-            onTap: () {
-              isExpanded.value = false;
-              showDialog(
-                context: context,
-                builder: (_) => const BroadcastModal(),
-              );
-            },
-          ),
-          const SizedBox(height: AppTheme.spacingSmall + 4),
+          // _FabOption(
+          //   label: 'Send Broadcast',
+          //   color: const Color(0xFF9C27B0), // Purple matching the radio buttons
+          //   icon: Icons.broadcast_on_personal_outlined,
+          //   onTap: () {
+          //     isExpanded.value = false;
+          //     showDialog(
+          //       context: context,
+          //       builder: (_) => const BroadcastModal(),
+          //     );
+          //   },
+          // ),
+          // const SizedBox(height: AppTheme.spacingSmall + 4),
         ],
 
         // main fab

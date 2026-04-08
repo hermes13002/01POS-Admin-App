@@ -322,13 +322,17 @@ class DiscountScreen extends HookConsumerWidget {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.pushNamed(context, AppRoutes.addDiscount);
-        },
-        backgroundColor: Colors.black,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-        child: const Icon(Icons.add, color: Colors.white),
+      floatingActionButton: discountsAsync.whenOrNull(
+        data: (_) => FloatingActionButton(
+          onPressed: () {
+            Navigator.pushNamed(context, AppRoutes.addDiscount);
+          },
+          backgroundColor: Colors.black,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(30),
+          ),
+          child: const Icon(Icons.add, color: Colors.white),
+        ),
       ),
     );
   }

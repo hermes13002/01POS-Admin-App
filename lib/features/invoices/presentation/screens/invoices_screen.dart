@@ -143,12 +143,14 @@ class InvoicesScreen extends ConsumerWidget {
               ),
             ],
           ),
-          floatingActionButton: FloatingActionButton(
-            onPressed: () =>
-                Navigator.pushNamed(context, AppRoutes.createInvoice),
-            backgroundColor: Colors.black,
-            shape: const CircleBorder(),
-            child: const Icon(Icons.add, color: Colors.white, size: 28),
+          floatingActionButton: invoicesAsync.whenOrNull(
+            data: (_) => FloatingActionButton(
+              onPressed: () =>
+                  Navigator.pushNamed(context, AppRoutes.createInvoice),
+              backgroundColor: Colors.black,
+              shape: const CircleBorder(),
+              child: const Icon(Icons.add, color: Colors.white, size: 28),
+            ),
           ),
         );
       },

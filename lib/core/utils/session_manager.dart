@@ -15,10 +15,7 @@ class SessionManager {
   /// guards against showing multiple expiry dialogs at once
   static bool _isShowingExpiry = false;
 
-  /// called by the auth interceptor when a 401 is received.
-  /// clears stored tokens, shows a dialog, then navigates to login.
   static Future<void> handleSessionExpired() async {
-    // prevent stacking multiple dialogs from concurrent 401 responses
     if (_isShowingExpiry) return;
     _isShowingExpiry = true;
 

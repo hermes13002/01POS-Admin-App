@@ -2,6 +2,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 import 'dart:developer';
+import 'package:onepos_admin_app/core/services/firebase_service.dart';
 
 class LocalNotificationService {
   static final LocalNotificationService _instance =
@@ -118,6 +119,11 @@ class LocalNotificationService {
       notificationDetails: platformChannelSpecifics,
       payload: payload,
     );
+
+    await FirebaseService().logEvent('notification_shown', {
+      'id': id,
+      'title': title,
+    });
   }
 
   Future<void> scheduleDailyNotification({
@@ -148,6 +154,11 @@ class LocalNotificationService {
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       matchDateTimeComponents: DateTimeComponents.time,
     );
+
+    await FirebaseService().logEvent('notification_scheduled_daily', {
+      'id': id,
+      'time': '$hour:$minute',
+    });
   }
 
   Future<void> scheduleWeeklyNotification({
@@ -179,6 +190,12 @@ class LocalNotificationService {
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
     );
+
+    await FirebaseService().logEvent('notification_scheduled_weekly', {
+      'id': id,
+      'day': day,
+      'time': '$hour:$minute',
+    });
   }
 
   tz.TZDateTime _nextInstanceOfTime(int hour, int minute) {

@@ -147,10 +147,12 @@ class SubCategoriesScreen extends HookConsumerWidget {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => Navigator.pushNamed(context, '/add-sub-category'),
-        backgroundColor: Colors.black,
-        child: const Icon(Icons.add, color: Colors.white),
+      floatingActionButton: subCategoriesAsync.whenOrNull(
+        data: (_) => FloatingActionButton(
+          onPressed: () => Navigator.pushNamed(context, '/add-sub-category'),
+          backgroundColor: Colors.black,
+          child: const Icon(Icons.add, color: Colors.white),
+        ),
       ),
     );
   }

@@ -45,11 +45,16 @@ class BroadcastModel {
   Map<String, dynamic> toJson() {
     return {
       'message': message,
-      'html_mode': htmlMode ? 1 : 0,
+      'message_type': htmlMode ? 'html' : 'plain',
       'customer_ids': customerIds,
-      if (sendAt != null)
-        'send_at': DateFormat('yyyy-MM-dd HH:mm:ss').format(sendAt!),
-      if (recurring != null) 'recurring': recurring,
+      'send_option': recurring != null
+          ? 'recurring'
+          : (sendAt != null ? 'later' : 'now'),
+      if (sendAt != null) ...{
+        'scheduled_date': DateFormat('yyyy-MM-dd').format(sendAt!),
+        'scheduled_time': DateFormat('HH:mm').format(sendAt!),
+      },
+      if (recurring != null) 'recurring_frequency': recurring!.toLowerCase(),
     };
   }
 }

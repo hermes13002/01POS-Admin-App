@@ -396,20 +396,32 @@ class _SendBroadcastTab extends HookConsumerWidget {
                     isSending.value = true;
                     final body = {
                       'message': messageController.text.trim(),
-                      'html_mode': htmlMode.value,
-                      'customer_ids': selectedCustomerIds.value.toList(),
-                      'send_type': selectedType.value.toLowerCase(),
+                      'message_type': htmlMode.value ? 'html' : 'plain',
+                      'customer_ids': selectedCustomerIds.value
+                          .map((id) => id.toString())
+                          .toList(),
+                      'send_option': selectedType.value == 'Send Now'
+                          ? 'now'
+                          : (selectedType.value == 'Send Later'
+                                ? 'later'
+                                : 'recurring'),
                       if (selectedType.value == 'Send Later') ...{
-                        'scheduled_date': scheduledDate.value!
-                            .toIso8601String(),
-                        if (scheduledTime.value != null)
-                          'scheduled_time':
-                              '${scheduledTime.value!.hour}:${scheduledTime.value!.minute}',
+                        'scheduled_date': DateFormat(
+                          'yyyy-MM-dd',
+                        ).format(scheduledDate.value!),
+                        'scheduled_time': scheduledTime.value != null
+                            ? '${scheduledTime.value!.hour.toString().padLeft(2, '0')}:${scheduledTime.value!.minute.toString().padLeft(2, '0')}'
+                            : DateFormat('HH:mm').format(DateTime.now()),
                       },
                       if (selectedType.value == 'Recurring') ...{
-                        'recurring_start_date': recurringStartDate.value!
-                            .toIso8601String(),
-                        'frequency': recurringFrequency.value.toLowerCase(),
+                        'scheduled_date': DateFormat(
+                          'yyyy-MM-dd',
+                        ).format(recurringStartDate.value!),
+                        'scheduled_time': DateFormat(
+                          'HH:mm',
+                        ).format(DateTime.now()),
+                        'recurring_frequency': recurringFrequency.value
+                            .toLowerCase(),
                       },
                     };
                     final error = await ref

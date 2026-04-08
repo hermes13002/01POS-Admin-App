@@ -11,7 +11,6 @@ import '../../data/models/reports_model.dart';
 
 part 'reports_provider.g.dart';
 
-/// Reports data provider
 @riverpod
 class Reports extends _$Reports {
   SalesRepository get _salesRepo =>
@@ -21,7 +20,6 @@ class Reports extends _$Reports {
 
   @override
   ReportsData build() {
-    // start fetching in background
     Future.microtask(() {
       _fetchTopSales();
       _fetchSalesSummary();
@@ -42,7 +40,6 @@ class Reports extends _$Reports {
     );
   }
 
-  /// Fetch top sales in background
   Future<void> _fetchTopSales() async {
     try {
       final result = await _salesRepo.getAllSalesDashboard();
@@ -70,7 +67,6 @@ class Reports extends _$Reports {
     }
   }
 
-  /// Update sales summary filter
   Future<void> updateSalesSummaryFilter(String filter) async {
     final currentData = state;
     state = currentData.copyWith(
@@ -80,7 +76,6 @@ class Reports extends _$Reports {
     await _fetchSalesSummary();
   }
 
-  /// Fetch sales summary in background
   Future<void> _fetchSalesSummary() async {
     try {
       final currentDataTemp = state;
@@ -112,7 +107,6 @@ class Reports extends _$Reports {
     }
   }
 
-  /// Fetch low stock products in background
   Future<void> _fetchLowStock() async {
     try {
       final result = await _productRepo.fetchLowStockProducts();
@@ -139,7 +133,6 @@ class Reports extends _$Reports {
     }
   }
 
-  /// Fetch sales overview in background
   Future<void> _fetchSalesOverview() async {
     try {
       final result = await _salesRepo.getSalesOverviewDashboard();
@@ -167,7 +160,6 @@ class Reports extends _$Reports {
     }
   }
 
-  /// Refresh reports data
   Future<void> refreshReports() async {
     final currentData = state;
     state = currentData.copyWith(
@@ -245,7 +237,6 @@ class Reports extends _$Reports {
     }
   }
 
-  /// Fetch store health based on last transaction date
   Future<void> _fetchStoreHealth() async {
     try {
       final result = await _salesRepo.getSales(page: 1);
@@ -267,13 +258,10 @@ class Reports extends _$Reports {
           final lastSaleDate = lastSale.date;
           final now = DateTime.now();
 
-          // d = days since last transaction
           final d = now.difference(lastSaleDate).inDays.toDouble();
 
-          // k = 0.18
           const k = 0.18;
 
-          // A = 100 * e^(-k * d)
           final score = (100 * exp(-k * d)).round();
 
           String status;
@@ -303,7 +291,6 @@ class Reports extends _$Reports {
     }
   }
 
-  /// Fetch performance stats for dashboard
   Future<void> _fetchPerformanceStats() async {
     try {
       final result = await _salesRepo.getPerformanceStats();
@@ -321,36 +308,25 @@ class Reports extends _$Reports {
     }
   }
 
-  /// Update funding readiness score using the formula:
-  /// P = (revenue - expenses) / revenue
-  /// Store Health = 100 * P * e^(-k * d)
-  /// Funding Readiness = (store health + (M * 100)) / 2
   void _updateFundingReadiness() {
     final current = state;
     final revenue = current.performanceStats?.month.current ?? 0.0;
     final expenses = current.expenseStatistics?.totalExpenses ?? 0.0;
     final baseStoreHealth = current.storeHealth.score.toDouble();
 
-    // P = (revenue - expenses) / revenue
-    // Cap P between 0 and 1 for health score calculation
     final p = revenue > 0
         ? ((revenue - expenses) / revenue).clamp(0.0, 1.0)
         : 0.0;
 
-    // Adjusted Store Health = Base Health * P
     final adjustedStoreHealth = baseStoreHealth * p;
 
-    // M = min(1, months active / 5)
-    // Defaulting to 1.0 (assuming 5+ months) as we don't have registration date
     const m = 1.0;
 
-    // Funding Readiness = (adjustedStoreHealth + (M * 100)) / 2
     final score = ((adjustedStoreHealth + (m * 100)) / 2).round();
 
     state = current.copyWith(fundingReadinessScore: score);
   }
 
-  /// Mock data for development
   ReportsData _getMockData() {
     return const ReportsData(
       salesOverview: SalesOverviewData(
@@ -405,7 +381,6 @@ class Reports extends _$Reports {
     );
   }
 
-  /// Refresh all dashboard data
   Future<void> refresh() async {
     state = _getMockData().copyWith(
       isTopSalesLoading: true,

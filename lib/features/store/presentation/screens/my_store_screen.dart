@@ -201,14 +201,16 @@ class MyStoreScreen extends HookConsumerWidget {
       ),
 
       // fab with speed dial
-      floatingActionButton: _AddCategoryFab(
-        onAddCategory: () {
-          Navigator.pushNamed(context, '/add-category');
-        },
-        onAddSubCategory: () {
-          Navigator.pushNamed(context, '/add-sub-category');
-        },
-        onGenerateStore: () => _showGenerateStoreModal(context, ref),
+      floatingActionButton: categoriesAsync.whenOrNull(
+        data: (_) => _AddCategoryFab(
+          onAddCategory: () {
+            Navigator.pushNamed(context, '/add-category');
+          },
+          onAddSubCategory: () {
+            Navigator.pushNamed(context, '/add-sub-category');
+          },
+          onGenerateStore: () => _showGenerateStoreModal(context, ref),
+        ),
       ),
     );
   }
