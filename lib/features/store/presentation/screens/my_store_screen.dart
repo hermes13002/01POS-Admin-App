@@ -848,6 +848,8 @@ class _DetailRow extends StatelessWidget {
           Expanded(
             child: Text(
               value,
+              overflow: TextOverflow.ellipsis,
+              maxLines: 2,
               style: GoogleFonts.poppins(
                 fontSize: 14,
                 color: valueColor ?? AppTheme.textPrimary,

@@ -104,16 +104,11 @@ class ToolsScreen extends HookConsumerWidget {
                     : AnimationLimiter(
                         child: GridView.builder(
                           gridDelegate:
-                              SliverGridDelegateWithFixedCrossAxisCount(
+                              const SliverGridDelegateWithFixedCrossAxisCount(
                                 crossAxisCount: 3,
                                 crossAxisSpacing: AppTheme.spacingMedium,
                                 mainAxisSpacing: AppTheme.spacingMedium,
-                                mainAxisExtent:
-                                    110 +
-                                    (35 *
-                                        MediaQuery.textScalerOf(
-                                          context,
-                                        ).scale(1)),
+                                childAspectRatio: 1.0,
                               ),
                           itemCount: filteredTools.length,
                           itemBuilder: (context, index) {
@@ -201,14 +196,14 @@ class ToolsScreen extends HookConsumerWidget {
           color: AppTheme.white,
           borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
         ),
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             // icon with light blue background
             Container(
-              width: 50,
-              height: 50,
+              width: 44,
+              height: 44,
               decoration: const BoxDecoration(
                 color: Color.fromRGBO(83, 157, 243, 0.15),
                 shape: BoxShape.circle,
@@ -216,12 +211,12 @@ class ToolsScreen extends HookConsumerWidget {
               child: Center(
                 child: Icon(
                   tool.icon,
-                  size: 26,
+                  size: 22,
                   color: const Color(0xFF2196F3),
                 ),
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 4),
             // label
             Expanded(
               child: Center(
@@ -235,7 +230,7 @@ class ToolsScreen extends HookConsumerWidget {
                       color: AppTheme.textPrimary.withValues(alpha: 0.7),
                     ),
                     textAlign: TextAlign.center,
-                    maxLines: 2,
+                    maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),

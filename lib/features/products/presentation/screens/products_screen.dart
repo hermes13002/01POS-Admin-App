@@ -53,14 +53,7 @@ class ProductsScreen extends HookConsumerWidget {
       appBar: CustomAppBar2(
         title: 'Products',
         backgroundColor: AppTheme.backgroundColor,
-        actions: [
-          // IconButton(
-          //   icon: const Icon(Icons.more_horiz, color: Colors.black),
-          //   onPressed: () {
-          //     // TODO: menu options
-          //   },
-          // ),
-        ],
+        actions: [],
       ),
       body: Column(
         children: [
@@ -100,9 +93,11 @@ class ProductsScreen extends HookConsumerWidget {
                 return AnimationLimiter(
                   child: ListView.separated(
                     controller: scrollController,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppTheme.spacingMedium,
-                      vertical: AppTheme.spacingSmall,
+                    padding: const EdgeInsets.only(
+                      right: AppTheme.spacingMedium,
+                      left: AppTheme.spacingMedium,
+                      top: AppTheme.spacingSmall,
+                      bottom: AppTheme.spacingXLarge,
                     ),
                     itemCount:
                         filtered.length + (productsState.hasMorePages ? 1 : 0),

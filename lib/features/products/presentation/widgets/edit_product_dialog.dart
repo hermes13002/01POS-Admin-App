@@ -267,14 +267,16 @@ class EditProductDialog extends HookConsumerWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
         ),
-        insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
         child: Container(
-          width: 800, // wider, desktop-friendly layout
-          padding: const EdgeInsets.all(AppTheme.spacingLarge),
-          constraints: const BoxConstraints(maxHeight: 750),
+          width: double.infinity,
+          padding: const EdgeInsets.all(AppTheme.spacingMedium),
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height * 0.85,
+          ),
           child: Column(
+            mainAxisSize: MainAxisSize.max,
             children: [
-              // Header
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -285,16 +287,16 @@ class EditProductDialog extends HookConsumerWidget {
                         Text(
                           'Edit Product Details',
                           style: GoogleFonts.poppins(
-                            fontSize: 20,
+                            fontSize: 18,
                             fontWeight: FontWeight.w600,
                             color: AppTheme.textPrimary,
                           ),
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: 2),
                         Text(
-                          'Update the properties below, untouched fields will retain their original values.',
+                          'Update fields below. Untouched fields keep original values.',
                           style: GoogleFonts.poppins(
-                            fontSize: 13,
+                            fontSize: 12,
                             color: AppTheme.textSecondary,
                           ),
                         ),
@@ -315,17 +317,17 @@ class EditProductDialog extends HookConsumerWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: AppTheme.spacingLarge),
+              const SizedBox(height: AppTheme.spacingMedium),
               const Divider(height: 1, color: AppTheme.grey200),
-              const SizedBox(height: AppTheme.spacingLarge),
+              const SizedBox(height: AppTheme.spacingMedium),
 
               // Image Picker
               Center(
                 child: Stack(
                   children: [
                     Container(
-                      width: 100,
-                      height: 100,
+                      width: 80,
+                      height: 80,
                       decoration: BoxDecoration(
                         color: AppTheme.grey100,
                         shape: BoxShape.circle,
@@ -347,7 +349,7 @@ class EditProductDialog extends HookConsumerWidget {
                               product.imageUrl == null)
                           ? const Icon(
                               Icons.image_outlined,
-                              size: 40,
+                              size: 32,
                               color: AppTheme.grey400,
                             )
                           : null,
@@ -358,7 +360,7 @@ class EditProductDialog extends HookConsumerWidget {
                       child: InkWell(
                         onTap: pickImage,
                         child: Container(
-                          padding: const EdgeInsets.all(8),
+                          padding: const EdgeInsets.all(6),
                           decoration: const BoxDecoration(
                             color: AppTheme.primaryColor,
                             shape: BoxShape.circle,
@@ -366,7 +368,7 @@ class EditProductDialog extends HookConsumerWidget {
                           child: const Icon(
                             Icons.camera_alt,
                             color: Colors.white,
-                            size: 16,
+                            size: 14,
                           ),
                         ),
                       ),
@@ -374,155 +376,148 @@ class EditProductDialog extends HookConsumerWidget {
                   ],
                 ),
               ),
-              const SizedBox(height: AppTheme.spacingLarge),
+              const SizedBox(height: AppTheme.spacingMedium),
 
-              // Form Content
+              // form content — single column
               Expanded(
                 child: SingleChildScrollView(
-                  child: Wrap(
-                    spacing: 24,
-                    runSpacing: 20,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Section 1: Basic Info
+                      // basic info
                       _buildSectionTitle('Basic Information'),
-                      _buildFieldRow(
-                        _buildField('Product Name', nameController, flex: 2),
-                        _amountBuildField(
-                          'Price',
-                          priceController,
-                          keyboardType: TextInputType.number,
-                          prefixText: '₦ ',
-                        ),
+                      _buildField('Product Name', nameController),
+                      const SizedBox(height: 12),
+                      _amountBuildField(
+                        'Price',
+                        priceController,
+                        keyboardType: TextInputType.number,
+                        prefixText: '₦ ',
                       ),
 
-                      const SizedBox(height: 8),
-                      // Section 2: Description
+                      const SizedBox(height: 16),
+                      // description
                       _buildSectionTitle('Description'),
-                      _buildFieldRow(
-                        _buildField(
-                          'Description',
-                          descController,
-                          minLines: 3,
-                          maxLines: null,
-                          hintText: 'Enter product description...',
-                        ),
+                      _buildField(
+                        'Description',
+                        descController,
+                        minLines: 3,
+                        maxLines: null,
+                        hintText: 'Enter product description...',
                       ),
 
-                      const SizedBox(height: 8),
-                      // Section 3: Inventory
+                      const SizedBox(height: 16),
+                      // inventory
                       _buildSectionTitle('Inventory Details'),
-                      _buildFieldRow(
-                        _buildField(
-                          'Available Quantity',
-                          qtyController,
-                          keyboardType: TextInputType.number,
-                        ),
+                      _buildField(
+                        'Available Quantity',
+                        qtyController,
+                        keyboardType: TextInputType.number,
                       ),
-                      _buildFieldRow(
-                        _buildField('SKU', skuController),
-                        _buildField(
-                          'Barcode',
-                          barcodeController,
-                          suffixIcon: IconButton(
-                            icon: const Icon(
-                              Icons.qr_code_scanner,
-                              color: AppTheme.primaryColor,
-                              size: 20,
-                            ),
-                            onPressed: () =>
-                                _showBarcodeScanner(context, barcodeController),
+                      const SizedBox(height: 12),
+                      _buildField('SKU', skuController),
+                      const SizedBox(height: 12),
+                      _buildField(
+                        'Barcode',
+                        barcodeController,
+                        suffixIcon: IconButton(
+                          icon: const Icon(
+                            Icons.qr_code_scanner,
+                            color: AppTheme.primaryColor,
+                            size: 20,
                           ),
+                          onPressed: () =>
+                              _showBarcodeScanner(context, barcodeController),
                         ),
                       ),
 
-                      const SizedBox(height: 8),
-                      // Section 3: Vendor & Dates
-                      _buildSectionTitle('Vendor & Dates Information'),
-                      _buildFieldRow(
-                        _buildField('Store', storeController),
-                        _buildField('Warehouse', warehouseController),
-                        _buildField('Supplier', supplierController),
+                      const SizedBox(height: 16),
+                      // vendor & dates
+                      _buildSectionTitle('Vendor & Dates'),
+                      _buildField('Store', storeController),
+                      const SizedBox(height: 12),
+                      _buildField('Warehouse', warehouseController),
+                      const SizedBox(height: 12),
+                      _buildField('Supplier', supplierController),
+                      const SizedBox(height: 12),
+                      _buildField(
+                        'Manufacturing Date',
+                        mfgDateController,
+                        hintText: 'YYYY-MM-DD',
                       ),
-                      _buildFieldRow(
-                        _buildField(
-                          'Manufacturing Date',
-                          mfgDateController,
-                          hintText: 'YYYY-MM-DD',
-                        ),
-                        _buildField(
-                          'Expiring Date',
-                          expDateController,
-                          hintText: 'YYYY-MM-DD',
-                        ),
+                      const SizedBox(height: 12),
+                      _buildField(
+                        'Expiring Date',
+                        expDateController,
+                        hintText: 'YYYY-MM-DD',
                       ),
                     ],
                   ),
                 ),
               ),
 
-              const SizedBox(height: AppTheme.spacingLarge),
+              const SizedBox(height: AppTheme.spacingSmall),
               const Divider(height: 1, color: AppTheme.grey200),
-              const SizedBox(height: AppTheme.spacingMedium),
+              const SizedBox(height: AppTheme.spacingSmall),
 
-              // Action Buttons
+              // action buttons — full width row
               Row(
-                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  OutlinedButton(
-                    onPressed: isSubmitting.value
-                        ? null
-                        : () async {
-                            await animationController.reverse();
-                            if (context.mounted) Navigator.pop(context);
-                          },
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 14,
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: isSubmitting.value
+                          ? null
+                          : () async {
+                              await animationController.reverse();
+                              if (context.mounted) Navigator.pop(context);
+                            },
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        side: const BorderSide(color: AppTheme.grey300),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
                       ),
-                      side: const BorderSide(color: AppTheme.grey300),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    child: Text(
-                      'Cancel',
-                      style: GoogleFonts.poppins(
-                        color: AppTheme.textSecondary,
-                        fontWeight: FontWeight.w500,
+                      child: Text(
+                        'Cancel',
+                        style: GoogleFonts.poppins(
+                          fontSize: 13,
+                          color: AppTheme.textSecondary,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ),
                   ),
-                  const SizedBox(width: AppTheme.spacingMedium),
-                  ElevatedButton(
-                    onPressed: isSubmitting.value ? null : saveChanges,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppTheme.primaryColor,
-                      foregroundColor: Colors.white,
-                      elevation: 0,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 14,
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: isSubmitting.value ? null : saveChanges,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.primaryColor,
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
                       ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
+                      child: isSubmitting.value
+                          ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            )
+                          : Text(
+                              'Save Changes',
+                              style: GoogleFonts.poppins(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
                     ),
-                    child: isSubmitting.value
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
-                              strokeWidth: 2,
-                            ),
-                          )
-                        : Text(
-                            'Save Changes',
-                            style: GoogleFonts.poppins(
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
                   ),
                 ],
               ),
@@ -548,22 +543,7 @@ class EditProductDialog extends HookConsumerWidget {
     );
   }
 
-  Widget _buildFieldRow(Widget child1, [Widget? child2, Widget? child3]) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(child: child1),
-        if (child2 != null) ...[
-          const SizedBox(width: 24),
-          Expanded(child: child2),
-        ],
-        if (child3 != null) ...[
-          const SizedBox(width: 24),
-          Expanded(child: child3),
-        ],
-      ],
-    );
-  }
+  // _buildFieldRow removed — fields are now single-column
 
   Widget _buildField(
     String label,
@@ -571,7 +551,6 @@ class EditProductDialog extends HookConsumerWidget {
     TextInputType? keyboardType,
     int? maxLines = 1,
     int? minLines,
-    int flex = 1,
     String? hintText,
     String? prefixText,
     Widget? suffixIcon,
@@ -610,8 +589,8 @@ class EditProductDialog extends HookConsumerWidget {
             filled: true,
             fillColor: Colors.grey.shade50,
             contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 14,
+              horizontal: 14,
+              vertical: 12,
             ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
@@ -678,8 +657,8 @@ Widget _amountBuildField(
           filled: true,
           fillColor: Colors.grey.shade50,
           contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 14,
+            horizontal: 14,
+            vertical: 12,
           ),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),

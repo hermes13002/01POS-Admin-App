@@ -18,7 +18,6 @@ import 'package:onepos_admin_app/core/utils/amount_formatter.dart';
 import '../../../../shared/widgets/dots_loader.dart';
 import 'package:onepos_admin_app/shared/widgets/app_snackbar.dart';
 
-
 const List<String> _backgroundImages = [
   'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80',
   'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80',
@@ -53,7 +52,6 @@ class HomeScreen extends HookConsumerWidget {
       return timer.cancel;
     }, []);
 
-
     // 10-second polling for chat unread badges
     useEffect(() {
       final timer = Timer.periodic(const Duration(seconds: 10), (_) {
@@ -74,529 +72,498 @@ class HomeScreen extends HookConsumerWidget {
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
       body: SafeArea(
-            child: RefreshIndicator(
-              onRefresh: () async {
-                final reportsNotifier = ref.read(reportsProvider.notifier);
-                final reportsFuture = reportsNotifier.refresh();
-                final profileFuture = ref.refresh(userProfileProvider.future);
-                final chatFuture = ref.refresh(chatContactsProvider.future);
-                final _ = ref.refresh(quickActionsProvider);
+        child: RefreshIndicator(
+          onRefresh: () async {
+            final reportsNotifier = ref.read(reportsProvider.notifier);
+            final reportsFuture = reportsNotifier.refresh();
+            final profileFuture = ref.refresh(userProfileProvider.future);
+            final chatFuture = ref.refresh(chatContactsProvider.future);
+            final _ = ref.refresh(quickActionsProvider);
 
-                await Future.wait([reportsFuture, profileFuture, chatFuture]);
-              },
-              child: SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // header row
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
-                      ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: _MarqueeGreeting(
-                              text: profileAsync.when(
-                                data: (p) => 'Welcome, ${p.firstname}',
-                                loading: () => 'Welcome...',
-                                error: (_, __) => 'Welcome',
-                              ),
-                              style: GoogleFonts.poppins(
-                                fontSize: greetingFontSize,
-                                fontWeight: FontWeight.w700,
-                                color: Colors.black,
-                              ),
-                            ),
+            await Future.wait([reportsFuture, profileFuture, chatFuture]);
+          },
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // header row
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: _MarqueeGreeting(
+                          text: profileAsync.when(
+                            data: (p) => 'Welcome, ${p.firstname}',
+                            loading: () => 'Welcome...',
+                            error: (_, __) => 'Welcome',
                           ),
-                          GestureDetector(
-                            onTap: () =>
-                                Navigator.pushNamed(context, AppRoutes.chats),
-                            child: Stack(
-                              clipBehavior: Clip.none,
-                              children: [
-                                IconButton(
-                                  icon: Image.asset(
-                                    'assets/icons/message.png',
-                                    width: 24,
-                                    height: 24,
-                                    errorBuilder: (_, __, ___) => const Icon(
-                                      Icons.mail_outline,
-                                      size: 24,
-                                    ),
-                                  ),
-                                  onPressed: () => Navigator.pushNamed(
-                                    context,
-                                    AppRoutes.chats,
-                                  ),
-                                ),
-                                Consumer(
-                                  builder: (context, ref, _) {
-                                    final unreadCount = ref.watch(
-                                      totalUnreadCountProvider,
-                                    );
-                                    if (unreadCount == 0)
-                                      return const SizedBox();
-
-                                    return Positioned(
-                                      right: 12,
-                                      top: 12,
-                                      child: Container(
-                                        width: 8,
-                                        height: 8,
-                                        decoration: const BoxDecoration(
-                                          color: Colors.red,
-                                          shape: BoxShape.circle,
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ],
-                            ),
+                          style: GoogleFonts.poppins(
+                            fontSize: greetingFontSize,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.black,
                           ),
-                          const SizedBox(width: 4),
-                          GestureDetector(
-                            onTap: () => Navigator.pushNamed(
-                              context,
-                              AppRoutes.notifications,
-                            ),
-                            child: Stack(
-                              children: [
-                                IconButton(
-                                  icon: Image.asset(
-                                    'assets/icons/notification.png',
-                                    width: 24,
-                                    height: 24,
-                                    errorBuilder: (_, __, ___) => const Icon(
-                                      Icons.notifications_outlined,
-                                      size: 24,
-                                    ),
-                                  ),
-                                  onPressed: () => Navigator.pushNamed(
-                                    context,
-                                    AppRoutes.notifications,
-                                  ),
-                                ),
-                                Consumer(
-                                  builder: (context, ref, _) {
-                                    final unreadCount = ref.watch(
-                                      unreadNotificationsCountProvider,
-                                    );
-                                    if (unreadCount == 0)
-                                      return const SizedBox();
-
-                                    return Positioned(
-                                      right: 8,
-                                      top: 8,
-                                      child: Container(
-                                        width: 16,
-                                        height: 16,
-                                        decoration: const BoxDecoration(
-                                          color: Colors.red,
-                                          shape: BoxShape.circle,
-                                        ),
-                                        child: Center(
-                                          child: Text(
-                                            unreadCount > 9
-                                                ? '9+'
-                                                : '$unreadCount',
-                                            style: const TextStyle(
-                                              fontSize: 9,
-                                              color: Colors.white,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(width: 4),
-                          GestureDetector(
-                            onTap: () => Navigator.pushNamed(
-                              context,
-                              AppRoutes.onlineStore,
-                            ),
-                            child: CircleAvatar(
-                              radius: 16,
-                              backgroundColor: AppTheme.grey300,
-                              child: const Icon(
-                                Icons.person,
-                                color: Colors.black,
-                                size: 18,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    // performance banner
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(18),
-                        child: Stack(
-                          children: [
-                            // animated background image
-                            Positioned.fill(
-                              child: AnimatedSwitcher(
-                                duration: const Duration(milliseconds: 800),
-                                child: SizedBox(
-                                  key: ValueKey(bgIndex.value),
-                                  width: double.infinity,
-                                  height: double.infinity,
-                                  child: CachedNetworkImage(
-                                    imageUrl: _backgroundImages[bgIndex.value],
-                                    fit: BoxFit.cover,
-                                    placeholder: (_, __) =>
-                                        Container(color: const Color(0xFF2D5A27)),
-                                    errorWidget: (_, __, ___) =>
-                                        Container(color: const Color(0xFF2D5A27)),
-                                    fadeInDuration: Duration.zero,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            // dark overlay
-                            Positioned.fill(
-                              child: Container(
-                                color: Colors.black.withValues(alpha: 0.30),
-                              ),
-                            ),
-                            // content
-                            Container(
-                              constraints: const BoxConstraints(minHeight: 260),
-                              width: double.infinity,
-                              padding: const EdgeInsets.all(20),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                    // period chips
-                                    SingleChildScrollView(
-                                      scrollDirection: Axis.horizontal,
-                                      child: Row(
-                                        children:
-                                            [
-                                              'Today',
-                                              'Week',
-                                              'Month',
-                                              'Year',
-                                            ].map((period) {
-                                              final isSelected =
-                                                  selectedPeriod.value ==
-                                                  period;
-                                              return Padding(
-                                                padding: const EdgeInsets.only(
-                                                  right: 8,
-                                                ),
-                                                child: GestureDetector(
-                                                  onTap: () =>
-                                                      selectedPeriod.value =
-                                                          period,
-                                                  child: _buildChip(
-                                                    period,
-                                                    isSelected,
-                                                  ),
-                                                ),
-                                              );
-                                            }).toList(),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 20),
-                                    Text(
-                                      'A quick update on your\nbusiness performance',
-                                      style: GoogleFonts.poppins(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.w700,
-                                        fontSize: 18,
-                                        height: 1.3,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Builder(
-                                      builder: (context) {
-                                        if (reportsAsync.performanceStats ==
-                                                null &&
-                                            reportsAsync
-                                                .isSalesOverviewLoading) {
-                                          return Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.start,
-                                            children: [
-                                              DotsLoader(
-                                                text: 'Fetching stats',
-                                                style: GoogleFonts.poppins(
-                                                  color: Colors.white,
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.w500,
-                                                ),
-                                              ),
-                                            ],
-                                          );
-                                        }
-
-                                        if (reportsAsync.salesOverviewError !=
-                                            null) {
-                                          return Text(
-                                            'Failed to load performance data',
-                                            style: GoogleFonts.poppins(
-                                              color: Colors.white70,
-                                            ),
-                                          );
-                                        }
-
-                                        final stats =
-                                            reportsAsync.performanceStats;
-                                        if (stats == null) {
-                                          return const SizedBox(height: 80);
-                                        }
-
-                                        final period = selectedPeriod.value;
-                                        String periodLabel = '';
-                                        String comparisonLabel = '';
-                                        double current = 0;
-                                        double previous = 0;
-
-                                        if (period == 'Today') {
-                                          periodLabel = 'today';
-                                          comparisonLabel = 'yesterday';
-                                          current = stats.today.current;
-                                          previous = stats.today.previous;
-                                        } else if (period == 'Week') {
-                                          periodLabel = 'this week';
-                                          comparisonLabel = 'last week';
-                                          current = stats.week.current;
-                                          previous = stats.week.previous;
-                                        } else if (period == 'Month') {
-                                          periodLabel = 'this month';
-                                          comparisonLabel = 'last month';
-                                          current = stats.month.current;
-                                          previous = stats.month.previous;
-                                        } else {
-                                          periodLabel = 'this year';
-                                          comparisonLabel = 'last year';
-                                          current = stats.year.current;
-                                          previous = stats.year.previous;
-                                        }
-
-                                        final diff = current - previous;
-                                        final percentage = previous != 0
-                                            ? (diff / previous.abs() * 100)
-                                            : (current > 0 ? 100.0 : 0.0);
-
-                                        String trendText = '';
-                                        if (diff == 0) {
-                                          trendText =
-                                              'That\'s the same as $comparisonLabel';
-                                        } else if (diff > 0) {
-                                          trendText =
-                                              '${percentage.toStringAsFixed(1)}% more than $comparisonLabel';
-                                        } else {
-                                          trendText =
-                                              '${percentage.abs().toStringAsFixed(1)}% less than $comparisonLabel';
-                                        }
-
-                                        return Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              'So far $periodLabel, your business has made',
-                                              style: GoogleFonts.poppins(
-                                                color: Colors.white.withValues(
-                                                  alpha: 0.9,
-                                                ),
-                                                fontWeight: FontWeight.w400,
-                                                fontSize: 13,
-                                              ),
-                                            ),
-                                            const SizedBox(height: 6),
-                                            Text(
-                                              AmountFormatter.formatCurrency(
-                                                current,
-                                                showDecimals: true,
-                                              ),
-                                              style:
-                                                  GoogleFonts.plusJakartaSans(
-                                                    color: Colors.white,
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 30,
-                                                  ),
-                                            ),
-                                            const SizedBox(height: 6),
-                                            Row(
-                                              children: [
-                                                Icon(
-                                                  diff >= 0
-                                                      ? Icons.trending_up
-                                                      : Icons.trending_down,
-                                                  color: diff >= 0
-                                                      ? Colors.greenAccent
-                                                      : Colors.orangeAccent,
-                                                  size: 16,
-                                                ),
-                                                const SizedBox(width: 4),
-                                                Text(
-                                                  trendText,
-                                                  style: GoogleFonts.poppins(
-                                                    color: Colors.white
-                                                        .withValues(
-                                                          alpha: 0.95,
-                                                        ),
-                                                    fontSize: 12,
-                                                    fontWeight: FontWeight.w500,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ],
-                                        );
-                                      },
-                                    ),
-                                    const SizedBox(height: 24),
-                                    // view report button
-                                    SizedBox(
-                                      height: 40,
-                                      child: OutlinedButton.icon(
-                                        style: OutlinedButton.styleFrom(
-                                          // foregroundColor: Colors.white,
-                                          backgroundColor: Colors.white,
-                                          side: const BorderSide(
-                                            color: Colors.white,
-                                            width: 1.5,
-                                          ),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(
-                                              8,
-                                            ),
-                                          ),
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 16,
-                                          ),
-                                        ),
-                                        onPressed: () => Navigator.pushNamed(
-                                          context,
-                                          '/reports',
-                                        ),
-                                        icon: const Icon(
-                                          Icons.arrow_forward,
-                                          size: 18,
-                                          color: AppTheme.textPrimary,
-                                        ),
-                                        label: Text(
-                                          'View Detailed Report',
-                                          style: GoogleFonts.poppins(
-                                            fontWeight: FontWeight.w500,
-                                            fontSize: 13,
-                                            color: AppTheme.textPrimary,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                  ]),
-                      ),
-                    ),
-
-                    const SizedBox(height: 24),
-
-                    // quick actions section header
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Quick Actions',
-                            style: GoogleFonts.poppins(
-                              fontSize: 17,
-                              fontWeight: FontWeight.w600,
-                              color: AppTheme.textPrimary,
-                            ),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              _showEditQuickActionsBottomSheet(context, ref);
-                            },
-                            child: Text(
-                              'Edit',
-                              style: GoogleFonts.poppins(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                                color: AppTheme.primaryColor,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    const SizedBox(height: 8),
-
-                    // quick actions grid — vertical card layout
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: AnimationLimiter(
-                        child: GridView.builder(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          gridDelegate:
-                              SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 2,
-                                crossAxisSpacing: 14,
-                                mainAxisSpacing: 14,
-                                mainAxisExtent:
-                                    100 +
-                                    (30 *
-                                        MediaQuery.textScalerOf(
-                                          context,
-                                        ).scale(1)),
-                              ),
-                          itemCount: quickActions.length > 6
-                              ? 6
-                              : quickActions.length,
-                          itemBuilder: (context, index) {
-                            final tool = quickActions[index];
-                            final color =
-                                pastelColors[index % pastelColors.length];
-                            return AnimationConfiguration.staggeredGrid(
-                              position: index,
-                              duration: const Duration(milliseconds: 375),
-                              columnCount: 2,
-                              child: SlideAnimation(
-                                verticalOffset: 50.0,
-                                child: FadeInAnimation(
-                                  child: QuickActionCard(
-                                    tool: tool,
-                                    color: color,
-                                    onTap: () => Navigator.pushNamed(
-                                      context,
-                                      tool.route,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            );
-                          },
                         ),
                       ),
-                    ),
+                      GestureDetector(
+                        onTap: () =>
+                            Navigator.pushNamed(context, AppRoutes.chats),
+                        child: Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            IconButton(
+                              icon: Image.asset(
+                                'assets/icons/message.png',
+                                width: 24,
+                                height: 24,
+                                errorBuilder: (_, __, ___) =>
+                                    const Icon(Icons.mail_outline, size: 24),
+                              ),
+                              onPressed: () =>
+                                  Navigator.pushNamed(context, AppRoutes.chats),
+                            ),
+                            Consumer(
+                              builder: (context, ref, _) {
+                                final unreadCount = ref.watch(
+                                  totalUnreadCountProvider,
+                                );
+                                if (unreadCount == 0) return const SizedBox();
 
-                    const SizedBox(height: 24),
-                  ],
-              ),
+                                return Positioned(
+                                  right: 12,
+                                  top: 12,
+                                  child: Container(
+                                    width: 8,
+                                    height: 8,
+                                    decoration: const BoxDecoration(
+                                      color: Colors.red,
+                                      shape: BoxShape.circle,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      GestureDetector(
+                        onTap: () => Navigator.pushNamed(
+                          context,
+                          AppRoutes.notifications,
+                        ),
+                        child: Stack(
+                          children: [
+                            IconButton(
+                              icon: Image.asset(
+                                'assets/icons/notification.png',
+                                width: 24,
+                                height: 24,
+                                errorBuilder: (_, __, ___) => const Icon(
+                                  Icons.notifications_outlined,
+                                  size: 24,
+                                ),
+                              ),
+                              onPressed: () => Navigator.pushNamed(
+                                context,
+                                AppRoutes.notifications,
+                              ),
+                            ),
+                            Consumer(
+                              builder: (context, ref, _) {
+                                final unreadCount = ref.watch(
+                                  unreadNotificationsCountProvider,
+                                );
+                                if (unreadCount == 0) return const SizedBox();
+
+                                return Positioned(
+                                  right: 8,
+                                  top: 8,
+                                  child: Container(
+                                    width: 16,
+                                    height: 16,
+                                    decoration: const BoxDecoration(
+                                      color: Colors.red,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        unreadCount > 9 ? '9+' : '$unreadCount',
+                                        style: const TextStyle(
+                                          fontSize: 9,
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      GestureDetector(
+                        onTap: () =>
+                            Navigator.pushNamed(context, AppRoutes.onlineStore),
+                        child: CircleAvatar(
+                          radius: 16,
+                          backgroundColor: AppTheme.grey300,
+                          child: const Icon(
+                            Icons.person,
+                            color: Colors.black,
+                            size: 18,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // performance banner
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(18),
+                    child: Stack(
+                      children: [
+                        // animated background image
+                        Positioned.fill(
+                          child: AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 800),
+                            child: SizedBox(
+                              key: ValueKey(bgIndex.value),
+                              width: double.infinity,
+                              height: double.infinity,
+                              child: CachedNetworkImage(
+                                imageUrl: _backgroundImages[bgIndex.value],
+                                fit: BoxFit.cover,
+                                placeholder: (_, __) =>
+                                    Container(color: const Color(0xFF2D5A27)),
+                                errorWidget: (_, __, ___) =>
+                                    Container(color: const Color(0xFF2D5A27)),
+                                fadeInDuration: Duration.zero,
+                              ),
+                            ),
+                          ),
+                        ),
+                        // dark overlay
+                        Positioned.fill(
+                          child: Container(
+                            color: Colors.black.withValues(alpha: 0.30),
+                          ),
+                        ),
+                        // content
+                        Container(
+                          constraints: const BoxConstraints(minHeight: 260),
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(20),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // period chips
+                              SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                child: Row(
+                                  children: ['Today', 'Week', 'Month', 'Year']
+                                      .map((period) {
+                                        final isSelected =
+                                            selectedPeriod.value == period;
+                                        return Padding(
+                                          padding: const EdgeInsets.only(
+                                            right: 8,
+                                          ),
+                                          child: GestureDetector(
+                                            onTap: () =>
+                                                selectedPeriod.value = period,
+                                            child: _buildChip(
+                                              period,
+                                              isSelected,
+                                            ),
+                                          ),
+                                        );
+                                      })
+                                      .toList(),
+                                ),
+                              ),
+                              const SizedBox(height: 20),
+                              Text(
+                                'A quick update on your\nbusiness performance',
+                                style: GoogleFonts.poppins(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 18,
+                                  height: 1.3,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Builder(
+                                builder: (context) {
+                                  if (reportsAsync.performanceStats == null &&
+                                      reportsAsync.isSalesOverviewLoading) {
+                                    return Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      children: [
+                                        DotsLoader(
+                                          text: 'Fetching stats',
+                                          style: GoogleFonts.poppins(
+                                            color: Colors.white,
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ],
+                                    );
+                                  }
+
+                                  if (reportsAsync.salesOverviewError != null) {
+                                    return Text(
+                                      'Failed to load performance data',
+                                      style: GoogleFonts.poppins(
+                                        color: Colors.white70,
+                                      ),
+                                    );
+                                  }
+
+                                  final stats = reportsAsync.performanceStats;
+                                  if (stats == null) {
+                                    return const SizedBox(height: 80);
+                                  }
+
+                                  final period = selectedPeriod.value;
+                                  String periodLabel = '';
+                                  String comparisonLabel = '';
+                                  double current = 0;
+                                  double previous = 0;
+
+                                  if (period == 'Today') {
+                                    periodLabel = 'today';
+                                    comparisonLabel = 'yesterday';
+                                    current = stats.today.current;
+                                    previous = stats.today.previous;
+                                  } else if (period == 'Week') {
+                                    periodLabel = 'this week';
+                                    comparisonLabel = 'last week';
+                                    current = stats.week.current;
+                                    previous = stats.week.previous;
+                                  } else if (period == 'Month') {
+                                    periodLabel = 'this month';
+                                    comparisonLabel = 'last month';
+                                    current = stats.month.current;
+                                    previous = stats.month.previous;
+                                  } else {
+                                    periodLabel = 'this year';
+                                    comparisonLabel = 'last year';
+                                    current = stats.year.current;
+                                    previous = stats.year.previous;
+                                  }
+
+                                  final diff = current - previous;
+                                  final percentage = previous != 0
+                                      ? (diff / previous.abs() * 100)
+                                      : (current > 0 ? 100.0 : 0.0);
+
+                                  String trendText = '';
+                                  if (diff == 0) {
+                                    trendText =
+                                        'That\'s the same as $comparisonLabel';
+                                  } else if (diff > 0) {
+                                    trendText =
+                                        '${percentage.toStringAsFixed(1)}% more than $comparisonLabel';
+                                  } else {
+                                    trendText =
+                                        '${percentage.abs().toStringAsFixed(1)}% less than $comparisonLabel';
+                                  }
+
+                                  return Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'So far $periodLabel, your business has made',
+                                        style: GoogleFonts.poppins(
+                                          color: Colors.white.withValues(
+                                            alpha: 0.9,
+                                          ),
+                                          fontWeight: FontWeight.w400,
+                                          fontSize: 13,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 6),
+                                      Text(
+                                        AmountFormatter.formatCurrency(
+                                          current,
+                                          showDecimals: true,
+                                        ),
+                                        style: GoogleFonts.plusJakartaSans(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 30,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 6),
+                                      Row(
+                                        children: [
+                                          Icon(
+                                            diff >= 0
+                                                ? Icons.trending_up
+                                                : Icons.trending_down,
+                                            color: diff >= 0
+                                                ? Colors.greenAccent
+                                                : Colors.orangeAccent,
+                                            size: 16,
+                                          ),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            trendText,
+                                            style: GoogleFonts.poppins(
+                                              color: Colors.white.withValues(
+                                                alpha: 0.95,
+                                              ),
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  );
+                                },
+                              ),
+                              const SizedBox(height: 24),
+                              // view report button
+                              SizedBox(
+                                height: 40,
+                                child: OutlinedButton.icon(
+                                  style: OutlinedButton.styleFrom(
+                                    // foregroundColor: Colors.white,
+                                    backgroundColor: Colors.white,
+                                    side: const BorderSide(
+                                      color: Colors.white,
+                                      width: 1.5,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                    ),
+                                  ),
+                                  onPressed: () =>
+                                      Navigator.pushNamed(context, '/reports'),
+                                  icon: const Icon(
+                                    Icons.arrow_forward,
+                                    size: 18,
+                                    color: AppTheme.textPrimary,
+                                  ),
+                                  label: Text(
+                                    'View Detailed Report',
+                                    style: GoogleFonts.poppins(
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 13,
+                                      color: AppTheme.textPrimary,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 24),
+
+                // quick actions section header
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Quick Actions',
+                        style: GoogleFonts.poppins(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w600,
+                          color: AppTheme.textPrimary,
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          _showEditQuickActionsBottomSheet(context, ref);
+                        },
+                        child: Text(
+                          'Edit',
+                          style: GoogleFonts.poppins(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: AppTheme.primaryColor,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 8),
+
+                // quick actions grid — vertical card layout
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: AnimationLimiter(
+                    child: GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 14,
+                        mainAxisSpacing: 14,
+                        mainAxisExtent:
+                            100 +
+                            (30 * MediaQuery.textScalerOf(context).scale(1)),
+                      ),
+                      itemCount: quickActions.length > 6
+                          ? 6
+                          : quickActions.length,
+                      itemBuilder: (context, index) {
+                        final tool = quickActions[index];
+                        final color = pastelColors[index % pastelColors.length];
+                        return AnimationConfiguration.staggeredGrid(
+                          position: index,
+                          duration: const Duration(milliseconds: 375),
+                          columnCount: 2,
+                          child: SlideAnimation(
+                            verticalOffset: 50.0,
+                            child: FadeInAnimation(
+                              child: QuickActionCard(
+                                tool: tool,
+                                color: color,
+                                onTap: () =>
+                                    Navigator.pushNamed(context, tool.route),
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 24),
+              ],
             ),
           ),
-    ));
+        ),
+      ),
+    );
   }
 
   Widget _buildChip(String label, bool selected) {
@@ -715,10 +682,10 @@ class EditQuickActionsSheet extends HookConsumerWidget {
                     physics: const NeverScrollableScrollPhysics(),
                     gridDelegate:
                         const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 4,
+                          crossAxisCount: 3,
                           crossAxisSpacing: AppTheme.spacingSmall,
                           mainAxisSpacing: AppTheme.spacingSmall,
-                          mainAxisExtent: 110,
+                          childAspectRatio: 1.0,
                         ),
                     itemCount: quickActions.length,
                     itemBuilder: (context, index) {
@@ -739,7 +706,7 @@ class EditQuickActionsSheet extends HookConsumerWidget {
                   ),
                   const SizedBox(height: AppTheme.spacingLarge),
                   Text(
-                    '➕ Available Tools',
+                    'Available Tools',
                     style: GoogleFonts.poppins(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
@@ -819,9 +786,7 @@ class EditQuickActionsSheet extends HookConsumerWidget {
               color: AppTheme.white,
               borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
               border: Border.all(
-                color: isAdded
-                    ? AppTheme.primaryColor.withValues(alpha: 0.3)
-                    : Colors.transparent,
+                color: isAdded ? Colors.transparent : Colors.transparent,
                 width: 1,
               ),
             ),
@@ -830,8 +795,8 @@ class EditQuickActionsSheet extends HookConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
-                  width: 46,
-                  height: 46,
+                  width: 44,
+                  height: 44,
                   decoration: const BoxDecoration(
                     color: Color.fromRGBO(83, 157, 243, 0.15),
                     shape: BoxShape.circle,
@@ -839,7 +804,7 @@ class EditQuickActionsSheet extends HookConsumerWidget {
                   child: Center(
                     child: Icon(
                       tool.icon,
-                      size: 24,
+                      size: 22,
                       color: const Color(0xFF2196F3),
                     ),
                   ),
@@ -1022,7 +987,7 @@ class _MarqueeGreeting extends HookWidget {
       Future<void> animate() async {
         if (!scrollController.hasClients || disposed) return;
 
-        // Give a small delay to ensure maxScrollExtent is correctly calculated
+        // small delay to ensure maxScrollExtent is correctly calculated
         await Future.delayed(const Duration(milliseconds: 500));
         if (!scrollController.hasClients || disposed) return;
 
