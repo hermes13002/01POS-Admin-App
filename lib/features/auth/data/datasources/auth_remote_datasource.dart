@@ -6,6 +6,7 @@ import 'package:onepos_admin_app/core/errors/exceptions.dart';
 import 'package:onepos_admin_app/core/network/dio_client.dart';
 import 'package:onepos_admin_app/core/storage/secure_storage_service.dart';
 import '../models/login_response_model.dart';
+import '../models/industry_model.dart';
 
 abstract class AuthRemoteDatasource {
   Future<LoginResponseModel> loginWithEmail(String email, String password);
@@ -13,6 +14,7 @@ abstract class AuthRemoteDatasource {
   Future<void> logout();
   Future<void> resetPassword(String email);
   Future<void> signUp(Map<String, dynamic> body);
+  Future<List<IndustryModel>> getIndustries();
 }
 
 class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
@@ -116,6 +118,23 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
         message: responseBody['message'] ?? 'Signup failed',
       );
     }
+  }
+
+  @override
+  Future<List<IndustryModel>> getIndustries() async {
+    final response = await _client.get(ApiEndpoints.industries);
+    final responseBody = response.data as Map<String, dynamic>;
+
+    if (responseBody['error'] == true) {
+      throw ServerException(
+        message: responseBody['message'] ?? 'Failed to fetch industries',
+      );
+    }
+
+    final data = responseBody['data'] as List;
+    return data
+        .map((e) => IndustryModel.fromJson(e as Map<String, dynamic>))
+        .toList();
   }
 
   Future<void> _persistToken(LoginResponseModel response) async {

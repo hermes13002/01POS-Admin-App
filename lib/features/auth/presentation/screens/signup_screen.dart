@@ -11,6 +11,7 @@ import 'package:onepos_admin_app/shared/widgets/app_dropdown.dart';
 import 'package:onepos_admin_app/shared/widgets/app_snackbar.dart';
 import 'package:onepos_admin_app/shared/widgets/animated_background.dart';
 import 'package:onepos_admin_app/features/auth/presentation/providers/auth_provider.dart';
+import 'package:onepos_admin_app/features/auth/presentation/providers/industry_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 const List<String> _backgroundImages = [
@@ -28,17 +29,20 @@ class SignupScreen extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final formKey = useMemoized(GlobalKey<FormState>.new);
     final isLoading = useState(false);
+    final industriesAsync = ref.watch(industriesProvider);
 
     final businessNameCtrl = useTextEditingController();
     final businessEmailCtrl = useTextEditingController();
     final whatsappCtrl = useTextEditingController();
+    final passwordCtrl = useTextEditingController();
+    final addressCtrl = useTextEditingController();
 
-    final industryType = useState<String?>(null);
+    final industryId = useState<int?>(null);
     final agreedToTerms = useState(false);
 
     Future<void> submit() async {
       if (!formKey.currentState!.validate()) return;
-      if (industryType.value == null) {
+      if (industryId.value == null) {
         AppSnackbar.showError(context, 'Please select an industry type');
         return;
       }
@@ -55,11 +59,12 @@ class SignupScreen extends HookConsumerWidget {
       final body = {
         "company_name": businessNameCtrl.text.trim(),
         "company_email": businessEmailCtrl.text.trim(),
-        "company_address": "14, lagos", // handled by admin
+        "company_address": addressCtrl.text.trim().isEmpty
+            ? "14, lagos"
+            : addressCtrl.text.trim(),
         "company_number": whatsappCtrl.text.trim(),
-        "company_type": industryType.value,
-        "password": "", // handled by admin
-        // "captcha_token": '',
+        "industry_type": industryId.value,
+        "password": passwordCtrl.text,
       };
 
       final error = await ref.read(authProvider.notifier).signUp(body);
@@ -71,7 +76,7 @@ class SignupScreen extends HookConsumerWidget {
       } else {
         AppSnackbar.showSuccess(
           context,
-          'Account created successfully! Please login.',
+          'Account created! Please check your email for your password  and login.',
         );
         Navigator.pop(context); // Go back to login
       }
@@ -154,7 +159,7 @@ class SignupScreen extends HookConsumerWidget {
                           validator: (val) =>
                               Validators.validateRequired(val, 'Business name'),
                           decoration: InputDecoration(
-                            hintText: 'business name',
+                            hintText: 'Business name',
                             hintStyle: GoogleFonts.poppins(
                               color: AppTheme.textSecondary,
                               fontSize: 13,
@@ -267,34 +272,40 @@ class SignupScreen extends HookConsumerWidget {
                         // Industry Type
                         const _FieldLabel('Industry type'),
                         const SizedBox(height: 8),
-                        AppDropdown<String>(
-                          hint: 'Select industry type',
-                          value: industryType.value,
-                          items:
-                              [
-                                    'Retail',
-                                    'Services',
-                                    'Pharmacy / Health',
-                                    'Hotel / Shortlet',
-                                    'Salon / Beauty',
-                                    'Bar / Lounge',
-                                    'Supermarket / Grocery',
-                                    'E-commerce / Online Store',
-                                    'Others',
-                                  ]
-                                  .map(
-                                    (e) => DropdownMenuItem(
-                                      value: e,
-                                      child: Text(
-                                        e,
-                                        style: GoogleFonts.poppins(
-                                          fontSize: 14,
-                                        ),
-                                      ),
+                        industriesAsync.when(
+                          data: (industries) => AppDropdown<int>(
+                            hint: 'Select industry type',
+                            value: industryId.value,
+                            items: industries
+                                .map(
+                                  (e) => DropdownMenuItem(
+                                    value: e.id,
+                                    child: Text(
+                                      e.name,
+                                      style: GoogleFonts.poppins(fontSize: 14),
                                     ),
-                                  )
-                                  .toList(),
-                          onChanged: (val) => industryType.value = val,
+                                  ),
+                                )
+                                .toList(),
+                            onChanged: (val) => industryId.value = val,
+                          ),
+                          loading: () => const AppDropdown<int>(
+                            hint: 'Loading industries...',
+                            items: [],
+                          ),
+                          error: (err, stack) => AppDropdown<int>(
+                            hint: 'Failed to load industries',
+                            items: [
+                              DropdownMenuItem(
+                                value: -1,
+                                enabled: false,
+                                child: Text(
+                                  'Error: ${err.toString()}',
+                                  style: const TextStyle(color: Colors.red),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                         const SizedBox(height: 24),
 

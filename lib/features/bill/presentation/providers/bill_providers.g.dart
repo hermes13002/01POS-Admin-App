@@ -43,7 +43,7 @@ final billOptionsProvider =
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef BillOptionsRef = AutoDisposeFutureProviderRef<List<BillOptionModel>>;
-String _$billsHash() => r'79f3ecf8fd674382379f0700c5450f2ad0f08a6c';
+String _$billsHash() => r'9ad63ecba9b36e2ce69d4278585f60e8a867ee7f';
 
 /// See also [Bills].
 @ProviderFor(Bills)

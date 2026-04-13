@@ -11,6 +11,13 @@ import '../../data/repositories/auth_repository_impl.dart';
 
 part 'auth_provider.g.dart';
 
+@riverpod
+AuthRepositoryImpl authRepository(AuthRepositoryRef ref) {
+  return AuthRepositoryImpl(
+    AuthRemoteDatasourceImpl(DioClient(), SecureStorageService()),
+  );
+}
+
 /// holds the current logged-in session
 @riverpod
 class Auth extends _$Auth {

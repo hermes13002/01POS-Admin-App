@@ -6,7 +6,24 @@ part of 'auth_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$authHash() => r'270e2f864c8a5314c362dee0e050a34a50bff3f6';
+String _$authRepositoryHash() => r'e376a0a067baa5914cd853072e24c064a1e688d7';
+
+/// See also [authRepository].
+@ProviderFor(authRepository)
+final authRepositoryProvider = AutoDisposeProvider<AuthRepositoryImpl>.internal(
+  authRepository,
+  name: r'authRepositoryProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$authRepositoryHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef AuthRepositoryRef = AutoDisposeProviderRef<AuthRepositoryImpl>;
+String _$authHash() => r'7a106bd5e5f45f6b1d8c342189eba5b725036f5e';
 
 /// holds the current logged-in session
 ///

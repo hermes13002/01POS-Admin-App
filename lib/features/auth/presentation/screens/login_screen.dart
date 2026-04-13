@@ -249,7 +249,6 @@ class LoginScreen extends HookConsumerWidget {
                               ],
                             ),
 
-                            const SizedBox(height: 16),
                             _LoginButton(
                               onPressed: submit,
                               isLoading: isLoading,

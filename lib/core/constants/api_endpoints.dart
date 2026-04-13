@@ -9,6 +9,7 @@ class ApiEndpoints {
   static const String register = '/auth/register';
   static const String onboarding = '/onboarding';
   static const String resetPassword = '/auth/rest-password';
+  static const String industries = '/industry';
 
   // Dashboard
   static const String dashboard = '/dashboard';

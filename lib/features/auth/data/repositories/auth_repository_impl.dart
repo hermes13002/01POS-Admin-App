@@ -3,6 +3,7 @@ import 'package:onepos_admin_app/core/errors/exceptions.dart';
 import 'package:onepos_admin_app/core/errors/failures.dart';
 import '../../data/datasources/auth_remote_datasource.dart';
 import '../../data/models/login_response_model.dart';
+import '../../data/models/industry_model.dart';
 import '../../domain/repositories/auth_repository.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
@@ -88,6 +89,20 @@ class AuthRepositoryImpl implements AuthRepository {
       return Left(ServerFailure(message: e.message, statusCode: e.statusCode));
     } on NetworkException catch (e) {
       return Left(NetworkFailure(message: e.message));
+    } catch (e) {
+      return Left(UnknownFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<IndustryModel>>> getIndustries() async {
+    try {
+      final result = await _datasource.getIndustries();
+      return Right(result);
+    } on NetworkException catch (e) {
+      return Left(NetworkFailure(message: e.message));
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message, statusCode: e.statusCode));
     } catch (e) {
       return Left(UnknownFailure(message: e.toString()));
     }
