@@ -14,6 +14,7 @@ import 'package:onepos_admin_app/core/utils/session_manager.dart';
 import 'package:onepos_admin_app/features/auth/presentation/screens/login_screen.dart';
 import 'package:onepos_admin_app/presentation/screens/main_navigation_screen.dart';
 import 'package:onepos_admin_app/core/services/firebase_service.dart';
+import 'package:onepos_admin_app/core/services/update_service.dart';
 
 void main() {
   runZoned(
@@ -34,6 +35,7 @@ void main() {
 
       // initialize firebase
       await FirebaseService().init();
+      await UpdateService().init();
 
       // report uncaught asynchronous errors that aren't handled by Flutter
       PlatformDispatcher.instance.onError = (error, stack) {
@@ -46,6 +48,11 @@ void main() {
       }
 
       runApp(ProviderScope(child: MyApp(isLoggedIn: isLoggedIn)));
+
+      // trigger update check on startup
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        UpdateService().checkForUpdates();
+      });
     },
     zoneSpecification: ZoneSpecification(
       print: (self, parent, zone, line) {
