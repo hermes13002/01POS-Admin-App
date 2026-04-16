@@ -123,7 +123,7 @@ class LowStockScreen extends HookConsumerWidget {
         ],
       ),
 
-      // simple black circular fab
+      /*
       floatingActionButton: productsAsync.whenOrNull(
         data: (_) => FloatingActionButton(
           onPressed: () {
@@ -134,6 +134,7 @@ class LowStockScreen extends HookConsumerWidget {
           child: const Icon(Icons.add, color: Colors.white, size: 28),
         ),
       ),
+      */
     );
   }
 }
