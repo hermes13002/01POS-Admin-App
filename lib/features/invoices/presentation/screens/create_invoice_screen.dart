@@ -385,7 +385,7 @@ class _ProductItemRow extends StatelessWidget {
           Expanded(
             flex: 1,
             child: Text(
-              '${product.stock}',
+              product.stock.toString().replaceAll(RegExp(r'\.0$'), ''),
               style: GoogleFonts.poppins(fontSize: 13),
             ),
           ),

@@ -41,7 +41,12 @@ class ToolsScreen extends HookConsumerWidget {
           children: [
             // header with title
             Padding(
-              padding: const EdgeInsets.all(AppTheme.spacingMedium),
+              padding: const EdgeInsets.only(
+                left: AppTheme.spacingMedium,
+                right: AppTheme.spacingMedium,
+                top: AppTheme.spacingMedium,
+                bottom: AppTheme.spacingXSmall,
+              ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -75,7 +80,7 @@ class ToolsScreen extends HookConsumerWidget {
             // search bar
             Padding(
               padding: const EdgeInsets.symmetric(
-                horizontal: AppTheme.spacingMedium,
+                horizontal: AppTheme.spacingXSmall,
               ),
               child: CustomSearchBar(
                 hintText: 'Search',
@@ -108,7 +113,7 @@ class ToolsScreen extends HookConsumerWidget {
                                 crossAxisCount: 3,
                                 crossAxisSpacing: AppTheme.spacingMedium,
                                 mainAxisSpacing: AppTheme.spacingMedium,
-                                childAspectRatio: 1.0,
+                                childAspectRatio: 1,
                               ),
                           itemCount: filteredTools.length,
                           itemBuilder: (context, index) {
@@ -200,23 +205,26 @@ class ToolsScreen extends HookConsumerWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
+            const SizedBox(height: 4),
             // icon with light blue background
-            Container(
-              width: 44,
-              height: 44,
-              decoration: const BoxDecoration(
-                color: Color.fromRGBO(83, 157, 243, 0.15),
-                shape: BoxShape.circle,
-              ),
-              child: Center(
-                child: Icon(
-                  tool.icon,
-                  size: 22,
-                  color: const Color(0xFF2196F3),
+            Expanded(
+              child: Container(
+                width: 44,
+                height: 44,
+                decoration: const BoxDecoration(
+                  color: Color.fromRGBO(83, 157, 243, 0.15),
+                  shape: BoxShape.circle,
+                ),
+                child: Center(
+                  child: Icon(
+                    tool.icon,
+                    size: 22,
+                    color: const Color(0xFF2196F3),
+                  ),
                 ),
               ),
             ),
-            const SizedBox(height: 4),
+            // const SizedBox(height: 4),
             // label
             Expanded(
               child: Center(

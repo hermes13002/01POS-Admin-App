@@ -167,7 +167,7 @@ class EditProductDialog extends HookConsumerWidget {
       text: product.barcode ?? '',
     );
     final qtyController = useTextEditingController(
-      text: product.stock.toString(),
+      text: product.stock.toString().replaceAll(RegExp(r'\.0$'), ''),
     );
     final priceController = useTextEditingController(
       text: product.price.toString(),
@@ -216,11 +216,11 @@ class EditProductDialog extends HookConsumerWidget {
         "sku": skuController.text.trim(),
         "barcode": barcodeController.text.trim(),
         "available_quantity":
-            int.tryParse(qtyController.text.trim()) ??
-            0, // Using proper api field
+            double.tryParse(qtyController.text.trim()) ??
+            0.0, // Using proper api field
         "quantity":
-            int.tryParse(qtyController.text.trim()) ??
-            0, // Mandatory for backend
+            double.tryParse(qtyController.text.trim()) ??
+            0.0, // Mandatory for backend
         "price": priceController.text.trim(),
         "manufacturing_date": mfgDateController.text.trim(),
         "expiring_date": expDateController.text.trim(),
@@ -339,7 +339,9 @@ class EditProductDialog extends HookConsumerWidget {
                               )
                             : (product.imageUrl != null
                                   ? DecorationImage(
-                                      image: NetworkImage(product.imageUrl!),
+                                      image: _getImageProvider(
+                                        product.imageUrl!,
+                                      ),
                                       fit: BoxFit.cover,
                                     )
                                   : null),
@@ -608,6 +610,18 @@ class EditProductDialog extends HookConsumerWidget {
         ),
       ],
     );
+  }
+
+  ImageProvider _getImageProvider(String url) {
+    if (url.startsWith('file://') ||
+        url.startsWith('/data/') ||
+        url.startsWith('/tmp/')) {
+      final path = url.startsWith('file://')
+          ? Uri.parse(url).toFilePath()
+          : url;
+      return FileImage(File(path));
+    }
+    return NetworkImage(url);
   }
 }
 

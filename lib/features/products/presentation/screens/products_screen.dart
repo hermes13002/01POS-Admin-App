@@ -11,6 +11,7 @@ import 'package:onepos_admin_app/shared/widgets/custom_app_bar2.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_search_bar.dart';
 import 'package:onepos_admin_app/shared/widgets/loading_widget.dart';
 import 'package:onepos_admin_app/shared/widgets/app_snackbar.dart';
+import 'package:onepos_admin_app/shared/widgets/product_image.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 
 /// products screen with expandable product tiles
@@ -299,26 +300,12 @@ class _ProductTile extends StatelessWidget {
                         AppTheme.borderRadiusSmall,
                       ),
                     ),
-                    child: product.imageUrl != null
-                        ? ClipRRect(
-                            borderRadius: BorderRadius.circular(
-                              AppTheme.borderRadiusSmall,
-                            ),
-                            child: Image.network(
-                              product.imageUrl!,
-                              fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) => const Icon(
-                                Icons.image_outlined,
-                                color: Colors.white,
-                                size: 20,
-                              ),
-                            ),
-                          )
-                        : const Icon(
-                            Icons.image_outlined,
-                            color: Colors.white,
-                            size: 20,
-                          ),
+                    child: ProductImage(
+                      imageUrl: product.imageUrl,
+                      width: 40,
+                      height: 40,
+                      borderRadius: AppTheme.borderRadiusSmall,
+                    ),
                   ),
                   const SizedBox(width: AppTheme.spacingSmall + 4),
 
@@ -872,7 +859,10 @@ class ViewProductDialog extends HookConsumerWidget {
                               children: [
                                 _DetailRow(
                                   label: 'Available Quantity',
-                                  value: '${p.stock}',
+                                  value: p.stock.toString().replaceAll(
+                                    RegExp(r'\.0$'),
+                                    '',
+                                  ),
                                 ),
                                 const SizedBox(height: 8),
                                 _DetailRow(

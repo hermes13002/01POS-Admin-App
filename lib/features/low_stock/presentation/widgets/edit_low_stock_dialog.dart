@@ -17,7 +17,7 @@ class EditLowStockDialog extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final qtyController = useTextEditingController(
-      text: product.stock.toString(),
+      text: product.stock.toString().replaceAll(RegExp(r'\.0$'), ''),
     );
     final isSubmitting = useState(false);
 
@@ -31,7 +31,7 @@ class EditLowStockDialog extends HookConsumerWidget {
     }, const []);
 
     Future<void> handleSave() async {
-      final newQty = int.tryParse(qtyController.text.trim());
+      final newQty = double.tryParse(qtyController.text.trim());
       if (newQty == null) {
         AppSnackbar.showError(context, 'Please enter a valid quantity');
         return;

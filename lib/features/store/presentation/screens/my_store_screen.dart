@@ -10,6 +10,7 @@ import 'package:onepos_admin_app/shared/widgets/custom_text_field.dart';
 import 'package:onepos_admin_app/shared/widgets/app_snackbar.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_switch.dart';
 import 'package:onepos_admin_app/shared/widgets/loading_widget.dart';
+import 'package:onepos_admin_app/shared/widgets/product_image.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import '../../data/models/category_model.dart';
 import '../providers/store_provider.dart';
@@ -373,19 +374,12 @@ class MyStoreScreen extends HookConsumerWidget {
                                             width: 50,
                                             height: 50,
                                             color: AppTheme.grey200,
-                                            child:
-                                                product.imageUrl != null &&
-                                                    product.imageUrl!.isNotEmpty
-                                                ? Image.network(
-                                                    product.imageUrl!,
-                                                    fit: BoxFit.cover,
-                                                    errorBuilder:
-                                                        (_, __, ___) =>
-                                                            const Icon(
-                                                              Icons.image,
-                                                            ),
-                                                  )
-                                                : const Icon(Icons.image),
+                                            child: ProductImage(
+                                              imageUrl: product.imageUrl,
+                                              width: 50,
+                                              height: 50,
+                                              borderRadius: 8,
+                                            ),
                                           ),
                                         ),
                                         const SizedBox(width: 12),
@@ -409,7 +403,7 @@ class MyStoreScreen extends HookConsumerWidget {
                                                 ),
                                               ),
                                               Text(
-                                                'Stock: ${product.stock}',
+                                                'Stock: ${product.stock.toString().replaceAll(RegExp(r'\.0$'), '')}',
                                                 style: GoogleFonts.poppins(
                                                   fontSize: 12,
                                                   fontWeight: FontWeight.w600,

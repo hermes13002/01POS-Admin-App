@@ -5,16 +5,10 @@ import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:onepos_admin_app/core/routes/app_routes.dart';
-import 'package:onepos_admin_app/core/storage/secure_storage_service.dart';
-import 'package:onepos_admin_app/core/constants/app_constants.dart';
-import 'package:onepos_admin_app/core/storage/shared_prefs_service.dart';
 import 'package:onepos_admin_app/core/theme/app_theme.dart';
 import 'package:onepos_admin_app/core/network/connectivity_provider.dart';
 import 'package:onepos_admin_app/core/utils/session_manager.dart';
-import 'package:onepos_admin_app/features/auth/presentation/screens/login_screen.dart';
-import 'package:onepos_admin_app/presentation/screens/main_navigation_screen.dart';
-import 'package:onepos_admin_app/core/services/firebase_service.dart';
-import 'package:onepos_admin_app/core/services/update_service.dart';
+import 'package:onepos_admin_app/features/splash/presentation/screens/splash_screen.dart';
 
 void main() {
   runZoned(
@@ -24,36 +18,13 @@ void main() {
       // enable edge-to-edge support for Android 15+
       SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
-      // initialize shared preferences
-      await SharedPrefsService().init();
-
-      // check for existing token to determine start screen
-      final token = await SecureStorageService().read(
-        AppConstants.keyAccessToken,
-      );
-      final isLoggedIn = token != null && token.isNotEmpty;
-
-      // initialize firebase
-      await FirebaseService().init();
-      await UpdateService().init();
-
-      // report uncaught asynchronous errors that aren't handled by Flutter
-      PlatformDispatcher.instance.onError = (error, stack) {
-        FirebaseService().logError(error, stack, reason: 'asynchronous error');
-        return true;
-      };
-
       if (kReleaseMode) {
         debugPrint = (String? message, {int? wrapWidth}) {};
       }
 
-      runApp(ProviderScope(child: MyApp(isLoggedIn: isLoggedIn)));
-
-      // trigger update check on startup
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        UpdateService().checkForUpdates();
-      });
+      runApp(const ProviderScope(child: MyApp()));
     },
+    // ... rest of zoned settings
     zoneSpecification: ZoneSpecification(
       print: (self, parent, zone, line) {
         if (!kReleaseMode) {
@@ -65,9 +36,7 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key, required this.isLoggedIn});
-
-  final bool isLoggedIn;
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -76,7 +45,7 @@ class MyApp extends StatelessWidget {
       title: '01POS',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
-      home: isLoggedIn ? const MainNavigationScreen() : const LoginScreen(),
+      home: const SplashScreen(),
       routes: AppRoutes.routes,
       // wrap every screen with the connectivity banner
       builder: (context, child) => ConnectivityBanner(child: child!),

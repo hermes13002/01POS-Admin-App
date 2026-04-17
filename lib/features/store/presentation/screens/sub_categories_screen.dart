@@ -10,6 +10,7 @@ import 'package:onepos_admin_app/shared/widgets/loading_widget.dart';
 import '../../data/models/category_model.dart';
 import '../providers/store_provider.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_switch.dart';
+import 'package:onepos_admin_app/shared/widgets/product_image.dart';
 
 class SubCategoriesScreen extends HookConsumerWidget {
   const SubCategoriesScreen({super.key});
@@ -296,19 +297,12 @@ class SubCategoriesScreen extends HookConsumerWidget {
                                             width: 50,
                                             height: 50,
                                             color: AppTheme.grey200,
-                                            child:
-                                                product.imageUrl != null &&
-                                                    product.imageUrl!.isNotEmpty
-                                                ? Image.network(
-                                                    product.imageUrl!,
-                                                    fit: BoxFit.cover,
-                                                    errorBuilder:
-                                                        (_, __, ___) =>
-                                                            const Icon(
-                                                              Icons.image,
-                                                            ),
-                                                  )
-                                                : const Icon(Icons.image),
+                                            child: ProductImage(
+                                              imageUrl: product.imageUrl,
+                                              width: 50,
+                                              height: 50,
+                                              borderRadius: 8,
+                                            ),
                                           ),
                                         ),
                                         const SizedBox(width: 12),
@@ -332,7 +326,7 @@ class SubCategoriesScreen extends HookConsumerWidget {
                                                 ),
                                               ),
                                               Text(
-                                                'Stock: ${product.stock}',
+                                                'Stock: ${product.stock.toString().replaceAll(RegExp(r'\.0$'), '')}',
                                                 style: GoogleFonts.poppins(
                                                   fontSize: 12,
                                                   fontWeight: FontWeight.w600,

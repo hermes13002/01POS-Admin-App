@@ -40,14 +40,63 @@ class ApiResponse<T> extends BaseModel {
     Map<String, dynamic> json,
     T Function(dynamic)? fromJsonT,
   ) {
-    final bool isError = json['error'] ?? false;
+    // identify error status from various fields
+    final dynamic errorJson = json['error'];
+    final bool isError =
+        (errorJson is bool && errorJson) ||
+        (errorJson is int && errorJson != 0) ||
+        (errorJson is String && (errorJson == 'true' || errorJson == '1'));
+
+    // explicit success check
+    final dynamic successJson = json['success'];
+    bool success = successJson != null
+        ? (successJson is bool ? successJson : successJson.toString() == 'true')
+        : !isError;
+
+    // extract message
+    String? message;
+    final messageRaw = json['message'];
+    if (messageRaw is String) {
+      message = messageRaw;
+    } else if (messageRaw is Map) {
+      // if it is a map, try to get 'message' or just use first value
+      message =
+          messageRaw['message']?.toString() ??
+          messageRaw.values.firstOrNull?.toString();
+    } else if (messageRaw is List && messageRaw.isNotEmpty) {
+      message = messageRaw.first.toString();
+    }
+
+    // business logic override: if success is true but message indicates failure
+    if (success &&
+        message != null &&
+        message.toLowerCase().contains('already exists')) {
+      success = false;
+    }
+
+    // safely parse data
+    T? dataValue;
+    final rawData = json['data'];
+    if (fromJsonT != null && rawData != null) {
+      try {
+        // only attempt parsing if data looks like a container
+        if (rawData is Map || rawData is List) {
+          dataValue = fromJsonT(rawData);
+        }
+      } catch (e) {
+        // parsing failed, likely wrong data structure for a success response
+        if (success) success = false;
+        message ??= 'data processing error';
+      }
+    } else if (rawData != null && rawData is T) {
+      dataValue = rawData;
+    }
+
     return ApiResponse<T>(
       error: isError,
-      success: json['success'] ?? !isError,
-      message: json['message'],
-      data: fromJsonT != null && json['data'] != null
-          ? fromJsonT(json['data'])
-          : json['data'],
+      success: success,
+      message: message,
+      data: dataValue,
       errors: json['errors'],
       currentPage: json['current_page'],
       lastPage: json['last_page'],

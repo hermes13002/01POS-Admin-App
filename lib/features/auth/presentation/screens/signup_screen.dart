@@ -346,7 +346,7 @@ class SignupScreen extends HookConsumerWidget {
                                       recognizer: TapGestureRecognizer()
                                         ..onTap = () => launchUrl(
                                           Uri.parse(
-                                            'https://01pos.net/ng/privacy-policy',
+                                            'https://01pos.net/privacy-policy',
                                           ),
                                         ),
                                     ),
@@ -360,7 +360,7 @@ class SignupScreen extends HookConsumerWidget {
                                       recognizer: TapGestureRecognizer()
                                         ..onTap = () => launchUrl(
                                           Uri.parse(
-                                            'https://01pos.net/ng/privacy-policy',
+                                            'https://01pos.net/privacy-policy',
                                           ),
                                         ),
                                     ),

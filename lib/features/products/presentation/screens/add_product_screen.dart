@@ -279,8 +279,10 @@ class AddProductScreen extends HookConsumerWidget {
                 label: 'Quantity *',
                 hint: 'Enter quantity',
                 controller: quantityController,
-                keyboardType: TextInputType.number,
-                validator: (val) => Validators.validateInteger(val, 'Quantity'),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                validator: (val) => Validators.validateNumber(val, 'Quantity'),
               ),
               const SizedBox(height: AppTheme.spacingMedium),
 
@@ -417,7 +419,7 @@ class AddProductScreen extends HookConsumerWidget {
                     'sku': skuController.text.trim(),
                     'barcode': barcodeController.text.trim(),
                     'quantity':
-                        int.tryParse(quantityController.text.trim()) ?? 0,
+                        double.tryParse(quantityController.text.trim()) ?? 0.0,
                     'price': priceController.text.trim(),
                     'manufacturing_date': manufacturingDate.value != null
                         ? DateFormat(

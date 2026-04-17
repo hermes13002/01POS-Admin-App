@@ -59,9 +59,6 @@ class AppImagePicker {
     }
   }
 
-  /// show a bottom sheet letting the user choose between camera and gallery,
-  /// then pick an image from the chosen source.
-  /// returns the file path or null if cancelled.
   static Future<String?> showPickerBottomSheet(BuildContext context) async {
     final source = await showModalBottomSheet<ImagePickSource>(
       context: context,

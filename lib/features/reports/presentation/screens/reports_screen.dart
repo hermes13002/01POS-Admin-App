@@ -1076,7 +1076,7 @@ class _LowStockSection extends StatelessWidget {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          '${item.stock}',
+                          item.stock.toString().replaceAll(RegExp(r'\.0$'), ''),
                           style: GoogleFonts.poppins(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,

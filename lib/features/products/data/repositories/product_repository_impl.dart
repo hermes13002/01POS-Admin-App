@@ -22,8 +22,7 @@ class ProductRepositoryImpl implements ProductRepository {
     } on DioException catch (e) {
       return ApiResponse<List<ProductModel>>(
         success: false,
-        message:
-            e.response?.data?['message'] ?? e.message ?? 'An error occurred',
+        message: _extractErrorMessage(e),
       );
     } catch (e) {
       return ApiResponse<List<ProductModel>>(
@@ -45,8 +44,7 @@ class ProductRepositoryImpl implements ProductRepository {
     } on DioException catch (e) {
       return ApiResponse<ProductModel>(
         success: false,
-        message:
-            e.response?.data?['message'] ?? e.message ?? 'An error occurred',
+        message: _extractErrorMessage(e),
       );
     } catch (e) {
       return ApiResponse<ProductModel>(success: false, message: e.toString());
@@ -62,8 +60,7 @@ class ProductRepositoryImpl implements ProductRepository {
     } on DioException catch (e) {
       return ApiResponse<void>(
         success: false,
-        message:
-            e.response?.data?['message'] ?? e.message ?? 'An error occurred',
+        message: _extractErrorMessage(e),
       );
     } catch (e) {
       return ApiResponse<void>(success: false, message: e.toString());
@@ -85,8 +82,7 @@ class ProductRepositoryImpl implements ProductRepository {
     } on DioException catch (e) {
       return ApiResponse<ProductModel>(
         success: false,
-        message:
-            e.response?.data?['message'] ?? e.message ?? 'An error occurred',
+        message: _extractErrorMessage(e),
       );
     } catch (e) {
       return ApiResponse<ProductModel>(success: false, message: e.toString());
@@ -124,8 +120,7 @@ class ProductRepositoryImpl implements ProductRepository {
     } on DioException catch (e) {
       return ApiResponse<ProductModel>(
         success: false,
-        message:
-            e.response?.data?['message'] ?? e.message ?? 'An error occurred',
+        message: _extractErrorMessage(e),
       );
     } catch (e) {
       return ApiResponse<ProductModel>(success: false, message: e.toString());
@@ -146,8 +141,7 @@ class ProductRepositoryImpl implements ProductRepository {
     } on DioException catch (e) {
       return ApiResponse<void>(
         success: false,
-        message:
-            e.response?.data?['message'] ?? e.message ?? 'An error occurred',
+        message: _extractErrorMessage(e),
       );
     } catch (e) {
       return ApiResponse<void>(success: false, message: e.toString());
@@ -183,8 +177,7 @@ class ProductRepositoryImpl implements ProductRepository {
     } on DioException catch (e) {
       return ApiResponse<List<ProductModel>>(
         success: false,
-        message:
-            e.response?.data?['message'] ?? e.message ?? 'An error occurred',
+        message: _extractErrorMessage(e),
       );
     } catch (e) {
       return ApiResponse<List<ProductModel>>(
@@ -192,5 +185,27 @@ class ProductRepositoryImpl implements ProductRepository {
         message: e.toString(),
       );
     }
+  }
+
+  String _extractErrorMessage(DioException e) {
+    if (e.response?.data != null && e.response!.data is Map) {
+      final data = e.response!.data as Map;
+      final message = data['message'];
+      if (message is String) return message;
+      if (message is Map) {
+        return message['message']?.toString() ??
+            message.values.firstOrNull?.toString() ??
+            'An error occurred';
+      }
+      if (data['errors'] is Map) {
+        final errors = data['errors'] as Map;
+        final firstError = errors.values.firstOrNull;
+        if (firstError is List) {
+          return firstError.firstOrNull?.toString() ?? 'An error occurred';
+        }
+        return firstError?.toString() ?? 'An error occurred';
+      }
+    }
+    return e.message ?? 'An error occurred';
   }
 }

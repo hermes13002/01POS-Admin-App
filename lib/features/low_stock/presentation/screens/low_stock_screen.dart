@@ -11,6 +11,7 @@ import 'package:onepos_admin_app/features/products/presentation/screens/products
 import 'package:onepos_admin_app/shared/widgets/custom_app_bar2.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_search_bar.dart';
 import 'package:onepos_admin_app/shared/widgets/loading_widget.dart';
+import 'package:onepos_admin_app/shared/widgets/product_image.dart';
 
 /// low stock screen with expandable product tiles
 class LowStockScreen extends HookConsumerWidget {
@@ -183,26 +184,12 @@ class _LowStockTile extends StatelessWidget {
                         AppTheme.borderRadiusSmall,
                       ),
                     ),
-                    child: product.imageUrl != null
-                        ? ClipRRect(
-                            borderRadius: BorderRadius.circular(
-                              AppTheme.borderRadiusSmall,
-                            ),
-                            child: Image.network(
-                              product.imageUrl!,
-                              fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) => const Icon(
-                                Icons.image_outlined,
-                                color: Colors.white,
-                                size: 20,
-                              ),
-                            ),
-                          )
-                        : const Icon(
-                            Icons.image_outlined,
-                            color: Colors.white,
-                            size: 20,
-                          ),
+                    child: ProductImage(
+                      imageUrl: product.imageUrl,
+                      width: 40,
+                      height: 40,
+                      borderRadius: AppTheme.borderRadiusSmall,
+                    ),
                   ),
                   const SizedBox(width: AppTheme.spacingSmall + 4),
 
@@ -267,7 +254,13 @@ class _LowStockTile extends StatelessWidget {
                   const SizedBox(height: AppTheme.spacingSmall),
 
                   // stock row
-                  _DetailRow(label: 'Stock:', value: '${product.stock}'),
+                  _DetailRow(
+                    label: 'Stock:',
+                    value: product.stock.toString().replaceAll(
+                      RegExp(r'\.0$'),
+                      '',
+                    ),
+                  ),
                 ],
               ),
             ),

@@ -5,7 +5,7 @@ class ProductModel {
   final double price;
   final String? category;
   final String? subCategory;
-  final int stock;
+  final double stock;
   final String? imageUrl;
   final String? store;
   final String? warehouse;
@@ -27,7 +27,7 @@ class ProductModel {
     required this.price,
     this.category,
     this.subCategory,
-    this.stock = 0,
+    this.stock = 0.0,
     this.imageUrl,
     this.store,
     this.warehouse,
@@ -82,10 +82,7 @@ class ProductModel {
       category: catName,
       subCategory: subCatName,
       stock:
-          double.tryParse(
-            json['available_quantity']?.toString() ?? '0',
-          )?.toInt() ??
-          0,
+          double.tryParse(json['available_quantity']?.toString() ?? '0') ?? 0.0,
       imageUrl: json['product_image']?.toString(),
       store: json['store']?.toString(),
       warehouse: json['warehouse']?.toString(),
@@ -114,7 +111,7 @@ class ProductModel {
     double? price,
     String? category,
     String? subCategory,
-    int? stock,
+    double? stock,
     String? imageUrl,
     String? store,
     String? warehouse,

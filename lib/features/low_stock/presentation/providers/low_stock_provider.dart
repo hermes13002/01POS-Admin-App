@@ -39,7 +39,7 @@ class LowStockProducts extends _$LowStockProducts {
   /// update a product's quantity
   Future<void> updateProductQuantity(
     ProductModel product,
-    int newQuantity,
+    double newQuantity,
   ) async {
     final repository = ref.read(productRepositoryProvider);
 
