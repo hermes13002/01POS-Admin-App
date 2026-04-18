@@ -6,7 +6,7 @@ import 'package:onepos_admin_app/core/routes/app_routes.dart';
 import 'package:onepos_admin_app/core/theme/app_theme.dart';
 import 'package:onepos_admin_app/features/payment_method/data/models/payment_method_model.dart';
 import 'package:onepos_admin_app/features/payment_method/presentation/providers/payment_method_provider.dart';
-import 'package:onepos_admin_app/features/payment_method/presentation/screens/connect_bank_account_screen.dart';
+// import 'package:onepos_admin_app/features/payment_method/presentation/screens/connect_bank_account_screen.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_app_bar.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_button_with_icon.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_search_bar.dart';
@@ -244,72 +244,71 @@ class PaymentMethodScreen extends HookConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             if (isFabExpanded.value) ...[
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    'Connect Bank Account',
-                    style: GoogleFonts.poppins(
-                      color: Colors.white,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  InkWell(
-                    onTap: () async {
-                      isFabExpanded.value = false;
-                      await showGeneralDialog<void>(
-                        context: context,
-                        barrierDismissible: true,
-                        barrierLabel: 'Connect Bank Account',
-                        barrierColor: Colors.black.withValues(alpha: 0.5),
-                        transitionDuration: const Duration(milliseconds: 260),
-                        pageBuilder: (_, __, ___) =>
-                            const ConnectBankAccountDialog(),
-                        transitionBuilder:
-                            (
-                              dialogContext,
-                              animation,
-                              secondaryAnimation,
-                              child,
-                            ) {
-                              final curvedAnimation = CurvedAnimation(
-                                parent: animation,
-                                curve: Curves.easeOutCubic,
-                                reverseCurve: Curves.easeInCubic,
-                              );
-
-                              return FadeTransition(
-                                opacity: curvedAnimation,
-                                child: ScaleTransition(
-                                  scale: Tween<double>(
-                                    begin: 0.94,
-                                    end: 1,
-                                  ).animate(curvedAnimation),
-                                  child: child,
-                                ),
-                              );
-                            },
-                      );
-                    },
-                    child: Container(
-                      width: 48,
-                      height: 48,
-                      decoration: const BoxDecoration(
-                        color: Color(0xFF9013FE), // purple from design
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.account_balance,
-                        color: Colors.white,
-                        size: 24,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
+              // Row(
+              //   mainAxisSize: MainAxisSize.min,
+              //   children: [
+              //     Text(
+              //       'Connect Bank Account',
+              //       style: GoogleFonts.poppins(
+              //         color: Colors.white,
+              //         fontSize: 14,
+              //         fontWeight: FontWeight.w500,
+              //       ),
+              //     ),
+              //     const SizedBox(width: 12),
+              //     InkWell(
+              //       onTap: () async {
+              //         isFabExpanded.value = false;
+              //         await showGeneralDialog<void>(
+              //           context: context,
+              //           barrierDismissible: true,
+              //           barrierLabel: 'Connect Bank Account',
+              //           barrierColor: Colors.black.withValues(alpha: 0.5),
+              //           transitionDuration: const Duration(milliseconds: 260),
+              //           pageBuilder: (_, __, ___) =>
+              //               const ConnectBankAccountDialog(),
+              //           transitionBuilder:
+              //               (
+              //                 dialogContext,
+              //                 animation,
+              //                 secondaryAnimation,
+              //                 child,
+              //               ) {
+              //                 final curvedAnimation = CurvedAnimation(
+              //                   parent: animation,
+              //                   curve: Curves.easeOutCubic,
+              //                   reverseCurve: Curves.easeInCubic,
+              //                 );
+              //                 return FadeTransition(
+              //                   opacity: curvedAnimation,
+              //                   child: ScaleTransition(
+              //                     scale: Tween<double>(
+              //                       begin: 0.94,
+              //                       end: 1,
+              //                     ).animate(curvedAnimation),
+              //                     child: child,
+              //                   ),
+              //                 );
+              //               },
+              //         );
+              //       },
+              //       child: Container(
+              //         width: 48,
+              //         height: 48,
+              //         decoration: const BoxDecoration(
+              //           color: Color(0xFF9013FE), // purple from design
+              //           shape: BoxShape.circle,
+              //         ),
+              //         child: const Icon(
+              //           Icons.account_balance,
+              //           color: Colors.white,
+              //           size: 24,
+              //         ),
+              //       ),
+              //     ),
+              //   ],
+              // ),
+              // const SizedBox(height: 16),
 
               Row(
                 mainAxisSize: MainAxisSize.min,

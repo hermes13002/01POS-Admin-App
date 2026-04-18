@@ -585,7 +585,9 @@ class _SalesFilterDialog extends HookWidget {
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
                           ),
-                          keyboardType: TextInputType.number,
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
                           decoration: InputDecoration(
                             isDense: true,
                             contentPadding: const EdgeInsets.symmetric(
@@ -635,7 +637,9 @@ class _SalesFilterDialog extends HookWidget {
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
                           ),
-                          keyboardType: TextInputType.number,
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
                           decoration: InputDecoration(
                             isDense: true,
                             contentPadding: const EdgeInsets.symmetric(

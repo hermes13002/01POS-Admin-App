@@ -104,7 +104,9 @@ class EditLowStockDialog extends HookConsumerWidget {
               CustomTextField(
                 label: 'Available Quantity',
                 controller: qtyController,
-                keyboardType: TextInputType.number,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
                 hint: 'e.g. 100',
               ),
               const SizedBox(height: AppTheme.spacingLarge),

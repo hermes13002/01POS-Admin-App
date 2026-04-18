@@ -10,6 +10,7 @@ import 'package:onepos_admin_app/core/services/firebase_service.dart';
 import 'package:onepos_admin_app/core/services/update_service.dart';
 import 'package:onepos_admin_app/features/auth/presentation/screens/login_screen.dart';
 import 'package:onepos_admin_app/presentation/screens/main_navigation_screen.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 class SplashScreen extends HookConsumerWidget {
   const SplashScreen({super.key});
@@ -19,6 +20,8 @@ class SplashScreen extends HookConsumerWidget {
     final animationController = useAnimationController(
       duration: const Duration(milliseconds: 1500),
     );
+
+    final versionString = useState<String>('');
 
     final fadeAnimation = useAnimation(
       Tween<double>(begin: 0.0, end: 1.0).animate(
@@ -52,6 +55,9 @@ class SplashScreen extends HookConsumerWidget {
           await FirebaseService().init();
           await UpdateService().init();
 
+          final packageInfo = await PackageInfo.fromPlatform();
+          versionString.value = 'Version ${packageInfo.version}';
+
           // check auth status
           final token = await SecureStorageService().read(
             AppConstants.keyAccessToken,
@@ -70,9 +76,26 @@ class SplashScreen extends HookConsumerWidget {
                     : const LoginScreen(),
                 transitionsBuilder:
                     (context, animation, secondaryAnimation, child) {
-                      return FadeTransition(opacity: animation, child: child);
+                      final curve = CurvedAnimation(
+                        parent: animation,
+                        curve: Curves.easeInOutQuart,
+                      );
+
+                      return FadeTransition(
+                        opacity: Tween<double>(
+                          begin: 0.0,
+                          end: 1.0,
+                        ).animate(curve),
+                        child: SlideTransition(
+                          position: Tween<Offset>(
+                            begin: const Offset(0.0, 0.05),
+                            end: Offset.zero,
+                          ).animate(curve),
+                          child: child,
+                        ),
+                      );
                     },
-                transitionDuration: const Duration(milliseconds: 800),
+                transitionDuration: const Duration(milliseconds: 1000),
               ),
             );
           }
@@ -138,7 +161,7 @@ class SplashScreen extends HookConsumerWidget {
         child: Padding(
           padding: const EdgeInsets.only(bottom: 24),
           child: Text(
-            'Version 1.1.0',
+            versionString.value,
             textAlign: TextAlign.center,
             style: GoogleFonts.poppins(fontSize: 12, color: AppTheme.grey400),
           ),

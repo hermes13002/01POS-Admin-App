@@ -393,7 +393,9 @@ class EditProductDialog extends HookConsumerWidget {
                       _amountBuildField(
                         'Price',
                         priceController,
-                        keyboardType: TextInputType.number,
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
                         prefixText: '₦ ',
                       ),
 
@@ -414,7 +416,9 @@ class EditProductDialog extends HookConsumerWidget {
                       _buildField(
                         'Available Quantity',
                         qtyController,
-                        keyboardType: TextInputType.number,
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
                       ),
                       const SizedBox(height: 12),
                       _buildField('SKU', skuController),
