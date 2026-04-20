@@ -17,6 +17,9 @@ import 'package:onepos_admin_app/features/reports/presentation/providers/reports
 import 'package:onepos_admin_app/core/utils/amount_formatter.dart';
 import '../../../../shared/widgets/dots_loader.dart';
 import 'package:onepos_admin_app/shared/widgets/app_snackbar.dart';
+import 'package:showcaseview/showcaseview.dart';
+import '../../../../presentation/providers/tutorial_keys_provider.dart';
+import '../../../../shared/widgets/app_showcase.dart';
 
 const List<String> _backgroundImages = [
   'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80',
@@ -109,115 +112,138 @@ class HomeScreen extends HookConsumerWidget {
                           ),
                         ),
                       ),
-                      GestureDetector(
-                        onTap: () =>
-                            Navigator.pushNamed(context, AppRoutes.chats),
-                        child: Stack(
-                          clipBehavior: Clip.none,
-                          children: [
-                            IconButton(
-                              icon: Image.asset(
-                                'assets/icons/message.png',
-                                width: 24,
-                                height: 24,
-                                errorBuilder: (_, __, ___) =>
-                                    const Icon(Icons.mail_outline, size: 24),
+                      AppShowcase(
+                        showcaseKey: ref
+                            .read(tutorialKeysProvider)
+                            .messagesIcon,
+                        description:
+                            'Check your messages and communicate here.',
+                        child: GestureDetector(
+                          onTap: () =>
+                              Navigator.pushNamed(context, AppRoutes.chats),
+                          child: Stack(
+                            clipBehavior: Clip.none,
+                            children: [
+                              IconButton(
+                                icon: Image.asset(
+                                  'assets/icons/message.png',
+                                  width: 24,
+                                  height: 24,
+                                  errorBuilder: (_, __, ___) =>
+                                      const Icon(Icons.mail_outline, size: 24),
+                                ),
+                                onPressed: () => Navigator.pushNamed(
+                                  context,
+                                  AppRoutes.chats,
+                                ),
                               ),
-                              onPressed: () =>
-                                  Navigator.pushNamed(context, AppRoutes.chats),
-                            ),
-                            Consumer(
-                              builder: (context, ref, _) {
-                                final unreadCount = ref.watch(
-                                  totalUnreadCountProvider,
-                                );
-                                if (unreadCount == 0) return const SizedBox();
+                              Consumer(
+                                builder: (context, ref, _) {
+                                  final unreadCount = ref.watch(
+                                    totalUnreadCountProvider,
+                                  );
+                                  if (unreadCount == 0) return const SizedBox();
 
-                                return Positioned(
-                                  right: 12,
-                                  top: 12,
-                                  child: Container(
-                                    width: 8,
-                                    height: 8,
-                                    decoration: const BoxDecoration(
-                                      color: Colors.red,
-                                      shape: BoxShape.circle,
+                                  return Positioned(
+                                    right: 12,
+                                    top: 12,
+                                    child: Container(
+                                      width: 8,
+                                      height: 8,
+                                      decoration: const BoxDecoration(
+                                        color: Colors.red,
+                                        shape: BoxShape.circle,
+                                      ),
                                     ),
-                                  ),
-                                );
-                              },
-                            ),
-                          ],
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                       const SizedBox(width: 4),
-                      GestureDetector(
-                        onTap: () => Navigator.pushNamed(
-                          context,
-                          AppRoutes.notifications,
-                        ),
-                        child: Stack(
-                          children: [
-                            IconButton(
-                              icon: Image.asset(
-                                'assets/icons/notification.png',
-                                width: 24,
-                                height: 24,
-                                errorBuilder: (_, __, ___) => const Icon(
-                                  Icons.notifications_outlined,
-                                  size: 24,
+                      AppShowcase(
+                        showcaseKey: ref
+                            .read(tutorialKeysProvider)
+                            .notificationsIcon,
+                        description: 'View your important alerts here.',
+                        child: GestureDetector(
+                          onTap: () => Navigator.pushNamed(
+                            context,
+                            AppRoutes.notifications,
+                          ),
+                          child: Stack(
+                            children: [
+                              IconButton(
+                                icon: Image.asset(
+                                  'assets/icons/notification.png',
+                                  width: 24,
+                                  height: 24,
+                                  errorBuilder: (_, __, ___) => const Icon(
+                                    Icons.notifications_outlined,
+                                    size: 24,
+                                  ),
+                                ),
+                                onPressed: () => Navigator.pushNamed(
+                                  context,
+                                  AppRoutes.notifications,
                                 ),
                               ),
-                              onPressed: () => Navigator.pushNamed(
-                                context,
-                                AppRoutes.notifications,
-                              ),
-                            ),
-                            Consumer(
-                              builder: (context, ref, _) {
-                                final unreadCount = ref.watch(
-                                  unreadNotificationsCountProvider,
-                                );
-                                if (unreadCount == 0) return const SizedBox();
+                              Consumer(
+                                builder: (context, ref, _) {
+                                  final unreadCount = ref.watch(
+                                    unreadNotificationsCountProvider,
+                                  );
+                                  if (unreadCount == 0) return const SizedBox();
 
-                                return Positioned(
-                                  right: 8,
-                                  top: 8,
-                                  child: Container(
-                                    width: 16,
-                                    height: 16,
-                                    decoration: const BoxDecoration(
-                                      color: Colors.red,
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: Center(
-                                      child: Text(
-                                        unreadCount > 9 ? '9+' : '$unreadCount',
-                                        style: const TextStyle(
-                                          fontSize: 9,
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold,
+                                  return Positioned(
+                                    right: 8,
+                                    top: 8,
+                                    child: Container(
+                                      width: 16,
+                                      height: 16,
+                                      decoration: const BoxDecoration(
+                                        color: Colors.red,
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Center(
+                                        child: Text(
+                                          unreadCount > 9
+                                              ? '9+'
+                                              : '$unreadCount',
+                                          style: const TextStyle(
+                                            fontSize: 9,
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                          ),
                                         ),
                                       ),
                                     ),
-                                  ),
-                                );
-                              },
-                            ),
-                          ],
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                       const SizedBox(width: 4),
-                      GestureDetector(
-                        onTap: () =>
-                            Navigator.pushNamed(context, AppRoutes.onlineStore),
-                        child: CircleAvatar(
-                          radius: 16,
-                          backgroundColor: AppTheme.grey300,
-                          child: const Icon(
-                            Icons.person,
-                            color: Colors.black,
-                            size: 18,
+                      AppShowcase(
+                        showcaseKey: ref.read(tutorialKeysProvider).profileIcon,
+                        description: 'Manage your online store profile.',
+                        child: GestureDetector(
+                          onTap: () => Navigator.pushNamed(
+                            context,
+                            AppRoutes.onlineStore,
+                          ),
+                          child: CircleAvatar(
+                            radius: 16,
+                            backgroundColor: AppTheme.grey300,
+                            child: const Icon(
+                              Icons.person,
+                              color: Colors.black,
+                              size: 18,
+                            ),
                           ),
                         ),
                       ),
@@ -438,36 +464,44 @@ class HomeScreen extends HookConsumerWidget {
                               ),
                               const SizedBox(height: 24),
                               // view report button
-                              SizedBox(
-                                height: 40,
-                                child: OutlinedButton.icon(
-                                  style: OutlinedButton.styleFrom(
-                                    // foregroundColor: Colors.white,
-                                    backgroundColor: Colors.white,
-                                    side: const BorderSide(
-                                      color: Colors.white,
-                                      width: 1.5,
+                              AppShowcase(
+                                showcaseKey: ref
+                                    .read(tutorialKeysProvider)
+                                    .viewReportButton,
+                                description: 'Tap to dive deeper into reports.',
+                                child: SizedBox(
+                                  height: 40,
+                                  child: OutlinedButton.icon(
+                                    style: OutlinedButton.styleFrom(
+                                      // foregroundColor: Colors.white,
+                                      backgroundColor: Colors.white,
+                                      side: const BorderSide(
+                                        color: Colors.white,
+                                        width: 1.5,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 16,
+                                      ),
                                     ),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
+                                    onPressed: () => Navigator.pushNamed(
+                                      context,
+                                      '/reports',
                                     ),
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 16,
-                                    ),
-                                  ),
-                                  onPressed: () =>
-                                      Navigator.pushNamed(context, '/reports'),
-                                  icon: const Icon(
-                                    Icons.arrow_forward,
-                                    size: 18,
-                                    color: AppTheme.textPrimary,
-                                  ),
-                                  label: Text(
-                                    'View Detailed Report',
-                                    style: GoogleFonts.poppins(
-                                      fontWeight: FontWeight.w500,
-                                      fontSize: 13,
+                                    icon: const Icon(
+                                      Icons.arrow_forward,
+                                      size: 18,
                                       color: AppTheme.textPrimary,
+                                    ),
+                                    label: Text(
+                                      'View Detailed Report',
+                                      style: GoogleFonts.poppins(
+                                        fontWeight: FontWeight.w500,
+                                        fontSize: 13,
+                                        color: AppTheme.textPrimary,
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -496,16 +530,22 @@ class HomeScreen extends HookConsumerWidget {
                           color: AppTheme.textPrimary,
                         ),
                       ),
-                      TextButton(
-                        onPressed: () {
-                          _showEditQuickActionsBottomSheet(context, ref);
-                        },
-                        child: Text(
-                          'Edit',
-                          style: GoogleFonts.poppins(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: AppTheme.primaryColor,
+                      AppShowcase(
+                        showcaseKey: ref
+                            .read(tutorialKeysProvider)
+                            .editQuickActionsButton,
+                        description: 'Customize which tools appear here.',
+                        child: TextButton(
+                          onPressed: () {
+                            _showEditQuickActionsBottomSheet(context, ref);
+                          },
+                          child: Text(
+                            'Edit',
+                            style: GoogleFonts.poppins(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: AppTheme.primaryColor,
+                            ),
                           ),
                         ),
                       ),
@@ -536,20 +576,60 @@ class HomeScreen extends HookConsumerWidget {
                       itemBuilder: (context, index) {
                         final tool = quickActions[index];
                         final color = pastelColors[index % pastelColors.length];
+
+                        GlobalKey? showcaseKey;
+                        String? showcaseDesc;
+                        final keys = ref.read(tutorialKeysProvider);
+
+                        if (tool.id == 'products') {
+                          showcaseKey = keys.quickProducts;
+                          showcaseDesc =
+                              'Manage your inventory and see all products here.';
+                        } else if (tool.id == 'low_stock') {
+                          showcaseKey = keys.quickLowStock;
+                          showcaseDesc =
+                              'Keep track of items running out soon.';
+                        } else if (tool.id == 'sales') {
+                          showcaseKey = keys.quickSales;
+                          showcaseDesc =
+                              'Process transactions and view records easily.';
+                        } else if (tool.id == 'users') {
+                          showcaseKey = keys.quickUsers;
+                          showcaseDesc =
+                              'Manage employees and give them role access.';
+                        } else if (tool.id == 'new_product') {
+                          showcaseKey = keys.quickNewProduct;
+                          showcaseDesc =
+                              'Quickly add a new item to your inventory.';
+                        } else if (tool.id == 'customers') {
+                          showcaseKey = keys.quickCustomers;
+                          showcaseDesc =
+                              'Manage profiles and reward loyal buyers.';
+                        }
+
+                        Widget card = QuickActionCard(
+                          tool: tool,
+                          color: color,
+                          onTap: () => Navigator.pushNamed(context, tool.route),
+                        );
+
+                        if (showcaseKey != null) {
+                          card = AppShowcase(
+                            showcaseKey: showcaseKey,
+                            description: showcaseDesc!,
+                            tooltipPosition: TooltipPosition.top,
+                            targetBorderRadius: AppTheme.borderRadiusMedium,
+                            child: card,
+                          );
+                        }
+
                         return AnimationConfiguration.staggeredGrid(
                           position: index,
                           duration: const Duration(milliseconds: 375),
                           columnCount: 2,
                           child: SlideAnimation(
                             verticalOffset: 50.0,
-                            child: FadeInAnimation(
-                              child: QuickActionCard(
-                                tool: tool,
-                                color: color,
-                                onTap: () =>
-                                    Navigator.pushNamed(context, tool.route),
-                              ),
-                            ),
+                            child: FadeInAnimation(child: card),
                           ),
                         );
                       },

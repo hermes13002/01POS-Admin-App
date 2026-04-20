@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:onepos_admin_app/core/theme/app_theme.dart';
+import '../../presentation/providers/tutorial_keys_provider.dart';
+import 'app_showcase.dart';
 
 /// Custom bottom navigation bar
-class CustomBottomNavigationBar extends StatelessWidget {
+class CustomBottomNavigationBar extends ConsumerWidget {
   final int currentIndex;
   final Function(int) onTap;
 
@@ -12,7 +16,9 @@ class CustomBottomNavigationBar extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final keys = ref.read(tutorialKeysProvider);
+
     return Container(
       decoration: BoxDecoration(
         color: Theme.of(context).scaffoldBackgroundColor,
@@ -36,6 +42,9 @@ class CustomBottomNavigationBar extends StatelessWidget {
                 inactiveIconPath: 'assets/icons/home-outline.png',
                 label: 'Home',
                 index: 0,
+                showcaseKey: keys.homeTab,
+                showcaseDesc:
+                    'Access your quick actions and performance overview here.',
               ),
               _buildNavItem(
                 context: context,
@@ -43,6 +52,8 @@ class CustomBottomNavigationBar extends StatelessWidget {
                 inactiveIconPath: 'assets/icons/loan.png',
                 label: 'Loan',
                 index: 1,
+                showcaseKey: keys.loanTab,
+                showcaseDesc: 'Manage and request loans for your business.',
               ),
               _buildNavItem(
                 context: context,
@@ -50,6 +61,8 @@ class CustomBottomNavigationBar extends StatelessWidget {
                 inactiveIconPath: 'assets/icons/tools-outline.png',
                 label: 'Tools',
                 index: 2,
+                showcaseKey: keys.toolsTab,
+                showcaseDesc: 'Explore all available tools and settings.',
               ),
             ],
           ),
@@ -64,35 +77,42 @@ class CustomBottomNavigationBar extends StatelessWidget {
     required String inactiveIconPath,
     required String label,
     required int index,
+    required GlobalKey showcaseKey,
+    required String showcaseDesc,
   }) {
     final isActive = currentIndex == index;
     final colorScheme = Theme.of(context).colorScheme;
 
     return Expanded(
-      child: InkWell(
-        onTap: () => onTap(index),
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Image.asset(
-                isActive ? iconPath : inactiveIconPath,
-                width: 28,
-                height: 28,
-                color: isActive ? colorScheme.primary : Colors.grey,
-              ),
-              const SizedBox(height: 4),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
+      child: AppShowcase(
+        targetBorderRadius: AppTheme.borderRadiusMedium,
+        showcaseKey: showcaseKey,
+        description: showcaseDesc,
+        child: InkWell(
+          onTap: () => onTap(index),
+          borderRadius: BorderRadius.circular(12),
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Image.asset(
+                  isActive ? iconPath : inactiveIconPath,
+                  width: 28,
+                  height: 28,
                   color: isActive ? colorScheme.primary : Colors.grey,
                 ),
-              ),
-            ],
+                const SizedBox(height: 4),
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
+                    color: isActive ? colorScheme.primary : Colors.grey,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

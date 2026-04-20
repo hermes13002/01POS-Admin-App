@@ -10,6 +10,9 @@ import '../../core/services/background_sync_service.dart';
 import 'dart:developer';
 import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:showcaseview/showcaseview.dart';
+import '../../core/storage/shared_prefs_service.dart';
+import '../providers/tutorial_keys_provider.dart';
 
 /// Main navigation screen with bottom navigation
 class MainNavigationScreen extends ConsumerStatefulWidget {
@@ -22,6 +25,7 @@ class MainNavigationScreen extends ConsumerStatefulWidget {
 
 class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
   int _currentIndex = 0;
+  bool _hasCheckedTutorial = false;
 
   List<Widget> get _screens => [
     const HomeScreen(),
@@ -122,16 +126,31 @@ class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: IndexedStack(index: _currentIndex, children: _screens),
-      bottomNavigationBar: CustomBottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: (index) {
-          setState(() {
-            _currentIndex = index;
+    return ShowCaseWidget(
+      builder: (builderContext) {
+        if (!_hasCheckedTutorial) {
+          _hasCheckedTutorial = true;
+          WidgetsBinding.instance.addPostFrameCallback((_) async {
+            if (!SharedPrefsService().hasSeenTutorial && mounted) {
+              final keys = ref.read(tutorialKeysProvider).allKeys;
+              ShowCaseWidget.of(builderContext).startShowCase(keys);
+              await SharedPrefsService().setTutorialCompleted();
+            }
           });
-        },
-      ),
+        }
+
+        return Scaffold(
+          body: IndexedStack(index: _currentIndex, children: _screens),
+          bottomNavigationBar: CustomBottomNavigationBar(
+            currentIndex: _currentIndex,
+            onTap: (index) {
+              setState(() {
+                _currentIndex = index;
+              });
+            },
+          ),
+        );
+      },
     );
   }
 }

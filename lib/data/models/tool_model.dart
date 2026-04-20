@@ -155,5 +155,12 @@ class AppTools {
   ];
 
   /// Default quick actions (first 6 tools)
-  static List<ToolModel> get defaultQuickActions => allTools.take(6).toList();
+  static List<ToolModel> get defaultQuickActions => [
+    allTools.firstWhere((t) => t.id == 'products'),
+    allTools.firstWhere((t) => t.id == 'low_stock'),
+    allTools.firstWhere((t) => t.id == 'sales'),
+    allTools.firstWhere((t) => t.id == 'users'),
+    allTools.firstWhere((t) => t.id == 'new_product'),
+    allTools.firstWhere((t) => t.id == 'customers'),
+  ];
 }

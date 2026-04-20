@@ -90,4 +90,10 @@ class SharedPrefsService {
 
   /// Helper to record that first login popup was handled
   Future<bool> setFirstLoginCompleted() => writeBool('isFirstLogin', false);
+
+  /// Helper for first-time showcase tutorial state
+  bool get hasSeenTutorial => readBool('hasSeenTutorial') ?? false;
+
+  /// Helper to record that showcase tutorial was completed
+  Future<bool> setTutorialCompleted() => writeBool('hasSeenTutorial', true);
 }
