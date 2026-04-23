@@ -26,7 +26,9 @@ class AppShowcase extends StatelessWidget {
     return Showcase.withWidget(
       key: showcaseKey,
       tooltipPosition: tooltipPosition,
-      targetBorderRadius: BorderRadius.circular(targetBorderRadius!),
+      targetBorderRadius: BorderRadius.circular(
+        targetBorderRadius ?? AppTheme.borderRadiusMedium,
+      ),
       container: Container(
         width: MediaQuery.sizeOf(context).width * 0.75,
         padding: padding ?? const EdgeInsets.all(AppTheme.spacingMedium),

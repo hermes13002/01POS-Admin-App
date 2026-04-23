@@ -41,3 +41,6 @@ class TutorialKeys {
 final tutorialKeysProvider = Provider<TutorialKeys>((ref) {
   return TutorialKeys();
 });
+
+/// signal to restart the tutorial showcase
+final tutorialRestartProvider = StateProvider<bool>((ref) => false);

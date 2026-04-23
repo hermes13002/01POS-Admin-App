@@ -152,6 +152,13 @@ class AppTools {
       icon: Icons.add_box_outlined,
       route: '/add-product',
     ),
+    ToolModel(
+      id: 'tutorial',
+      name: 'Tutorial',
+      iconPath: 'assets/icons/tutorial.png',
+      icon: Icons.help_outline_rounded,
+      route: '/tutorial',
+    ),
   ];
 
   /// Default quick actions (first 6 tools)

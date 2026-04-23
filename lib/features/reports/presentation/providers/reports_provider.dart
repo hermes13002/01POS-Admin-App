@@ -7,12 +7,15 @@ import 'package:onepos_admin_app/features/sales/data/datasources/sales_remote_da
 import 'package:onepos_admin_app/features/sales/data/repositories/sales_repository_impl.dart';
 import 'package:onepos_admin_app/features/sales/domain/repositories/sales_repository.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import '../../data/datasources/report_cache_service.dart';
 import '../../data/models/reports_model.dart';
 
 part 'reports_provider.g.dart';
 
 @riverpod
 class Reports extends _$Reports {
+  final _cacheService = ReportCacheService();
+
   SalesRepository get _salesRepo =>
       SalesRepositoryImpl(SalesRemoteDatasourceImpl(DioClient()));
 
@@ -20,16 +23,8 @@ class Reports extends _$Reports {
 
   @override
   ReportsData build() {
-    Future.microtask(() {
-      _fetchTopSales();
-      _fetchSalesSummary();
-      _fetchLowStock();
-      _fetchSalesOverview();
-      _fetchStockLevel();
-      _fetchExpenses();
-      _fetchStoreHealth();
-      _fetchPerformanceStats();
-    });
+    _init();
+    // Start with empty state but loading indicators
     return _getMockData().copyWith(
       isTopSalesLoading: true,
       isSalesSummaryLoading: true,
@@ -38,6 +33,44 @@ class Reports extends _$Reports {
       isStockLevelLoading: true,
       isExpensesLoading: true,
     );
+  }
+
+  Future<void> _init({bool forceRefresh = false}) async {
+    // 1. Try to load from cache
+    final cachedData = await _cacheService.getCachedReports();
+    final bool isStale = await _cacheService.isCacheStale();
+
+    if (cachedData != null) {
+      // Immediately emit cached data without loading flags if not stale
+      state = cachedData.copyWith(
+        isTopSalesLoading: isStale || forceRefresh,
+        isSalesSummaryLoading: isStale || forceRefresh,
+        isLowStockLoading: isStale || forceRefresh,
+        isSalesOverviewLoading: isStale || forceRefresh,
+        isStockLevelLoading: isStale || forceRefresh,
+        isExpensesLoading: isStale || forceRefresh,
+      );
+
+      // If cache is fresh and we're not forcing, we are done
+      if (!isStale && !forceRefresh) {
+        return;
+      }
+    }
+
+    // 2. Fetch from network (if no cache, or stale, or force refresh)
+    await Future.wait([
+      _fetchTopSales(),
+      _fetchSalesSummary(),
+      _fetchLowStock(),
+      _fetchSalesOverview(),
+      _fetchStockLevel(),
+      _fetchExpenses(),
+      _fetchStoreHealth(),
+      _fetchPerformanceStats(),
+    ]);
+
+    // 3. Save result to cache
+    await _cacheService.cacheReports(state);
   }
 
   Future<void> _fetchTopSales() async {
@@ -382,24 +415,6 @@ class Reports extends _$Reports {
   }
 
   Future<void> refresh() async {
-    state = _getMockData().copyWith(
-      isTopSalesLoading: true,
-      isSalesSummaryLoading: true,
-      isLowStockLoading: true,
-      isSalesOverviewLoading: true,
-      isStockLevelLoading: true,
-      isExpensesLoading: true,
-    );
-
-    await Future.wait([
-      _fetchTopSales(),
-      _fetchSalesSummary(),
-      _fetchLowStock(),
-      _fetchSalesOverview(),
-      _fetchStockLevel(),
-      _fetchExpenses(),
-      _fetchStoreHealth(),
-      _fetchPerformanceStats(),
-    ]);
+    await _init(forceRefresh: true);
   }
 }

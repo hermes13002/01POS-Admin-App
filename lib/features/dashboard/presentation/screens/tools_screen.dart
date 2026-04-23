@@ -9,6 +9,7 @@ import 'package:onepos_admin_app/shared/widgets/custom_search_bar.dart';
 import 'package:onepos_admin_app/data/models/tool_model.dart';
 import 'package:onepos_admin_app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:onepos_admin_app/presentation/providers/quick_actions_provider.dart';
+import 'package:onepos_admin_app/presentation/providers/tutorial_keys_provider.dart';
 
 /// Tools screen showing all available tools
 class ToolsScreen extends HookConsumerWidget {
@@ -125,7 +126,7 @@ class ToolsScreen extends HookConsumerWidget {
                               child: SlideAnimation(
                                 verticalOffset: 50.0,
                                 child: FadeInAnimation(
-                                  child: _buildToolItem(context, tool),
+                                  child: _buildToolItem(context, ref, tool),
                                 ),
                               ),
                             );
@@ -189,11 +190,21 @@ class ToolsScreen extends HookConsumerWidget {
     );
   }
 
-  Widget _buildToolItem(BuildContext context, ToolModel tool) {
+  Widget _buildToolItem(BuildContext context, WidgetRef ref, ToolModel tool) {
     return InkWell(
       onTap: () {
-        // navigate to tool screen
-        Navigator.pushNamed(context, tool.route);
+        if (tool.id == 'tutorial') {
+          // signal to restart tutorial
+          ref.read(tutorialRestartProvider.notifier).state = true;
+          // navigate back to home where showcase is hosted
+          // index 0 is home in MainNavigationScreen
+          // the parent context handles the index change if we were using a provider for it
+          // but here we might need to find a way to change the index.
+          // since MainNavigationScreen watches tutorialRestartProvider, we can handle index change there.
+        } else {
+          // navigate to tool screen
+          Navigator.pushNamed(context, tool.route);
+        }
       },
       borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
       child: Container(

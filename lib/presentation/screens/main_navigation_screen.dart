@@ -13,6 +13,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:showcaseview/showcaseview.dart';
 import '../../core/storage/shared_prefs_service.dart';
 import '../providers/tutorial_keys_provider.dart';
+import '../../features/reports/presentation/providers/reports_provider.dart';
 
 /// Main navigation screen with bottom navigation
 class MainNavigationScreen extends ConsumerStatefulWidget {
@@ -38,6 +39,10 @@ class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
     super.initState();
     // pre-fetch user profile on app startup so screens have data immediately
     ref.read(userProfileProvider.future).ignore();
+
+    // proactively sync reports in the background after login/start
+    // this ensures reports are ready (cached) before the user visits the screen
+    ref.read(reportsProvider);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _initAppServices();
@@ -126,6 +131,17 @@ class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(tutorialRestartProvider, (previous, next) {
+      if (next == true) {
+        setState(() {
+          _currentIndex = 0;
+          _hasCheckedTutorial = false;
+        });
+        SharedPrefsService().writeBool('hasSeenTutorial', false);
+        ref.read(tutorialRestartProvider.notifier).state = false;
+      }
+    });
+
     return ShowCaseWidget(
       builder: (builderContext) {
         if (!_hasCheckedTutorial) {

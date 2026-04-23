@@ -13,18 +13,11 @@ import '../providers/reports_provider.dart';
 import 'package:onepos_admin_app/shared/widgets/dots_loader.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 
-import 'package:flutter_hooks/flutter_hooks.dart';
-
 class ReportsScreen extends HookConsumerWidget {
   const ReportsScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    useEffect(() {
-      Future.microtask(() => ref.read(reportsProvider.notifier).refresh());
-      return null;
-    }, []);
-
     final reportsData = ref.watch(reportsProvider);
 
     return Scaffold(

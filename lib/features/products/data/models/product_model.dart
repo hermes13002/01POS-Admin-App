@@ -150,6 +150,29 @@ class ProductModel {
       isActive: isActive ?? this.isActive,
     );
   }
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'product_name': name,
+    'price': price,
+    'category': category,
+    'subcategory': subCategory,
+    'available_quantity': stock,
+    'product_image': imageUrl,
+    'store': store,
+    'warehouse': warehouse,
+    'supplier': supplier,
+    'sku': sku,
+    'barcode': barcode,
+    'manufacturing_date': manufacturingDate,
+    'expiring_date': expiryDate,
+    'description': description,
+    'cat_id': catId,
+    'sub_cat_id': subCatId,
+    'quantity_purchased': quantityPurchased,
+    'in_stock': inStock,
+    'is_active': isActive,
+  };
 }
 
 /// model for a product category

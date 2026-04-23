@@ -38,6 +38,14 @@ class SalesOverviewData {
       revenuePercentage: parseDouble(json['revenuePercentage']),
     );
   }
+
+  Map<String, dynamic> toJson() => {
+    'todaysSalesCount': todaysSalesCount,
+    'salesCountPercentage': salesCountPercentage,
+    'lowStockCount': lowStockCount,
+    'todaysTotalRevenue': todaysTotalRevenue,
+    'revenuePercentage': revenuePercentage,
+  };
 }
 
 /// Model for store health
@@ -46,6 +54,15 @@ class StoreHealthData {
   final String status;
 
   const StoreHealthData({required this.score, required this.status});
+
+  factory StoreHealthData.fromJson(Map<String, dynamic> json) {
+    return StoreHealthData(
+      score: json['score'] as int? ?? 0,
+      status: json['status'] as String? ?? '',
+    );
+  }
+
+  Map<String, dynamic> toJson() => {'score': score, 'status': status};
 }
 
 /// Model for monthly sales data
@@ -59,6 +76,20 @@ class MonthlySalesData {
     required this.totalSales,
     required this.transactions,
   });
+
+  factory MonthlySalesData.fromJson(Map<String, dynamic> json) {
+    return MonthlySalesData(
+      month: json['month'] as String? ?? '',
+      totalSales: (json['totalSales'] as num?)?.toDouble() ?? 0.0,
+      transactions: json['transactions'] as int? ?? 0,
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+    'month': month,
+    'totalSales': totalSales,
+    'transactions': transactions,
+  };
 
   /// Parse from dashboard JSON
   static List<MonthlySalesData> fromDashboardJson(Map<String, dynamic> json) {
@@ -102,6 +133,15 @@ class StockLevelData {
   final double totalStock;
 
   const StockLevelData({required this.month, required this.totalStock});
+
+  factory StockLevelData.fromJson(Map<String, dynamic> json) {
+    return StockLevelData(
+      month: json['month'] as String? ?? '',
+      totalStock: (json['totalStock'] as num?)?.toDouble() ?? 0.0,
+    );
+  }
+
+  Map<String, dynamic> toJson() => {'month': month, 'totalStock': totalStock};
 
   /// Parse from dashboard JSON
   static List<StockLevelData> fromDashboardJson(Map<String, dynamic> json) {
@@ -178,6 +218,13 @@ class ExpenseStatisticsData {
       countByCategory: countByCategory,
     );
   }
+
+  Map<String, dynamic> toJson() => {
+    'total_expenses': totalExpenses,
+    'by_category': byCategory,
+    'by_type': byType,
+    'count_by_category': countByCategory,
+  };
 }
 
 /// Model for performance statistics (Dashboard card)
@@ -219,6 +266,13 @@ class PerformanceStats {
     );
   }
 
+  Map<String, dynamic> toJson() => {
+    'today': today.toJson('today_total_sales', 'yesterday_total_sales'),
+    'week': week.toJson('this_week_total_sales', 'last_week_total_sales'),
+    'month': month.toJson('this_month_total_sales', 'last_month_total_sales'),
+    'year': year.toJson('this_year_total_sales', 'last_year_total_sales'),
+  };
+
   static PerformanceStats empty() => const PerformanceStats(
     today: PerformancePeriod(current: 0, previous: 0),
     week: PerformancePeriod(current: 0, previous: 0),
@@ -249,6 +303,11 @@ class PerformancePeriod {
       previous: parseCurrency(json[previousKey]),
     );
   }
+
+  Map<String, dynamic> toJson(String currentKey, String previousKey) => {
+    currentKey: current,
+    previousKey: previous,
+  };
 
   double get percentageChange {
     if (previous == 0) return current > 0 ? 100.0 : 0.0;
@@ -307,6 +366,56 @@ class ReportsData {
     this.isExpensesLoading = false,
     this.fundingReadinessScore = 0,
   });
+
+  factory ReportsData.fromJson(Map<String, dynamic> json) {
+    return ReportsData(
+      salesOverview: SalesOverviewData.fromJson(
+        json['salesOverview'] as Map<String, dynamic>? ?? {},
+      ),
+      performanceStats: json['performanceStats'] != null
+          ? PerformanceStats.fromJson(
+              json['performanceStats'] as Map<String, dynamic>,
+            )
+          : null,
+      storeHealth: StoreHealthData.fromJson(
+        json['storeHealth'] as Map<String, dynamic>? ?? {},
+      ),
+      aiInsight: json['aiInsight'] as String? ?? '',
+      lowStockItems: (json['lowStockItems'] as List? ?? [])
+          .map((e) => ProductModel.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      salesSummary: (json['salesSummary'] as List? ?? [])
+          .map((e) => MonthlySalesData.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      salesSummaryFilter: json['salesSummaryFilter'] as String? ?? '12months',
+      expenseStatistics: json['expenseStatistics'] != null
+          ? ExpenseStatisticsData.fromJson(
+              json['expenseStatistics'] as Map<String, dynamic>,
+            )
+          : null,
+      stockLevel: (json['stockLevel'] as List? ?? [])
+          .map((e) => StockLevelData.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      topSales: (json['topSales'] as List? ?? [])
+          .map((e) => TopSellingProduct.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      fundingReadinessScore: json['fundingReadinessScore'] as int? ?? 0,
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+    'salesOverview': salesOverview.toJson(),
+    'performanceStats': performanceStats?.toJson(),
+    'storeHealth': storeHealth.toJson(),
+    'aiInsight': aiInsight,
+    'lowStockItems': lowStockItems.map((e) => e.toJson()).toList(),
+    'salesSummary': salesSummary.map((e) => e.toJson()).toList(),
+    'salesSummaryFilter': salesSummaryFilter,
+    'expenseStatistics': expenseStatistics?.toJson(),
+    'stockLevel': stockLevel.map((e) => e.toJson()).toList(),
+    'topSales': topSales.map((e) => e.toJson()).toList(),
+    'fundingReadinessScore': fundingReadinessScore,
+  };
 
   ReportsData copyWith({
     SalesOverviewData? salesOverview,

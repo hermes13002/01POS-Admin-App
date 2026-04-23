@@ -4,17 +4,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:onepos_admin_app/core/routes/app_routes.dart';
 import 'package:onepos_admin_app/core/theme/app_theme.dart';
 import 'package:onepos_admin_app/core/network/connectivity_provider.dart';
 import 'package:onepos_admin_app/core/utils/session_manager.dart';
 import 'package:onepos_admin_app/features/splash/presentation/screens/splash_screen.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Hive.initFlutter();
+
   runZoned(
     () async {
-      WidgetsFlutterBinding.ensureInitialized();
-
       // enable edge-to-edge support for Android 15+
       SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
@@ -24,7 +26,6 @@ void main() {
 
       runApp(const ProviderScope(child: MyApp()));
     },
-    // ... rest of zoned settings
     zoneSpecification: ZoneSpecification(
       print: (self, parent, zone, line) {
         if (!kReleaseMode) {
