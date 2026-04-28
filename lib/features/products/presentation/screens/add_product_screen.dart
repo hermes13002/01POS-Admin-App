@@ -15,10 +15,24 @@ import 'package:onepos_admin_app/shared/widgets/custom_button.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_text_field.dart';
 import 'package:onepos_admin_app/core/utils/validators.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:showcaseview/showcaseview.dart';
+import 'package:onepos_admin_app/shared/widgets/app_showcase.dart';
+import 'package:onepos_admin_app/presentation/providers/guided_tour_provider.dart';
 
 /// screen for adding a new product (single scrollable form)
-class AddProductScreen extends HookConsumerWidget {
+class AddProductScreen extends StatelessWidget {
   const AddProductScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ShowCaseWidget(
+      builder: (context) => const _AddProductScreenContent(),
+    );
+  }
+}
+
+class _AddProductScreenContent extends HookConsumerWidget {
+  const _AddProductScreenContent();
 
   void _showBarcodeScanner(
     BuildContext context,
@@ -157,6 +171,27 @@ class AddProductScreen extends HookConsumerWidget {
     final formKey = useMemoized(() => GlobalKey<FormState>());
     final categoriesAsync = ref.watch(storeCategoriesProvider);
 
+    // showcase keys
+    final nameKey = useMemoized(() => GlobalKey());
+    final priceKey = useMemoized(() => GlobalKey());
+    final saveKey = useMemoized(() => GlobalKey());
+    final tourState = ref.watch(guidedTourProvider);
+
+    // trigger guided tour sequence continuation
+    useEffect(() {
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        if (tourState == TourType.addProduct) {
+          ShowCaseWidget.of(
+            context,
+          ).startShowCase([nameKey, priceKey, saveKey]);
+          ref
+              .read(guidedTourProvider.notifier)
+              .completeTour(TourType.addProduct);
+        }
+      });
+      return null;
+    }, [tourState]);
+
     // step 1 controllers
     final nameController = useTextEditingController();
     final quantityController = useTextEditingController();
@@ -218,12 +253,16 @@ class AddProductScreen extends HookConsumerWidget {
               const SizedBox(height: AppTheme.spacingSmall),
 
               // product name
-              CustomTextField(
-                label: 'Product name *',
-                hint: 'Enter product name',
-                controller: nameController,
-                validator: (val) =>
-                    Validators.validateRequired(val, 'Product name'),
+              AppShowcase(
+                showcaseKey: nameKey,
+                description: 'Enter the name of your product here.',
+                child: CustomTextField(
+                  label: 'Product name *',
+                  hint: 'Enter product name',
+                  controller: nameController,
+                  validator: (val) =>
+                      Validators.validateRequired(val, 'Product name'),
+                ),
               ),
               const SizedBox(height: AppTheme.spacingMedium),
 
@@ -287,15 +326,19 @@ class AddProductScreen extends HookConsumerWidget {
               const SizedBox(height: AppTheme.spacingMedium),
 
               // price
-              CustomTextField(
-                label: 'Price *',
-                hint: 'Enter price',
-                controller: priceController,
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
+              AppShowcase(
+                showcaseKey: priceKey,
+                description: 'Set the selling price for your product.',
+                child: CustomTextField(
+                  label: 'Price *',
+                  hint: 'Enter price',
+                  controller: priceController,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  validator: (val) =>
+                      Validators.validatePositiveNumber(val, 'Price'),
                 ),
-                validator: (val) =>
-                    Validators.validatePositiveNumber(val, 'Price'),
               ),
               const SizedBox(height: AppTheme.spacingLarge),
 
@@ -400,65 +443,70 @@ class AddProductScreen extends HookConsumerWidget {
               const SizedBox(height: AppTheme.spacingLarge),
 
               // save button
-              CustomButton(
-                text: 'Save Product',
-                isLoading: isLoading.value,
-                onPressed: () async {
-                  if (!formKey.currentState!.validate()) return;
+              AppShowcase(
+                showcaseKey: saveKey,
+                description: 'Tap to save and publish your new product!',
+                child: CustomButton(
+                  text: 'Save Product',
+                  isLoading: isLoading.value,
+                  onPressed: () async {
+                    if (!formKey.currentState!.validate()) return;
 
-                  isLoading.value = true;
+                    isLoading.value = true;
 
-                  // prepare API body
-                  final body = <String, dynamic>{
-                    'store': storeController.text.trim(),
-                    'warehouse': warehouseController.text.trim(),
-                    'supplier': supplierController.text.trim(),
-                    'cat_id': selectedCategoryId.value,
-                    'sub_cat_id': selectedSubCategoryId.value,
-                    'product_name': nameController.text.trim(),
-                    'sku': skuController.text.trim(),
-                    'barcode': barcodeController.text.trim(),
-                    'quantity':
-                        double.tryParse(quantityController.text.trim()) ?? 0.0,
-                    'price': priceController.text.trim(),
-                    'manufacturing_date': manufacturingDate.value != null
-                        ? DateFormat(
-                            'yyyy-MM-dd HH:mm:ss',
-                          ).format(manufacturingDate.value!)
-                        : null,
-                    'expiring_date': expiryDate.value != null
-                        ? DateFormat(
-                            'yyyy-MM-dd HH:mm:ss',
-                          ).format(expiryDate.value!)
-                        : null,
-                    'product_image': productImage.value,
-                    'description': descriptionController.text.trim(),
-                  };
+                    // prepare API body
+                    final body = <String, dynamic>{
+                      'store': storeController.text.trim(),
+                      'warehouse': warehouseController.text.trim(),
+                      'supplier': supplierController.text.trim(),
+                      'cat_id': selectedCategoryId.value,
+                      'sub_cat_id': selectedSubCategoryId.value,
+                      'product_name': nameController.text.trim(),
+                      'sku': skuController.text.trim(),
+                      'barcode': barcodeController.text.trim(),
+                      'quantity':
+                          double.tryParse(quantityController.text.trim()) ??
+                          0.0,
+                      'price': priceController.text.trim(),
+                      'manufacturing_date': manufacturingDate.value != null
+                          ? DateFormat(
+                              'yyyy-MM-dd HH:mm:ss',
+                            ).format(manufacturingDate.value!)
+                          : null,
+                      'expiring_date': expiryDate.value != null
+                          ? DateFormat(
+                              'yyyy-MM-dd HH:mm:ss',
+                            ).format(expiryDate.value!)
+                          : null,
+                      'product_image': productImage.value,
+                      'description': descriptionController.text.trim(),
+                    };
 
-                  final response = await ref
-                      .read(productsProvider.notifier)
-                      .addProductItem(body);
+                    final response = await ref
+                        .read(productsProvider.notifier)
+                        .addProductItem(body);
 
-                  isLoading.value = false;
+                    isLoading.value = false;
 
-                  if (context.mounted) {
-                    if (response.success) {
-                      AppSnackbar.showSuccess(
-                        context,
-                        'Product created successfully',
-                      );
-                      Navigator.pushReplacementNamed(
-                        context,
-                        AppRoutes.products,
-                      );
-                    } else {
-                      AppSnackbar.showError(
-                        context,
-                        response.message ?? 'Failed to add product',
-                      );
+                    if (context.mounted) {
+                      if (response.success) {
+                        AppSnackbar.showSuccess(
+                          context,
+                          'Product created successfully',
+                        );
+                        Navigator.pushReplacementNamed(
+                          context,
+                          AppRoutes.products,
+                        );
+                      } else {
+                        AppSnackbar.showError(
+                          context,
+                          response.message ?? 'Failed to add product',
+                        );
+                      }
                     }
-                  }
-                },
+                  },
+                ),
               ),
               const SizedBox(height: AppTheme.spacingXLarge),
             ],

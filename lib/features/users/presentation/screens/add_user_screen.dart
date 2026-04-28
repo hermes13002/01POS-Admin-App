@@ -10,10 +10,22 @@ import 'package:onepos_admin_app/core/utils/validators.dart';
 import 'package:onepos_admin_app/features/users/presentation/providers/roles_provider.dart';
 import 'package:onepos_admin_app/features/users/presentation/providers/users_provider.dart';
 import 'package:onepos_admin_app/shared/widgets/app_snackbar.dart';
+import 'package:showcaseview/showcaseview.dart';
+import 'package:onepos_admin_app/shared/widgets/app_showcase.dart';
+import 'package:onepos_admin_app/presentation/providers/guided_tour_provider.dart';
 
 /// Screen for adding a new user
-class AddUserScreen extends HookConsumerWidget {
+class AddUserScreen extends StatelessWidget {
   const AddUserScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ShowCaseWidget(builder: (context) => const _AddUserScreenContent());
+  }
+}
+
+class _AddUserScreenContent extends HookConsumerWidget {
+  const _AddUserScreenContent();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -32,6 +44,24 @@ class AddUserScreen extends HookConsumerWidget {
     final isPasswordVisible = useState<bool>(false);
     final isConfirmPasswordVisible = useState<bool>(false);
     final isSubmitting = useState<bool>(false);
+
+    // showcase keys
+    final roleKey = useMemoized(() => GlobalKey());
+    final saveKey = useMemoized(() => GlobalKey());
+    final tourState = ref.watch(guidedTourProvider);
+
+    // trigger guided tour sequence continuation
+    useEffect(() {
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        if (tourState == TourType.addCashier) {
+          ShowCaseWidget.of(context).startShowCase([roleKey, saveKey]);
+          ref
+              .read(guidedTourProvider.notifier)
+              .completeTour(TourType.addCashier);
+        }
+      });
+      return null;
+    }, [tourState]);
 
     return Scaffold(
       appBar: CustomAppBar(
@@ -78,22 +108,27 @@ class AddUserScreen extends HookConsumerWidget {
                 const SizedBox(height: AppTheme.spacingMedium),
 
                 rolesAsync.when(
-                  data: (roles) => AppDropdown<int>(
-                    hint: 'Role',
-                    value: selectedRoleId.value,
-                    items: roles.map((role) {
-                      return DropdownMenuItem<int>(
-                        value: role.id,
-                        child: Text(role.name),
-                      );
-                    }).toList(),
-                    onChanged: (val) {
-                      if (val != null) selectedRoleId.value = val;
-                    },
-                    validator: (val) {
-                      if (val == null) return 'Role is required';
-                      return null;
-                    },
+                  data: (roles) => AppShowcase(
+                    showcaseKey: roleKey,
+                    description:
+                        'Select "Cashier" from the roles to give them appropriate permissions.',
+                    child: AppDropdown<int>(
+                      hint: 'Role',
+                      value: selectedRoleId.value,
+                      items: roles.map((role) {
+                        return DropdownMenuItem<int>(
+                          value: role.id,
+                          child: Text(role.name),
+                        );
+                      }).toList(),
+                      onChanged: (val) {
+                        if (val != null) selectedRoleId.value = val;
+                      },
+                      validator: (val) {
+                        if (val == null) return 'Role is required';
+                        return null;
+                      },
+                    ),
                   ),
                   loading: () => const AppDropdown<int>(
                     hint: 'Loading roles...',
@@ -175,48 +210,54 @@ class AddUserScreen extends HookConsumerWidget {
 
                 const SizedBox(height: AppTheme.spacingLarge),
 
-                CustomButton(
-                  text: 'Add User',
-                  isLoading: isSubmitting.value,
-                  onPressed: () async {
-                    if (!formKey.currentState!.validate()) {
-                      return;
-                    }
+                AppShowcase(
+                  showcaseKey: saveKey,
+                  description:
+                      'Once all details are filled out, tap here to create the new user account.',
+                  child: CustomButton(
+                    text: 'Add User',
+                    isLoading: isSubmitting.value,
+                    onPressed: () async {
+                      if (!formKey.currentState!.validate()) {
+                        return;
+                      }
 
-                    isSubmitting.value = true;
+                      isSubmitting.value = true;
 
-                    final body = <String, dynamic>{
-                      'role_id': selectedRoleId.value,
-                      'firstname': firstNameController.text.trim(),
-                      'lastname': lastNameController.text.trim(),
-                      'email': emailController.text.trim(),
-                      'address': addressController.text.trim(),
-                      'phoneno': phoneController.text.trim(),
-                      'password': passwordController.text.trim(),
-                      'confirmPassword': confirmPasswordController.text.trim(),
-                    };
+                      final body = <String, dynamic>{
+                        'role_id': selectedRoleId.value,
+                        'firstname': firstNameController.text.trim(),
+                        'lastname': lastNameController.text.trim(),
+                        'email': emailController.text.trim(),
+                        'address': addressController.text.trim(),
+                        'phoneno': phoneController.text.trim(),
+                        'password': passwordController.text.trim(),
+                        'confirmPassword': confirmPasswordController.text
+                            .trim(),
+                      };
 
-                    final error = await ref
-                        .read(allUsersProvider.notifier)
-                        .createUser(body);
+                      final error = await ref
+                          .read(allUsersProvider.notifier)
+                          .createUser(body);
 
-                    isSubmitting.value = false;
+                      isSubmitting.value = false;
 
-                    if (!context.mounted) return;
+                      if (!context.mounted) return;
 
-                    if (error != null) {
-                      AppSnackbar.showError(context, error);
-                      return;
-                    }
+                      if (error != null) {
+                        AppSnackbar.showError(context, error);
+                        return;
+                      }
 
-                    AppSnackbar.showSuccess(
-                      context,
-                      'User created successfully',
-                    );
-                    Navigator.pop(context, true);
-                  },
-                  backgroundColor: Colors.black,
-                  textColor: Colors.white,
+                      AppSnackbar.showSuccess(
+                        context,
+                        'User created successfully',
+                      );
+                      Navigator.pop(context, true);
+                    },
+                    backgroundColor: Colors.black,
+                    textColor: Colors.white,
+                  ),
                 ),
                 const SizedBox(height: AppTheme.spacingMedium),
               ],

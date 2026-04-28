@@ -12,17 +12,15 @@ String _$productRepositoryHash() => r'2c93231218b83a32f74762cc26bd1f73e38b9efa';
 @ProviderFor(productRepository)
 final productRepositoryProvider =
     AutoDisposeProvider<ProductRepositoryImpl>.internal(
-      productRepository,
-      name: r'productRepositoryProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$productRepositoryHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+  productRepository,
+  name: r'productRepositoryProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$productRepositoryHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
 typedef ProductRepositoryRef = AutoDisposeProviderRef<ProductRepositoryImpl>;
 String _$singleProductHash() => r'3bf38d54d4cd046b6e1bd3c9879f80adf4a47dd5';
 
@@ -66,15 +64,21 @@ class SingleProductFamily
   /// fetch single product by id endpoint
   ///
   /// Copied from [singleProduct].
-  SingleProductProvider call(int id) {
-    return SingleProductProvider(id);
+  SingleProductProvider call(
+    int id,
+  ) {
+    return SingleProductProvider(
+      id,
+    );
   }
 
   @override
   SingleProductProvider getProviderOverride(
     covariant SingleProductProvider provider,
   ) {
-    return call(provider.id);
+    return call(
+      provider.id,
+    );
   }
 
   static const Iterable<ProviderOrFamily>? _dependencies = null;
@@ -100,19 +104,24 @@ class SingleProductProvider
   /// fetch single product by id endpoint
   ///
   /// Copied from [singleProduct].
-  SingleProductProvider(int id)
-    : this._internal(
-        (ref) => singleProduct(ref as SingleProductRef, id),
-        from: singleProductProvider,
-        name: r'singleProductProvider',
-        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-            ? null
-            : _$singleProductHash,
-        dependencies: SingleProductFamily._dependencies,
-        allTransitiveDependencies:
-            SingleProductFamily._allTransitiveDependencies,
-        id: id,
-      );
+  SingleProductProvider(
+    int id,
+  ) : this._internal(
+          (ref) => singleProduct(
+            ref as SingleProductRef,
+            id,
+          ),
+          from: singleProductProvider,
+          name: r'singleProductProvider',
+          debugGetCreateSourceHash:
+              const bool.fromEnvironment('dart.vm.product')
+                  ? null
+                  : _$singleProductHash,
+          dependencies: SingleProductFamily._dependencies,
+          allTransitiveDependencies:
+              SingleProductFamily._allTransitiveDependencies,
+          id: id,
+        );
 
   SingleProductProvider._internal(
     super._createNotifier, {
@@ -129,7 +138,7 @@ class SingleProductProvider
   @override
   Override overrideWith(
     FutureOr<ApiResponse<ProductModel>> Function(SingleProductRef provider)
-    create,
+        create,
   ) {
     return ProviderOverride(
       origin: this,
@@ -164,8 +173,6 @@ class SingleProductProvider
   }
 }
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
 mixin SingleProductRef
     on AutoDisposeFutureProviderRef<ApiResponse<ProductModel>> {
   /// The parameter `id` of this provider.
@@ -189,14 +196,13 @@ String _$productsHash() => r'28dfdb3eb32c0dc28a7d1c714b45afdda4a14904';
 @ProviderFor(Products)
 final productsProvider =
     AutoDisposeAsyncNotifierProvider<Products, ProductsState>.internal(
-      Products.new,
-      name: r'productsProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$productsHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+  Products.new,
+  name: r'productsProvider',
+  debugGetCreateSourceHash:
+      const bool.fromEnvironment('dart.vm.product') ? null : _$productsHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
 
 typedef _$Products = AutoDisposeAsyncNotifier<ProductsState>;
 String _$productCategoriesHash() => r'33ccd1961702e877e1a9c3da324b4171d4da6e6b';
@@ -205,20 +211,17 @@ String _$productCategoriesHash() => r'33ccd1961702e877e1a9c3da324b4171d4da6e6b';
 ///
 /// Copied from [ProductCategories].
 @ProviderFor(ProductCategories)
-final productCategoriesProvider =
-    AutoDisposeAsyncNotifierProvider<
-      ProductCategories,
-      List<ProductCategory>
-    >.internal(
-      ProductCategories.new,
-      name: r'productCategoriesProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$productCategoriesHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+final productCategoriesProvider = AutoDisposeAsyncNotifierProvider<
+    ProductCategories, List<ProductCategory>>.internal(
+  ProductCategories.new,
+  name: r'productCategoriesProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$productCategoriesHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
 
 typedef _$ProductCategories = AutoDisposeAsyncNotifier<List<ProductCategory>>;
 // ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member

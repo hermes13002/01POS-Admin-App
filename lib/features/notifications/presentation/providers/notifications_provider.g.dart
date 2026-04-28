@@ -13,19 +13,17 @@ String _$notificationRemoteDatasourceHash() =>
 @ProviderFor(notificationRemoteDatasource)
 final notificationRemoteDatasourceProvider =
     AutoDisposeProvider<NotificationRemoteDatasource>.internal(
-      notificationRemoteDatasource,
-      name: r'notificationRemoteDatasourceProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$notificationRemoteDatasourceHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+  notificationRemoteDatasource,
+  name: r'notificationRemoteDatasourceProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$notificationRemoteDatasourceHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef NotificationRemoteDatasourceRef =
-    AutoDisposeProviderRef<NotificationRemoteDatasource>;
+typedef NotificationRemoteDatasourceRef
+    = AutoDisposeProviderRef<NotificationRemoteDatasource>;
 String _$notificationRepositoryHash() =>
     r'43c6e182a7df9aa36dccaf87917a7be636c0e567';
 
@@ -33,19 +31,17 @@ String _$notificationRepositoryHash() =>
 @ProviderFor(notificationRepository)
 final notificationRepositoryProvider =
     AutoDisposeProvider<NotificationRepository>.internal(
-      notificationRepository,
-      name: r'notificationRepositoryProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$notificationRepositoryHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+  notificationRepository,
+  name: r'notificationRepositoryProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$notificationRepositoryHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef NotificationRepositoryRef =
-    AutoDisposeProviderRef<NotificationRepository>;
+typedef NotificationRepositoryRef
+    = AutoDisposeProviderRef<NotificationRepository>;
 String _$notificationDetailHash() =>
     r'eacf7bac1bb13fdfe09e81cab1dc83e831ce89c8';
 
@@ -81,15 +77,21 @@ class NotificationDetailFamily
   const NotificationDetailFamily();
 
   /// See also [notificationDetail].
-  NotificationDetailProvider call(int id) {
-    return NotificationDetailProvider(id);
+  NotificationDetailProvider call(
+    int id,
+  ) {
+    return NotificationDetailProvider(
+      id,
+    );
   }
 
   @override
   NotificationDetailProvider getProviderOverride(
     covariant NotificationDetailProvider provider,
   ) {
-    return call(provider.id);
+    return call(
+      provider.id,
+    );
   }
 
   static const Iterable<ProviderOrFamily>? _dependencies = null;
@@ -111,19 +113,24 @@ class NotificationDetailFamily
 class NotificationDetailProvider
     extends AutoDisposeFutureProvider<NotificationDetailModel> {
   /// See also [notificationDetail].
-  NotificationDetailProvider(int id)
-    : this._internal(
-        (ref) => notificationDetail(ref as NotificationDetailRef, id),
-        from: notificationDetailProvider,
-        name: r'notificationDetailProvider',
-        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-            ? null
-            : _$notificationDetailHash,
-        dependencies: NotificationDetailFamily._dependencies,
-        allTransitiveDependencies:
-            NotificationDetailFamily._allTransitiveDependencies,
-        id: id,
-      );
+  NotificationDetailProvider(
+    int id,
+  ) : this._internal(
+          (ref) => notificationDetail(
+            ref as NotificationDetailRef,
+            id,
+          ),
+          from: notificationDetailProvider,
+          name: r'notificationDetailProvider',
+          debugGetCreateSourceHash:
+              const bool.fromEnvironment('dart.vm.product')
+                  ? null
+                  : _$notificationDetailHash,
+          dependencies: NotificationDetailFamily._dependencies,
+          allTransitiveDependencies:
+              NotificationDetailFamily._allTransitiveDependencies,
+          id: id,
+        );
 
   NotificationDetailProvider._internal(
     super._createNotifier, {
@@ -140,7 +147,7 @@ class NotificationDetailProvider
   @override
   Override overrideWith(
     FutureOr<NotificationDetailModel> Function(NotificationDetailRef provider)
-    create,
+        create,
   ) {
     return ProviderOverride(
       origin: this,
@@ -175,8 +182,6 @@ class NotificationDetailProvider
   }
 }
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
 mixin NotificationDetailRef
     on AutoDisposeFutureProviderRef<NotificationDetailModel> {
   /// The parameter `id` of this provider.
@@ -207,27 +212,22 @@ final unreadNotificationsCountProvider = AutoDisposeProvider<int>.internal(
   allTransitiveDependencies: null,
 );
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
 typedef UnreadNotificationsCountRef = AutoDisposeProviderRef<int>;
 String _$notificationsHash() => r'f3822c59f3f5c61322be536624db8f8ca38b778a';
 
 /// See also [Notifications].
 @ProviderFor(Notifications)
-final notificationsProvider =
-    AutoDisposeAsyncNotifierProvider<
-      Notifications,
-      NotificationsState
-    >.internal(
-      Notifications.new,
-      name: r'notificationsProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$notificationsHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+final notificationsProvider = AutoDisposeAsyncNotifierProvider<Notifications,
+    NotificationsState>.internal(
+  Notifications.new,
+  name: r'notificationsProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$notificationsHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
 
 typedef _$Notifications = AutoDisposeAsyncNotifier<NotificationsState>;
 // ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member

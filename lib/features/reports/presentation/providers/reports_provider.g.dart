@@ -6,21 +6,20 @@ part of 'reports_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$reportsHash() => r'97ca63ef92dc1c61b8afced810d868bd9290fc0c';
+String _$reportsHash() => r'7da4cb0e74ee7ccc3d624aaced4af54105ca0ea6';
 
 /// See also [Reports].
 @ProviderFor(Reports)
 final reportsProvider =
     AutoDisposeNotifierProvider<Reports, ReportsData>.internal(
-      Reports.new,
-      name: r'reportsProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$reportsHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+  Reports.new,
+  name: r'reportsProvider',
+  debugGetCreateSourceHash:
+      const bool.fromEnvironment('dart.vm.product') ? null : _$reportsHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
 
 typedef _$Reports = AutoDisposeNotifier<ReportsData>;
 // ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member

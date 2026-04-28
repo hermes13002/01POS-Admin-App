@@ -13,10 +13,22 @@ import 'package:onepos_admin_app/shared/widgets/loading_widget.dart';
 import 'package:onepos_admin_app/shared/widgets/app_snackbar.dart';
 import 'package:onepos_admin_app/shared/widgets/product_image.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
+import 'package:showcaseview/showcaseview.dart';
+import 'package:onepos_admin_app/shared/widgets/app_showcase.dart';
+import 'package:onepos_admin_app/presentation/providers/guided_tour_provider.dart';
 
 /// products screen with expandable product tiles
-class ProductsScreen extends HookConsumerWidget {
+class ProductsScreen extends StatelessWidget {
   const ProductsScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ShowCaseWidget(builder: (context) => const _ProductsScreenContent());
+  }
+}
+
+class _ProductsScreenContent extends HookConsumerWidget {
+  const _ProductsScreenContent();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -25,6 +37,29 @@ class ProductsScreen extends HookConsumerWidget {
     final expandedProductId = useState<int?>(null);
     final productsAsync = ref.watch(productsProvider);
     final scrollController = useScrollController();
+
+    final addProductKey = useMemoized(() => GlobalKey());
+    final tourState = ref.watch(guidedTourProvider);
+
+    // trigger guided tour
+    useEffect(() {
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        final guidedTourService = ref.read(guidedTourProvider.notifier);
+
+        if (tourState == null) {
+          final hasSeen = await guidedTourService.hasCompletedTour(
+            TourType.addProduct,
+          );
+          if (!hasSeen && context.mounted) {
+            guidedTourService.startTour(TourType.addProduct);
+            ShowCaseWidget.of(context).startShowCase([addProductKey]);
+          }
+        } else if (tourState == TourType.addProduct) {
+          ShowCaseWidget.of(context).startShowCase([addProductKey]);
+        }
+      });
+      return null;
+    }, [tourState]);
 
     // listen for search changes
     useEffect(() {
@@ -181,16 +216,22 @@ class ProductsScreen extends HookConsumerWidget {
 
       // floating action button with expandable speed dial
       floatingActionButton: productsAsync.whenOrNull(
-        data: (_) => _AddProductFab(
-          onAddProduct: () {
-            Navigator.pushNamed(context, '/add-product');
-          },
-          onAddCategory: () {
-            Navigator.pushNamed(context, '/add-category');
-          },
-          onAddSubCategory: () {
-            Navigator.pushNamed(context, '/add-sub-category');
-          },
+        data: (_) => AppShowcase(
+          showcaseKey: addProductKey,
+          description: 'Tap here to add a new product to your inventory.',
+          child: _AddProductFab(
+            onAddProduct: () {
+              // mark the active portion completed if it's running
+              // (will be restarted automatically on AddProductScreen)
+              Navigator.pushNamed(context, '/add-product');
+            },
+            onAddCategory: () {
+              Navigator.pushNamed(context, '/add-category');
+            },
+            onAddSubCategory: () {
+              Navigator.pushNamed(context, '/add-sub-category');
+            },
+          ),
         ),
       ),
     );

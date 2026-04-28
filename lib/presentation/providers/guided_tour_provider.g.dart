@@ -1,24 +1,25 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'roles_provider.dart';
+part of 'guided_tour_provider.dart';
 
 // **************************************************************************
 // RiverpodGenerator
 // **************************************************************************
 
-String _$rolesHash() => r'a3c71ee07dd978339462c2e5ce12b9df4c684f95';
+String _$guidedTourHash() => r'4e10a4fe3ca436d96eb6a82c3f2226e582c6b270';
 
-/// See also [roles].
-@ProviderFor(roles)
-final rolesProvider = AutoDisposeFutureProvider<List<RoleModel>>.internal(
-  roles,
-  name: r'rolesProvider',
+/// See also [GuidedTour].
+@ProviderFor(GuidedTour)
+final guidedTourProvider =
+    AutoDisposeNotifierProvider<GuidedTour, TourType?>.internal(
+  GuidedTour.new,
+  name: r'guidedTourProvider',
   debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product') ? null : _$rolesHash,
+      const bool.fromEnvironment('dart.vm.product') ? null : _$guidedTourHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
 
-typedef RolesRef = AutoDisposeFutureProviderRef<List<RoleModel>>;
+typedef _$GuidedTour = AutoDisposeNotifier<TourType?>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member

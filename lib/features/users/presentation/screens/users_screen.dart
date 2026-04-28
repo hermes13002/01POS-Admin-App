@@ -17,10 +17,22 @@ import 'package:onepos_admin_app/shared/widgets/custom_text_field.dart';
 import 'package:onepos_admin_app/shared/widgets/app_dropdown.dart';
 import 'package:onepos_admin_app/core/utils/validators.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_switch.dart';
+import 'package:showcaseview/showcaseview.dart';
+import 'package:onepos_admin_app/shared/widgets/app_showcase.dart';
+import 'package:onepos_admin_app/presentation/providers/guided_tour_provider.dart';
 
 /// Screen for viewing and managing users
-class UsersScreen extends HookConsumerWidget {
+class UsersScreen extends StatelessWidget {
   const UsersScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ShowCaseWidget(builder: (context) => const _UsersScreenContent());
+  }
+}
+
+class _UsersScreenContent extends HookConsumerWidget {
+  const _UsersScreenContent();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -30,6 +42,29 @@ class UsersScreen extends HookConsumerWidget {
     final searchController = useTextEditingController();
     final searchQuery = useState('');
     final scrollController = useScrollController();
+
+    final tourState = ref.watch(guidedTourProvider);
+    final addCashierKey = useMemoized(() => GlobalKey());
+
+    // trigger guided tour
+    useEffect(() {
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        final guidedTourService = ref.read(guidedTourProvider.notifier);
+
+        if (tourState == null) {
+          final hasSeen = await guidedTourService.hasCompletedTour(
+            TourType.addCashier,
+          );
+          if (!hasSeen && context.mounted) {
+            guidedTourService.startTour(TourType.addCashier);
+            ShowCaseWidget.of(context).startShowCase([addCashierKey]);
+          }
+        } else if (tourState == TourType.addCashier) {
+          ShowCaseWidget.of(context).startShowCase([addCashierKey]);
+        }
+      });
+      return null;
+    }, [tourState]);
 
     useEffect(() {
       void listener() {
@@ -181,21 +216,25 @@ class UsersScreen extends HookConsumerWidget {
         ),
       ),
       floatingActionButton: usersAsync.whenOrNull(
-        data: (_) => FloatingActionButton(
-          onPressed: () async {
-            final created = await Navigator.pushNamed(
-              context,
-              AppRoutes.addUser,
-            );
-            if (created == true) {
-              await ref.read(allUsersProvider.notifier).refresh();
-            }
-          },
-          backgroundColor: Colors.black,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(30),
+        data: (_) => AppShowcase(
+          showcaseKey: addCashierKey,
+          description: 'Tap here to add a new cashier or user to the system.',
+          child: FloatingActionButton(
+            onPressed: () async {
+              final created = await Navigator.pushNamed(
+                context,
+                AppRoutes.addUser,
+              );
+              if (created == true) {
+                await ref.read(allUsersProvider.notifier).refresh();
+              }
+            },
+            backgroundColor: Colors.black,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(30),
+            ),
+            child: const Icon(Icons.add, color: Colors.white),
           ),
-          child: const Icon(Icons.add, color: Colors.white),
         ),
       ),
     );

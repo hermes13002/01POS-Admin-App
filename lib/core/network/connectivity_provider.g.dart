@@ -15,15 +15,12 @@ String _$connectivityHash() => r'6c004e62df31c35f59b7119b4d54a8d6b7427ecc';
 final connectivityProvider = AutoDisposeStreamProvider<bool>.internal(
   connectivity,
   name: r'connectivityProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$connectivityHash,
+  debugGetCreateSourceHash:
+      const bool.fromEnvironment('dart.vm.product') ? null : _$connectivityHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
 typedef ConnectivityRef = AutoDisposeStreamProviderRef<bool>;
 String _$isConnectedHash() => r'9e1fefdbc2ce7d2d8e1e664d476d48722a577735';
 
@@ -34,15 +31,12 @@ String _$isConnectedHash() => r'9e1fefdbc2ce7d2d8e1e664d476d48722a577735';
 final isConnectedProvider = AutoDisposeFutureProvider<bool>.internal(
   isConnected,
   name: r'isConnectedProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$isConnectedHash,
+  debugGetCreateSourceHash:
+      const bool.fromEnvironment('dart.vm.product') ? null : _$isConnectedHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
 typedef IsConnectedRef = AutoDisposeFutureProviderRef<bool>;
 // ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member

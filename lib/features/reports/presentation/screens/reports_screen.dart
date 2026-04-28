@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../../../core/theme/app_theme.dart';
@@ -12,25 +13,67 @@ import '../../data/models/top_selling_model.dart';
 import '../providers/reports_provider.dart';
 import 'package:onepos_admin_app/shared/widgets/dots_loader.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
+import 'package:showcaseview/showcaseview.dart';
+import 'package:onepos_admin_app/shared/widgets/app_showcase.dart';
+import 'package:onepos_admin_app/presentation/providers/guided_tour_provider.dart';
 
-class ReportsScreen extends HookConsumerWidget {
+class ReportsScreen extends StatelessWidget {
   const ReportsScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ShowCaseWidget(builder: (context) => const _ReportsScreenContent());
+  }
+}
+
+class _ReportsScreenContent extends HookConsumerWidget {
+  const _ReportsScreenContent();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final reportsData = ref.watch(reportsProvider);
+    final tourState = ref.watch(guidedTourProvider);
+    final salesOverviewKey = useMemoized(() => GlobalKey());
+
+    // trigger guided tour logic
+    useEffect(() {
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        final guidedTourService = ref.read(guidedTourProvider.notifier);
+
+        if (tourState == null) {
+          final hasSeen = await guidedTourService.hasCompletedTour(
+            TourType.checkSales,
+          );
+          if (!hasSeen && context.mounted) {
+            guidedTourService.startTour(TourType.checkSales);
+            ShowCaseWidget.of(context).startShowCase([salesOverviewKey]);
+            guidedTourService.completeTour(TourType.checkSales);
+          }
+        } else if (tourState == TourType.checkSales) {
+          ShowCaseWidget.of(context).startShowCase([salesOverviewKey]);
+          guidedTourService.completeTour(TourType.checkSales);
+        }
+      });
+      return null;
+    }, [tourState]);
 
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
-      body: SafeArea(child: _ReportsContent(data: reportsData)),
+      body: SafeArea(
+        child: _ReportsContent(
+          data: reportsData,
+          salesOverviewKey: salesOverviewKey,
+        ),
+      ),
     );
   }
 }
 
 class _ReportsContent extends ConsumerWidget {
   final ReportsData data;
+  final GlobalKey salesOverviewKey;
 
-  const _ReportsContent({required this.data});
+  const _ReportsContent({required this.data, required this.salesOverviewKey});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -75,10 +118,15 @@ class _ReportsContent extends ConsumerWidget {
                   children: [
                     const SizedBox(height: 8),
 
-                    _SalesOverviewSection(
-                      data: data.salesOverview,
-                      isLoading: data.isSalesOverviewLoading,
-                      errorMessage: data.salesOverviewError,
+                    AppShowcase(
+                      showcaseKey: salesOverviewKey,
+                      description:
+                          'Track your daily sales, total revenue, and restocking needs at a glance.',
+                      child: _SalesOverviewSection(
+                        data: data.salesOverview,
+                        isLoading: data.isSalesOverviewLoading,
+                        errorMessage: data.salesOverviewError,
+                      ),
                     ),
 
                     const SizedBox(height: 16),

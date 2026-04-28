@@ -13,9 +13,23 @@ import 'package:onepos_admin_app/shared/widgets/custom_search_bar.dart';
 import 'package:onepos_admin_app/shared/widgets/loading_widget.dart';
 import 'package:onepos_admin_app/shared/widgets/app_snackbar.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_text_field.dart';
+import 'package:showcaseview/showcaseview.dart';
+import 'package:onepos_admin_app/shared/widgets/app_showcase.dart';
+import 'package:onepos_admin_app/presentation/providers/guided_tour_provider.dart';
 
-class PaymentMethodScreen extends HookConsumerWidget {
+class PaymentMethodScreen extends StatelessWidget {
   const PaymentMethodScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ShowCaseWidget(
+      builder: (context) => const _PaymentMethodScreenContent(),
+    );
+  }
+}
+
+class _PaymentMethodScreenContent extends HookConsumerWidget {
+  const _PaymentMethodScreenContent();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -24,6 +38,29 @@ class PaymentMethodScreen extends HookConsumerWidget {
     final expandedMethodId = useState<int?>(null);
     final isFabExpanded = useState<bool>(false);
     final methodsAsync = ref.watch(paymentMethodsProvider);
+
+    final tourState = ref.watch(guidedTourProvider);
+    final addPaymentKey = useMemoized(() => GlobalKey());
+
+    // trigger guided tour
+    useEffect(() {
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        final guidedTourService = ref.read(guidedTourProvider.notifier);
+
+        if (tourState == null) {
+          final hasSeen = await guidedTourService.hasCompletedTour(
+            TourType.addPayment,
+          );
+          if (!hasSeen && context.mounted) {
+            guidedTourService.startTour(TourType.addPayment);
+            ShowCaseWidget.of(context).startShowCase([addPaymentKey]);
+          }
+        } else if (tourState == TourType.addPayment) {
+          ShowCaseWidget.of(context).startShowCase([addPaymentKey]);
+        }
+      });
+      return null;
+    }, [tourState]);
 
     useEffect(() {
       Future.microtask(() {
@@ -309,7 +346,6 @@ class PaymentMethodScreen extends HookConsumerWidget {
               //   ],
               // ),
               // const SizedBox(height: 16),
-
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -354,16 +390,20 @@ class PaymentMethodScreen extends HookConsumerWidget {
               const SizedBox(height: 16),
             ],
 
-            FloatingActionButton(
-              backgroundColor: isFabExpanded.value
-                  ? Colors.white
-                  : Colors.black,
-              onPressed: () {
-                isFabExpanded.value = !isFabExpanded.value;
-              },
-              child: Icon(
-                isFabExpanded.value ? Icons.close : Icons.add,
-                color: isFabExpanded.value ? Colors.black : Colors.white,
+            AppShowcase(
+              showcaseKey: addPaymentKey,
+              description: 'Tap here to add a new payment method.',
+              child: FloatingActionButton(
+                backgroundColor: isFabExpanded.value
+                    ? Colors.white
+                    : Colors.black,
+                onPressed: () {
+                  isFabExpanded.value = !isFabExpanded.value;
+                },
+                child: Icon(
+                  isFabExpanded.value ? Icons.close : Icons.add,
+                  color: isFabExpanded.value ? Colors.black : Colors.white,
+                ),
               ),
             ),
           ],
