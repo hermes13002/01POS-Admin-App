@@ -112,13 +112,14 @@ class HomeScreen extends HookConsumerWidget {
                           ),
                         ),
                       ),
-                      AppShowcase(
-                        showcaseKey: ref
-                            .read(tutorialKeysProvider)
-                            .messagesIcon,
-                        description:
-                            'Check your messages and communicate here.',
-                        child: GestureDetector(
+                      // AppShowcase(
+                      //   showcaseKey: ref
+                      //       .read(tutorialKeysProvider)
+                      //       .messagesIcon,
+                      //   description:
+                      //       'Check your messages and communicate here.',
+                      //   child: 
+                        GestureDetector(
                           onTap: () =>
                               Navigator.pushNamed(context, AppRoutes.chats),
                           child: Stack(
@@ -161,14 +162,15 @@ class HomeScreen extends HookConsumerWidget {
                             ],
                           ),
                         ),
-                      ),
+                      // ),
                       const SizedBox(width: 4),
-                      AppShowcase(
-                        showcaseKey: ref
-                            .read(tutorialKeysProvider)
-                            .notificationsIcon,
-                        description: 'View your important alerts here.',
-                        child: GestureDetector(
+                      // AppShowcase(
+                      //   showcaseKey: ref
+                      //       .read(tutorialKeysProvider)
+                      //       .notificationsIcon,
+                      //   description: 'View your important alerts here.',
+                      //   child: 
+                        GestureDetector(
                           onTap: () => Navigator.pushNamed(
                             context,
                             AppRoutes.notifications,
@@ -226,12 +228,13 @@ class HomeScreen extends HookConsumerWidget {
                             ],
                           ),
                         ),
-                      ),
+                      // ),
                       const SizedBox(width: 4),
-                      AppShowcase(
-                        showcaseKey: ref.read(tutorialKeysProvider).profileIcon,
-                        description: 'Manage your online store profile.',
-                        child: GestureDetector(
+                      // AppShowcase(
+                      //   showcaseKey: ref.read(tutorialKeysProvider).profileIcon,
+                      //   description: 'Manage your online store profile.',
+                      //   child: 
+                        GestureDetector(
                           onTap: () => Navigator.pushNamed(
                             context,
                             AppRoutes.onlineStore,
@@ -246,7 +249,7 @@ class HomeScreen extends HookConsumerWidget {
                             ),
                           ),
                         ),
-                      ),
+                      // ),
                     ],
                   ),
                 ),
@@ -464,12 +467,13 @@ class HomeScreen extends HookConsumerWidget {
                               ),
                               const SizedBox(height: 24),
                               // view report button
-                              AppShowcase(
-                                showcaseKey: ref
-                                    .read(tutorialKeysProvider)
-                                    .viewReportButton,
-                                description: 'Tap to dive deeper into reports.',
-                                child: SizedBox(
+                              // AppShowcase(
+                              //   showcaseKey: ref
+                              //       .read(tutorialKeysProvider)
+                              //       .viewReportButton,
+                              //   description: 'Tap to dive deeper into reports.',
+                              //   child: 
+                                SizedBox(
                                   height: 40,
                                   child: OutlinedButton.icon(
                                     style: OutlinedButton.styleFrom(
@@ -505,7 +509,7 @@ class HomeScreen extends HookConsumerWidget {
                                     ),
                                   ),
                                 ),
-                              ),
+                              // ),
                             ],
                           ),
                         ),
@@ -530,12 +534,13 @@ class HomeScreen extends HookConsumerWidget {
                           color: AppTheme.textPrimary,
                         ),
                       ),
-                      AppShowcase(
-                        showcaseKey: ref
-                            .read(tutorialKeysProvider)
-                            .editQuickActionsButton,
-                        description: 'Customize which tools appear here.',
-                        child: TextButton(
+                      // AppShowcase(
+                      //   showcaseKey: ref
+                      //       .read(tutorialKeysProvider)
+                      //       .editQuickActionsButton,
+                      //   description: 'Customize which tools appear here.',
+                      //   child: 
+                        TextButton(
                           onPressed: () {
                             _showEditQuickActionsBottomSheet(context, ref);
                           },
@@ -548,7 +553,7 @@ class HomeScreen extends HookConsumerWidget {
                             ),
                           ),
                         ),
-                      ),
+                      // ),
                     ],
                   ),
                 ),
@@ -613,15 +618,15 @@ class HomeScreen extends HookConsumerWidget {
                           onTap: () => Navigator.pushNamed(context, tool.route),
                         );
 
-                        if (showcaseKey != null) {
-                          card = AppShowcase(
-                            showcaseKey: showcaseKey,
-                            description: showcaseDesc!,
-                            tooltipPosition: TooltipPosition.top,
-                            targetBorderRadius: AppTheme.borderRadiusMedium,
-                            child: card,
-                          );
-                        }
+                        // if (showcaseKey != null) {
+                        //   card = AppShowcase(
+                        //     showcaseKey: showcaseKey,
+                        //     description: showcaseDesc!,
+                        //     tooltipPosition: TooltipPosition.top,
+                        //     targetBorderRadius: AppTheme.borderRadiusMedium,
+                        //     child: card,
+                        //   );
+                        // }
 
                         return AnimationConfiguration.staggeredGrid(
                           position: index,

@@ -372,7 +372,7 @@ class _ProfileContent extends ConsumerWidget {
           Text(
             'Profile Details',
             style: GoogleFonts.poppins(
-              fontSize: 15,
+              fontSize: 17,
               fontWeight: FontWeight.w600,
               color: AppTheme.textPrimary,
             ),

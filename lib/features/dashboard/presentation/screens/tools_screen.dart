@@ -148,7 +148,7 @@ class ToolsScreen extends HookConsumerWidget {
                     if (searchQuery.value.isEmpty) ...[
                       const SizedBox(height: 32),
                       Text(
-                        'Guided Tours',
+                        'Guided Tutorials',
                         style: GoogleFonts.poppins(
                           fontSize: 18,
                           fontWeight: FontWeight.w600,

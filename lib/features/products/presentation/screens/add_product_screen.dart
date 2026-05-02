@@ -440,76 +440,87 @@ class _AddProductScreenContent extends HookConsumerWidget {
                 controller: descriptionController,
                 maxLines: 4,
               ),
-              const SizedBox(height: AppTheme.spacingLarge),
-
-              // save button
-              AppShowcase(
-                showcaseKey: saveKey,
-                description: 'Tap to save and publish your new product!',
-                child: CustomButton(
-                  text: 'Save Product',
-                  isLoading: isLoading.value,
-                  onPressed: () async {
-                    if (!formKey.currentState!.validate()) return;
-
-                    isLoading.value = true;
-
-                    // prepare API body
-                    final body = <String, dynamic>{
-                      'store': storeController.text.trim(),
-                      'warehouse': warehouseController.text.trim(),
-                      'supplier': supplierController.text.trim(),
-                      'cat_id': selectedCategoryId.value,
-                      'sub_cat_id': selectedSubCategoryId.value,
-                      'product_name': nameController.text.trim(),
-                      'sku': skuController.text.trim(),
-                      'barcode': barcodeController.text.trim(),
-                      'quantity':
-                          double.tryParse(quantityController.text.trim()) ??
-                          0.0,
-                      'price': priceController.text.trim(),
-                      'manufacturing_date': manufacturingDate.value != null
-                          ? DateFormat(
-                              'yyyy-MM-dd HH:mm:ss',
-                            ).format(manufacturingDate.value!)
-                          : null,
-                      'expiring_date': expiryDate.value != null
-                          ? DateFormat(
-                              'yyyy-MM-dd HH:mm:ss',
-                            ).format(expiryDate.value!)
-                          : null,
-                      'product_image': productImage.value,
-                      'description': descriptionController.text.trim(),
-                    };
-
-                    final response = await ref
-                        .read(productsProvider.notifier)
-                        .addProductItem(body);
-
-                    isLoading.value = false;
-
-                    if (context.mounted) {
-                      if (response.success) {
-                        AppSnackbar.showSuccess(
-                          context,
-                          'Product created successfully',
-                        );
-                        Navigator.pushReplacementNamed(
-                          context,
-                          AppRoutes.products,
-                        );
-                      } else {
-                        AppSnackbar.showError(
-                          context,
-                          response.message ?? 'Failed to add product',
-                        );
-                      }
-                    }
-                  },
-                ),
-              ),
-              const SizedBox(height: AppTheme.spacingXLarge),
+              const SizedBox(height: AppTheme.spacingMedium),
             ],
+          ),
+        ),
+      ),
+      bottomNavigationBar: Container(
+        padding: const EdgeInsets.all(AppTheme.spacingMedium),
+        decoration: BoxDecoration(
+          color: AppTheme.surfaceColor,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 10,
+              offset: const Offset(0, -5),
+            ),
+          ],
+        ),
+        child: SafeArea(
+          child: AppShowcase(
+            showcaseKey: saveKey,
+            description: 'Tap to save and publish your new product!',
+            child: CustomButton(
+              text: 'Save Product',
+              isLoading: isLoading.value,
+              onPressed: () async {
+                if (!formKey.currentState!.validate()) return;
+
+                isLoading.value = true;
+
+                // prepare API body
+                final body = <String, dynamic>{
+                  'store': storeController.text.trim(),
+                  'warehouse': warehouseController.text.trim(),
+                  'supplier': supplierController.text.trim(),
+                  'cat_id': selectedCategoryId.value,
+                  'sub_cat_id': selectedSubCategoryId.value,
+                  'product_name': nameController.text.trim(),
+                  'sku': skuController.text.trim(),
+                  'barcode': barcodeController.text.trim(),
+                  'quantity':
+                      double.tryParse(quantityController.text.trim()) ?? 0.0,
+                  'price': priceController.text.trim(),
+                  'manufacturing_date': manufacturingDate.value != null
+                      ? DateFormat(
+                          'yyyy-MM-dd HH:mm:ss',
+                        ).format(manufacturingDate.value!)
+                      : null,
+                  'expiring_date': expiryDate.value != null
+                      ? DateFormat(
+                          'yyyy-MM-dd HH:mm:ss',
+                        ).format(expiryDate.value!)
+                      : null,
+                  'product_image': productImage.value,
+                  'description': descriptionController.text.trim(),
+                };
+
+                final response = await ref
+                    .read(productsProvider.notifier)
+                    .addProductItem(body);
+
+                isLoading.value = false;
+
+                if (context.mounted) {
+                  if (response.success) {
+                    AppSnackbar.showSuccess(
+                      context,
+                      'Product created successfully',
+                    );
+                    Navigator.pushReplacementNamed(
+                      context,
+                      AppRoutes.products,
+                    );
+                  } else {
+                    AppSnackbar.showError(
+                      context,
+                      response.message ?? 'Failed to add product',
+                    );
+                  }
+                }
+              },
+            ),
           ),
         ),
       ),
