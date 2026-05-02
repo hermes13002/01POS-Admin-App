@@ -1,3 +1,5 @@
+import 'package:onepos_admin_app/core/env/env.dart';
+
 /// Application-wide constants
 class AppConstants {
   AppConstants._();
@@ -7,7 +9,7 @@ class AppConstants {
   static const String appVersion = '1.0.0';
 
   // API Constants
-  static const String baseUrl = 'https://01pos2.01technologies.net/api';
+  static final String baseUrl = Env.baseUrl;
   static const int connectionTimeout = 30000; // 30 seconds
   static const int receiveTimeout = 30000; // 30 seconds
 

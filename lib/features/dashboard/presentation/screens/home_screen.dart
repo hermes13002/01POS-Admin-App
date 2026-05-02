@@ -17,9 +17,7 @@ import 'package:onepos_admin_app/features/reports/presentation/providers/reports
 import 'package:onepos_admin_app/core/utils/amount_formatter.dart';
 import '../../../../shared/widgets/dots_loader.dart';
 import 'package:onepos_admin_app/shared/widgets/app_snackbar.dart';
-import 'package:showcaseview/showcaseview.dart';
 import '../../../../presentation/providers/tutorial_keys_provider.dart';
-import '../../../../shared/widgets/app_showcase.dart';
 
 const List<String> _backgroundImages = [
   'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80',

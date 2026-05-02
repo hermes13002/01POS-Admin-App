@@ -92,7 +92,7 @@ class ExpenseRemoteDatasourceImpl implements ExpenseRemoteDatasource {
 
   @override
   Future<ApiResponse<ExpenseMetadataModel>> fetchMetadata() async {
-    const url = '${AppConstants.baseUrl}${ApiEndpoints.expenseMetadata}';
+    final url = '${AppConstants.baseUrl}${ApiEndpoints.expenseMetadata}';
 
     log('fetch_metadata url: $url', name: 'API');
 
