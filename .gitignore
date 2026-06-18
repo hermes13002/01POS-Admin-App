@@ -48,3 +48,6 @@ app.*.map.json
 # Env files
 .env
 lib/core/env/env.g.dart
+
+# Docs
+docs/

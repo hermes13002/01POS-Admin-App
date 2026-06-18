@@ -4,6 +4,7 @@ import 'package:onepos_admin_app/features/auth/presentation/screens/signup_scree
 import 'package:onepos_admin_app/features/auth/presentation/screens/reset_password_screen.dart';
 import 'package:onepos_admin_app/features/low_stock/presentation/screens/low_stock_screen.dart';
 import 'package:onepos_admin_app/features/products/presentation/screens/add_product_screen.dart';
+import 'package:onepos_admin_app/features/restock_pro/presentation/screens/restock_pro_screen.dart';
 import 'package:onepos_admin_app/features/sales/presentation/screens/sales_screen.dart';
 import 'package:onepos_admin_app/features/sales/presentation/screens/sales_settings_screen.dart';
 import 'package:onepos_admin_app/features/products/presentation/screens/products_screen.dart';
@@ -64,6 +65,7 @@ class AppRoutes {
   static const String addCategory = '/add-category';
   static const String addSubCategory = '/add-sub-category';
   static const String lowStock = '/low-stock';
+  static const String restockPro = '/restock-pro';
   static const String sales = '/sales';
   static const String customers = '/customers';
   static const String addCustomer = '/add-customer';
@@ -115,6 +117,7 @@ class AppRoutes {
       return AddSubCategoryScreen(subCategory: args);
     },
     lowStock: (context) => const LowStockScreen(),
+    restockPro: (context) => const RestockProScreen(),
     sales: (context) {
       final args = ModalRoute.of(context)!.settings.arguments as String?;
       return SalesScreen(initialSearch: args);

@@ -68,6 +68,13 @@ class AppTools {
       icon: Icons.warning_amber_outlined,
       route: '/low-stock',
     ),
+    ToolModel(
+      id: 'restock_pro',
+      name: 'Restock pro',
+      iconPath: 'assets/icons/restock_pro.png',
+      icon: Icons.trending_up_outlined,
+      route: '/restock-pro',
+    ),
     // ToolModel(
     //   id: 'low_stock_ai',
     //   name: 'Low Stock AI',
