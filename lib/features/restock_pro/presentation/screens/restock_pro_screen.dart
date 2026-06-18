@@ -120,7 +120,7 @@ class RestockProScreen extends HookConsumerWidget {
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
       appBar: CustomAppBar2(
-        title: 'Restock pro',
+        title: 'Restock Pro',
         backgroundColor: AppTheme.backgroundColor,
       ),
       body: Column(
