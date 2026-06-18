@@ -4,16 +4,19 @@ import 'package:onepos_admin_app/core/constants/api_endpoints.dart';
 import 'package:onepos_admin_app/data/models/api_response_model.dart';
 import '../../domain/repositories/restock_repository.dart';
 import '../models/restock_suggestion_model.dart';
+
 class RestockRepositoryImpl implements RestockRepository {
   final DioClient _dioClient;
 
   RestockRepositoryImpl({DioClient? dioClient})
-      : _dioClient = dioClient ?? DioClient();
+    : _dioClient = dioClient ?? DioClient();
 
   @override
-  Future<ApiResponse<List<RestockSuggestionModel>>> fetchRestockSuggestions({int page = 1}) async {
+  Future<ApiResponse<List<RestockSuggestionModel>>> fetchRestockSuggestions({
+    int page = 1,
+  }) async {
     try {
-      final response = await _dioClient.post(
+      final response = await _dioClient.get(
         '${ApiEndpoints.restock}?page=$page',
       );
       final rawData = response.data;
@@ -33,7 +36,9 @@ class RestockRepositoryImpl implements RestockRepository {
       }
 
       final suggestions = list
-          .map((e) => RestockSuggestionModel.fromJson(e as Map<String, dynamic>))
+          .map(
+            (e) => RestockSuggestionModel.fromJson(e as Map<String, dynamic>),
+          )
           .toList();
 
       int? currentPage;

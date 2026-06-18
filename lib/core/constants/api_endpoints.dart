@@ -153,5 +153,5 @@ class ApiEndpoints {
   static const String broadcastHistory = '/broadcasts/history';
 
   // restock
-  static const String restock = '/restock';
+  static const String restock = '/admin/restock';
 }
