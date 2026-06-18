@@ -13,11 +13,16 @@ class ChatRemoteSource {
     try {
       final response = await _dioClient.get('/admin/chats/get/$receiverId');
 
-      if (response.data != null && response.data['data'] is List) {
-        final list = response.data['data'] as List;
-        return list
-            .map((json) => ChatMessage.fromJson(json as Map<String, dynamic>))
-            .toList();
+      if (response.data != null) {
+        if (response.data is List) {
+          return (response.data as List)
+              .map((json) => ChatMessage.fromJson(json as Map<String, dynamic>))
+              .toList();
+        } else if (response.data is Map && response.data['data'] is List) {
+          return (response.data['data'] as List)
+              .map((json) => ChatMessage.fromJson(json as Map<String, dynamic>))
+              .toList();
+        }
       }
 
       return [];
@@ -37,11 +42,16 @@ class ChatRemoteSource {
         data: {'receiver_id': receiverId, 'message': message},
       );
 
-      if (response.data != null && response.data['data'] != null) {
-        return SendMessageResponse.fromJson(response.data['data']);
+      if (response.data != null) {
+        if (response.data is Map && response.data['data'] != null) {
+          return SendMessageResponse.fromJson(response.data['data']);
+        } else if (response.data is Map && response.data['id'] != null) {
+          return SendMessageResponse.fromJson(response.data as Map<String, dynamic>);
+        }
       }
 
-      throw Exception('Failed to send message: ${response.data?['message']}');
+      final errorMsg = response.data is Map ? response.data['message'] : null;
+      throw Exception('Failed to send message: $errorMsg');
     } catch (e) {
       rethrow;
     }
@@ -70,11 +80,16 @@ class ChatRemoteSource {
     try {
       final response = await _dioClient.get('/admin/chats/contacts');
 
-      if (response.data != null && response.data['data'] is List) {
-        final list = response.data['data'] as List;
-        return list
-            .map((json) => ChatContact.fromJson(json as Map<String, dynamic>))
-            .toList();
+      if (response.data != null) {
+        if (response.data is List) {
+          return (response.data as List)
+              .map((json) => ChatContact.fromJson(json as Map<String, dynamic>))
+              .toList();
+        } else if (response.data is Map && response.data['data'] is List) {
+          return (response.data['data'] as List)
+              .map((json) => ChatContact.fromJson(json as Map<String, dynamic>))
+              .toList();
+        }
       }
 
       return [];
