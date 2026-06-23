@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -16,6 +17,10 @@ import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:showcaseview/showcaseview.dart';
 import 'package:onepos_admin_app/shared/widgets/app_showcase.dart';
 import 'package:onepos_admin_app/presentation/providers/guided_tour_provider.dart';
+import 'package:onepos_admin_app/features/ai_insights/presentation/providers/ai_insights_provider.dart';
+import 'package:onepos_admin_app/features/ai_insights/data/models/ai_insight_model.dart';
+import 'package:onepos_admin_app/features/ai_insights/presentation/widgets/ai_insight_card.dart';
+import 'package:onepos_admin_app/features/ai_insights/presentation/widgets/ai_prompt_dialog.dart';
 
 class ReportsScreen extends StatelessWidget {
   const ReportsScreen({super.key});
@@ -135,6 +140,8 @@ class _ReportsContent extends ConsumerWidget {
 
                     const SizedBox(height: 16),
 
+                    const _AiInsightsSection(),
+
                     const SizedBox(height: 16),
 
                     _LowStockSection(
@@ -187,6 +194,196 @@ class _ReportsContent extends ConsumerWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _AiInsightsSection extends ConsumerWidget {
+  const _AiInsightsSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final insightsAsync = ref.watch(historicalInsightsProvider);
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'AI Insights',
+                style: GoogleFonts.poppins(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: AppTheme.textPrimary,
+                ),
+              ),
+              IconButton(
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) => const AiPromptDialog(),
+                  );
+                },
+                icon: const Icon(Icons.auto_awesome),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          insightsAsync.when(
+            data: (insights) {
+              if (insights.isEmpty) {
+                return Center(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 20),
+                    child: Text(
+                      'No insights available.',
+                      style: GoogleFonts.poppins(
+                        fontSize: 12,
+                        color: AppTheme.textSecondary,
+                      ),
+                    ),
+                  ),
+                );
+              }
+              return SizedBox(
+                height: 160,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: insights.length,
+                  clipBehavior: Clip.none,
+                  separatorBuilder: (context, index) =>
+                      const SizedBox(width: 16),
+                  itemBuilder: (context, index) {
+                    return SizedBox(
+                      width: 280,
+                      child: AiInsightCard(
+                        insight: insights[index],
+                        maxLines: 4,
+                        onTap: () {
+                          showDialog(
+                            context: context,
+                            builder: (context) => BackdropFilter(
+                              filter: ImageFilter.blur(
+                                sigmaX: 5.0,
+                                sigmaY: 5.0,
+                              ),
+                              child: _AiInsightDetailDialog(
+                                insight: insights[index],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    );
+                  },
+                ),
+              );
+            },
+            loading: () => const Center(
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: 20),
+                child: DotsLoader(),
+              ),
+            ),
+            error: (error, _) => Center(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 20),
+                child: Text(
+                  error.toString(),
+                  style: GoogleFonts.poppins(
+                    fontSize: 12,
+                    color: AppTheme.errorColor,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AiInsightDetailDialog extends StatelessWidget {
+  final AiInsight insight;
+
+  const _AiInsightDetailDialog({required this.insight});
+
+  @override
+  Widget build(BuildContext context) {
+    final bool isDanger = insight.type.toLowerCase() == 'danger';
+    final Color accentColor = isDanger ? AppTheme.errorColor : Colors.orange;
+    final IconData icon = isDanger
+        ? Icons.warning_rounded
+        : Icons.info_outline_rounded;
+    final Color backgroundColor = accentColor.withValues(alpha: 0.1);
+
+    return Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
+      ),
+      backgroundColor: Colors.white,
+      surfaceTintColor: Colors.transparent,
+      child: Container(
+        padding: const EdgeInsets.all(AppTheme.spacingLarge),
+        decoration: BoxDecoration(
+          color: backgroundColor,
+          border: Border.all(color: accentColor.withValues(alpha: 0.5)),
+          borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(icon, color: accentColor, size: 28),
+                const SizedBox(width: AppTheme.spacingMedium),
+                Expanded(
+                  child: Text(
+                    insight.title,
+                    style: GoogleFonts.poppins(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 16,
+                      color: AppTheme.textPrimary,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () => Navigator.pop(context),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                  color: AppTheme.textSecondary,
+                ),
+              ],
+            ),
+            const SizedBox(height: AppTheme.spacingMedium),
+            Flexible(
+              child: SingleChildScrollView(
+                child: Text(
+                  insight.detail,
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    color: AppTheme.textSecondary,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

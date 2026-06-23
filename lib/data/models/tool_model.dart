@@ -166,6 +166,13 @@ class AppTools {
     //   icon: Icons.help_outline_rounded,
     //   route: '/tutorial',
     // ),
+    ToolModel(
+      id: 'ai_insights',
+      name: 'AI Insights',
+      iconPath: 'assets/icons/reports.png', // fallback
+      icon: Icons.auto_awesome,
+      route: AppRoutes.aiInsights,
+    ),
   ];
 
   /// Default quick actions (first 6 tools)
