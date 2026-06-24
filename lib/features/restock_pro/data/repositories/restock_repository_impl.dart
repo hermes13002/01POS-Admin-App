@@ -16,6 +16,7 @@ class RestockRepositoryImpl implements RestockRepository {
     int page = 1,
   }) async {
     try {
+      /*
       final response = await _dioClient.get(
         '${ApiEndpoints.restock}?page=$page',
       );
@@ -59,6 +60,68 @@ class RestockRepositoryImpl implements RestockRepository {
         lastPage: lastPage,
         perPage: perPage,
         total: total,
+      );
+      */
+
+      // Dummy data implementation to bypass backend error
+      await Future.delayed(
+        const Duration(milliseconds: 500),
+      ); // network delay
+      final suggestions = [
+        const RestockSuggestionModel(
+          id: 1,
+          productId: 'P001',
+          companyId: 'C001',
+          productName: 'Organic Coffee Beans 1kg',
+          currentStock: 12.0,
+          averageDailySales: 5.5,
+          lowStockLimit: 20.0,
+          stockOutDays: 10,
+          stockOutDate: '2026-06-26',
+          suggestedReorderQty: 50.0,
+          createdAt: '2026-06-01',
+          updatedAt: '2026-06-24',
+          price: 24.99,
+        ),
+        const RestockSuggestionModel(
+          id: 2,
+          productId: 'P002',
+          companyId: 'C001',
+          productName: 'Almond Milk 1L',
+          currentStock: 5.0,
+          averageDailySales: 8.0,
+          lowStockLimit: 30.0,
+          stockOutDays: 0,
+          stockOutDate: '2026-06-24',
+          suggestedReorderQty: 100.0,
+          createdAt: '2026-06-01',
+          updatedAt: '2026-06-24',
+          price: 3.50,
+        ),
+        const RestockSuggestionModel(
+          id: 3,
+          productId: 'P003',
+          companyId: 'C001',
+          productName: 'Raw Honey 500g',
+          currentStock: 8.0,
+          averageDailySales: 1.5,
+          lowStockLimit: 15.0,
+          stockOutDays: 5,
+          stockOutDate: '2026-06-29',
+          suggestedReorderQty: 30.0,
+          createdAt: '2026-06-01',
+          updatedAt: '2026-06-24',
+          price: 12.00,
+        ),
+      ];
+
+      return ApiResponse<List<RestockSuggestionModel>>(
+        success: true,
+        data: suggestions,
+        currentPage: 1,
+        lastPage: 1,
+        perPage: 10,
+        total: 3,
       );
     } on DioException catch (e) {
       return ApiResponse<List<RestockSuggestionModel>>(

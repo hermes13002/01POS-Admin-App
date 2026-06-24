@@ -11,7 +11,6 @@ import '../providers/restock_provider.dart';
 import '../../data/models/restock_suggestion_model.dart';
 import 'package:onepos_admin_app/features/online_store/presentation/providers/profile_provider.dart';
 import 'package:onepos_admin_app/core/routes/app_routes.dart';
-import 'package:onepos_admin_app/shared/widgets/product_image.dart';
 import 'package:onepos_admin_app/features/low_stock/presentation/widgets/edit_low_stock_dialog.dart';
 import 'package:onepos_admin_app/features/products/presentation/screens/products_screen.dart';
 import 'package:onepos_admin_app/shared/widgets/app_snackbar.dart';
@@ -166,7 +165,9 @@ class RestockProScreen extends HookConsumerWidget {
                           horizontal: AppTheme.spacingMedium,
                           vertical: AppTheme.spacingSmall,
                         ),
-                        itemCount: filtered.length + (restockState.hasMorePages ? 1 : 0),
+                        itemCount:
+                            filtered.length +
+                            (restockState.hasMorePages ? 1 : 0),
                         separatorBuilder: (_, __) =>
                             const SizedBox(height: AppTheme.spacingSmall),
                         itemBuilder: (context, index) {
@@ -190,7 +191,8 @@ class RestockProScreen extends HookConsumerWidget {
                                   : item.id;
                             },
                             onView: () {
-                              final parsedId = int.tryParse(item.productId) ?? item.id;
+                              final parsedId =
+                                  int.tryParse(item.productId) ?? item.id;
                               showDialog(
                                 context: context,
                                 builder: (context) =>
@@ -202,12 +204,12 @@ class RestockProScreen extends HookConsumerWidget {
                               showDialog(
                                 context: context,
                                 barrierDismissible: false,
-                                builder: (context) => const Center(
-                                  child: LoadingWidget(),
-                                ),
+                                builder: (context) =>
+                                    const Center(child: LoadingWidget()),
                               );
                               try {
-                                final parsedId = int.tryParse(item.productId) ?? item.id;
+                                final parsedId =
+                                    int.tryParse(item.productId) ?? item.id;
                                 final productResponse = await ref.read(
                                   singleProductProvider(parsedId).future,
                                 );
@@ -309,21 +311,22 @@ class _RestockSuggestionTile extends StatelessWidget {
               padding: const EdgeInsets.all(AppTheme.spacingMedium),
               child: Row(
                 children: [
-                  // product image placeholder
+                  // ai icon
                   Container(
                     width: 40,
                     height: 40,
                     decoration: BoxDecoration(
-                      color: AppTheme.grey800,
+                      color: AppTheme.white,
                       borderRadius: BorderRadius.circular(
                         AppTheme.borderRadiusSmall,
                       ),
                     ),
-                    child: const ProductImage(
-                      imageUrl: null,
-                      width: 40,
-                      height: 40,
-                      borderRadius: AppTheme.borderRadiusSmall,
+                    child: Center(
+                      child: Image.asset(
+                        'assets/icons/ai-icon.png',
+                        width: 24,
+                        height: 24,
+                      ),
                     ),
                   ),
                   const SizedBox(width: AppTheme.spacingSmall + 4),
@@ -340,18 +343,18 @@ class _RestockSuggestionTile extends StatelessWidget {
                     ),
                   ),
 
-                  // price
+                  // stockout days
                   Text(
-                    item.price != null
-                        ? AmountFormatter.formatCurrency(
-                            item.price!,
-                            showDecimals: false,
-                          )
+                    item.stockOutDays != null
+                        ? '${item.stockOutDays} Days'
                         : '—',
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
-                      color: AppTheme.textPrimary,
+                      color:
+                          (item.stockOutDays != null && item.stockOutDays! < 10)
+                          ? AppTheme.errorColor
+                          : AppTheme.textPrimary,
                     ),
                   ),
                   const SizedBox(width: 4),
@@ -418,6 +421,15 @@ class _RestockSuggestionTile extends StatelessWidget {
                   _DetailRow(
                     label: 'Low Stock Limit:',
                     value: item.lowStockLimit.toStringAsFixed(0),
+                  ),
+                  const SizedBox(height: AppTheme.spacingSmall),
+
+                  // price row
+                  _DetailRow(
+                    label: 'Price:',
+                    value: item.price != null
+                        ? AmountFormatter.formatCurrency(item.price!, showDecimals: true)
+                        : '—',
                   ),
                 ],
               ),

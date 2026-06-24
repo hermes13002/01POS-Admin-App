@@ -206,7 +206,7 @@ class _AiInsightsSection extends ConsumerWidget {
     final insightsAsync = ref.watch(historicalInsightsProvider);
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(vertical: 16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
@@ -214,29 +214,32 @@ class _AiInsightsSection extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'AI Insights',
-                style: GoogleFonts.poppins(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: AppTheme.textPrimary,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'AI Insights',
+                  style: GoogleFonts.poppins(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: AppTheme.textPrimary,
+                  ),
                 ),
-              ),
-              IconButton(
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (context) => const AiPromptDialog(),
-                  );
-                },
-                icon: const Icon(Icons.auto_awesome),
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-              ),
-            ],
+                IconButton(
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) => const AiPromptDialog(),
+                    );
+                  },
+                  icon: const Icon(Icons.auto_awesome),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: 16),
           insightsAsync.when(
@@ -257,35 +260,49 @@ class _AiInsightsSection extends ConsumerWidget {
               }
               return SizedBox(
                 height: 160,
-                child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: insights.length,
-                  clipBehavior: Clip.none,
-                  separatorBuilder: (context, index) =>
-                      const SizedBox(width: 16),
-                  itemBuilder: (context, index) {
-                    return SizedBox(
-                      width: 280,
-                      child: AiInsightCard(
-                        insight: insights[index],
-                        maxLines: 4,
-                        onTap: () {
-                          showDialog(
-                            context: context,
-                            builder: (context) => BackdropFilter(
-                              filter: ImageFilter.blur(
-                                sigmaX: 5.0,
-                                sigmaY: 5.0,
-                              ),
-                              child: _AiInsightDetailDialog(
-                                insight: insights[index],
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    );
+                child: ShaderMask(
+                  shaderCallback: (Rect bounds) {
+                    return const LinearGradient(
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                      colors: [Colors.white, Colors.white, Colors.transparent],
+                      stops: [0.0, 0.9, 1.0],
+                    ).createShader(bounds);
                   },
+                  blendMode: BlendMode.dstIn,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    itemCount: insights.length,
+                    separatorBuilder: (context, index) =>
+                        const SizedBox(width: 16),
+                    itemBuilder: (context, index) {
+                      return Align(
+                        alignment: Alignment.topCenter,
+                        child: SizedBox(
+                          width: 280,
+                          child: AiInsightCard(
+                            insight: insights[index],
+                            maxLines: 4,
+                            onTap: () {
+                              showDialog(
+                                context: context,
+                                builder: (context) => BackdropFilter(
+                                  filter: ImageFilter.blur(
+                                    sigmaX: 5.0,
+                                    sigmaY: 5.0,
+                                  ),
+                                  child: _AiInsightDetailDialog(
+                                    insight: insights[index],
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      );
+                    },
+                  ),
                 ),
               );
             },
