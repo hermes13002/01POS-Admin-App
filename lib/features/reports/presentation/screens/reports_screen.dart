@@ -283,7 +283,7 @@ class _AiInsightsSection extends ConsumerWidget {
                           width: 280,
                           child: AiInsightCard(
                             insight: insights[index],
-                            maxLines: 4,
+                            maxLines: 3,
                             onTap: () {
                               showDialog(
                                 context: context,

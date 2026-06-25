@@ -51,3 +51,6 @@ lib/core/env/env.g.dart
 
 # Docs
 docs/
+
+
+/ios_backup/

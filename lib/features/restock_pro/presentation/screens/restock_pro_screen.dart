@@ -335,6 +335,8 @@ class _RestockSuggestionTile extends StatelessWidget {
                   Expanded(
                     child: Text(
                       item.productName,
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
                       style: GoogleFonts.poppins(
                         fontSize: 15,
                         fontWeight: FontWeight.w500,
@@ -428,7 +430,10 @@ class _RestockSuggestionTile extends StatelessWidget {
                   _DetailRow(
                     label: 'Price:',
                     value: item.price != null
-                        ? AmountFormatter.formatCurrency(item.price!, showDecimals: true)
+                        ? AmountFormatter.formatCurrency(
+                            item.price!,
+                            showDecimals: true,
+                          )
                         : '—',
                   ),
                 ],
