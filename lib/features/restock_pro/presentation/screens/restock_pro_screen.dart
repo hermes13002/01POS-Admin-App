@@ -295,6 +295,8 @@ class _RestockSuggestionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final stockOutDays = item.resolvedStockOutDays;
+
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
       decoration: BoxDecoration(
@@ -347,14 +349,11 @@ class _RestockSuggestionTile extends StatelessWidget {
 
                   // stockout days
                   Text(
-                    item.stockOutDays != null
-                        ? '${item.stockOutDays} Days'
-                        : '—',
+                    stockOutDays != null ? '$stockOutDays Days' : '',
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
-                      color:
-                          (item.stockOutDays != null && item.stockOutDays! < 10)
+                      color: (stockOutDays != null && stockOutDays < 10)
                           ? AppTheme.errorColor
                           : AppTheme.textPrimary,
                     ),
