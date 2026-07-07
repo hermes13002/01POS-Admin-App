@@ -13,6 +13,7 @@ abstract class AuthRemoteDatasource {
   Future<LoginResponseModel> loginWithPin(String pin);
   Future<void> logout();
   Future<void> resetPassword(String email);
+  Future<void> requestAccountDeletion();
   Future<void> signUp(Map<String, dynamic> body);
   Future<List<IndustryModel>> getIndustries();
 }
@@ -98,6 +99,28 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
     if (responseBody['error'] == true) {
       throw ServerException(
         message: responseBody['message'] ?? 'Failed to send reset email',
+      );
+    }
+  }
+
+  @override
+  Future<void> requestAccountDeletion() async {
+    final url = '${AppConstants.baseUrl}${ApiEndpoints.requestAccountDeletion}';
+
+    log('request_account_deletion url: $url', name: 'API');
+
+    final response = await _client.post(ApiEndpoints.requestAccountDeletion);
+    final responseBody = response.data as Map<String, dynamic>;
+
+    log(
+      'request_account_deletion response: ${jsonEncode(responseBody)}',
+      name: 'API',
+    );
+
+    if (responseBody['error'] == true) {
+      throw ServerException(
+        message:
+            responseBody['message'] ?? 'Failed to request account deletion',
       );
     }
   }

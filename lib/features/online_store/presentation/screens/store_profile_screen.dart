@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import 'package:onepos_admin_app/core/routes/app_routes.dart';
@@ -63,7 +64,7 @@ class StoreProfileScreen extends HookConsumerWidget {
   }
 }
 
-class _ProfileContent extends ConsumerWidget {
+class _ProfileContent extends HookConsumerWidget {
   final ProfileModel profile;
 
   const _ProfileContent({required this.profile});
@@ -71,6 +72,7 @@ class _ProfileContent extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final company = profile.company;
+    final isRequestingDeletion = useState(false);
 
     // format license expiry
     String expiryLabel = company?.licenseDuration ?? '—';
@@ -157,10 +159,9 @@ class _ProfileContent extends ConsumerWidget {
 
                 // plan row
                 GestureDetector(
-                  onTap: () => Navigator.pushNamed(
-                    context,
-                    AppRoutes.subscriptionDetails,
-                  ),
+                  onTap: () {
+                    // Navigator.pushNamed(context, AppRoutes.subscriptionDetails);
+                  },
                   behavior: HitTestBehavior.opaque,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -182,12 +183,12 @@ class _ProfileContent extends ConsumerWidget {
                               color: AppTheme.textPrimary,
                             ),
                           ),
-                          const SizedBox(width: 4),
-                          const Icon(
-                            Icons.arrow_forward_ios,
-                            size: 12,
-                            color: AppTheme.textPrimary,
-                          ),
+                          // const SizedBox(width: 4),
+                          // const Icon(
+                          //   Icons.arrow_forward_ios,
+                          //   size: 12,
+                          //   color: AppTheme.textPrimary,
+                          // ),
                         ],
                       ),
                     ],
@@ -368,6 +369,9 @@ class _ProfileContent extends ConsumerWidget {
 
           const SizedBox(height: AppTheme.spacingLarge),
 
+          Divider(height: 1),
+          const SizedBox(height: AppTheme.spacingLarge),
+
           // profile details section
           Text(
             'Profile Details',
@@ -397,7 +401,86 @@ class _ProfileContent extends ConsumerWidget {
             iconColor: AppTheme.errorColor,
             onPressed: () => _showLogoutDialog(context, ref),
           ),
+          const SizedBox(height: AppTheme.spacingMedium),
+          CustomButtonWithIcon(
+            text: 'Request Account Deletion',
+            icon: Icons.mail_outline_rounded,
+            backgroundColor: AppTheme.errorColor.withValues(alpha: 0.1),
+            textColor: AppTheme.errorColor,
+            iconColor: AppTheme.errorColor,
+            borderColor: AppTheme.errorColor.withValues(alpha: 0.2),
+            isOutlined: true,
+            isLoading: isRequestingDeletion.value,
+            onPressed: () => _showAccountDeletionConfirmation(
+              context,
+              ref,
+              isRequestingDeletion,
+            ),
+          ),
           const SizedBox(height: AppTheme.spacingLarge),
+        ],
+      ),
+    );
+  }
+
+  void _showAccountDeletionConfirmation(
+    BuildContext context,
+    WidgetRef ref,
+    ValueNotifier<bool> isRequestingDeletion,
+  ) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
+        ),
+        title: Text(
+          'Request Account Deletion',
+          style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+        ),
+        content: Text(
+          'This will send a deletion request to the organization email. Do you want to continue?',
+          style: GoogleFonts.poppins(fontSize: 14),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: Text(
+              'Cancel',
+              style: GoogleFonts.poppins(color: AppTheme.textSecondary),
+            ),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.of(dialogContext).pop();
+              isRequestingDeletion.value = true;
+
+              final error = await ref
+                  .read(authProvider.notifier)
+                  .requestAccountDeletion();
+
+              isRequestingDeletion.value = false;
+
+              if (!context.mounted) return;
+
+              if (error != null) {
+                AppSnackbar.showError(context, error);
+                return;
+              }
+
+              AppSnackbar.showSuccess(
+                context,
+                'Check your inbox, We sent you a mail!',
+              );
+            },
+            child: Text(
+              'Send',
+              style: GoogleFonts.poppins(
+                color: AppTheme.errorColor,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
         ],
       ),
     );

@@ -88,6 +88,11 @@ class Auth extends _$Auth {
     return result.fold((failure) => failure.message, (_) => null);
   }
 
+  Future<String?> requestAccountDeletion() async {
+    final result = await _repo.requestAccountDeletion();
+    return result.fold((failure) => failure.message, (data) => null);
+  }
+
   Future<String?> signUp(Map<String, dynamic> body) async {
     state = const AsyncLoading();
     final result = await _repo.signUp(body);

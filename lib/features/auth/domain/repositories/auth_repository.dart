@@ -11,6 +11,7 @@ abstract class AuthRepository {
   Future<Either<Failure, LoginResponseModel>> loginWithPin(String pin);
   Future<Either<Failure, void>> logout();
   Future<Either<Failure, void>> resetPassword(String email);
+  Future<Either<Failure, void>> requestAccountDeletion();
   Future<Either<Failure, void>> signUp(Map<String, dynamic> body);
   Future<Either<Failure, List<IndustryModel>>> getIndustries();
 }
