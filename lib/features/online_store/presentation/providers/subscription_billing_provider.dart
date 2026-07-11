@@ -196,7 +196,16 @@ class SubscriptionBillingNotifier
     );
 
     try {
-      await _iap.buyNonConsumable(purchaseParam: purchaseParam);
+      final success = await _iap.buyNonConsumable(purchaseParam: purchaseParam);
+      if (!success) {
+        _setState(
+          _currentState.copyWith(
+            clearPendingProductId: true,
+            errorMessage: 'Unable to start purchase. Please try again.',
+            clearSuccess: true,
+          ),
+        );
+      }
     } catch (_) {
       _setState(
         _currentState.copyWith(
@@ -227,6 +236,7 @@ class SubscriptionBillingNotifier
 
     try {
       await _iap.restorePurchases();
+      _setState(_currentState.copyWith(isRestoring: false));
     } catch (_) {
       _setState(
         _currentState.copyWith(
@@ -284,6 +294,8 @@ class SubscriptionBillingNotifier
 
   Future<void> _onPurchaseUpdate(List<PurchaseDetails> purchases) async {
     for (final purchase in purchases) {
+      bool shouldComplete = false;
+
       switch (purchase.status) {
         case PurchaseStatus.pending:
           _setState(
@@ -296,7 +308,10 @@ class SubscriptionBillingNotifier
           break;
         case PurchaseStatus.purchased:
         case PurchaseStatus.restored:
-          await _handleCompletedPurchase(purchase);
+          final success = await _handleCompletedPurchase(purchase);
+          if (success) {
+            shouldComplete = true;
+          }
           break;
         case PurchaseStatus.error:
           _setState(
@@ -309,6 +324,7 @@ class SubscriptionBillingNotifier
               clearSuccess: true,
             ),
           );
+          shouldComplete = true;
           break;
         case PurchaseStatus.canceled:
           _setState(
@@ -319,16 +335,21 @@ class SubscriptionBillingNotifier
               clearSuccess: true,
             ),
           );
+          shouldComplete = true;
           break;
       }
 
-      if (purchase.pendingCompletePurchase) {
-        await _iap.completePurchase(purchase);
+      if (shouldComplete && purchase.pendingCompletePurchase) {
+        try {
+          await _iap.completePurchase(purchase);
+        } catch (_) {
+          // Ignore complete purchase errors
+        }
       }
     }
   }
 
-  Future<void> _handleCompletedPurchase(PurchaseDetails purchase) async {
+  Future<bool> _handleCompletedPurchase(PurchaseDetails purchase) async {
     final purchaseId = purchase.purchaseID;
     if (purchaseId != null && _processedPurchaseIds.contains(purchaseId)) {
       _setState(
@@ -338,7 +359,7 @@ class SubscriptionBillingNotifier
           clearError: true,
         ),
       );
-      return;
+      return true;
     }
 
     final plan = kSubscriptionPlans
@@ -355,7 +376,7 @@ class SubscriptionBillingNotifier
           clearSuccess: true,
         ),
       );
-      return;
+      return true;
     }
 
     try {
@@ -386,6 +407,7 @@ class SubscriptionBillingNotifier
               : '${plan.displayName} activated successfully.',
         ),
       );
+      return true;
     } catch (_) {
       _setState(
         _currentState.copyWith(
@@ -396,6 +418,7 @@ class SubscriptionBillingNotifier
           clearSuccess: true,
         ),
       );
+      return false;
     }
   }
 

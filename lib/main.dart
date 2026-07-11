@@ -10,6 +10,7 @@ import 'package:onepos_admin_app/core/theme/app_theme.dart';
 import 'package:onepos_admin_app/core/network/connectivity_provider.dart';
 import 'package:onepos_admin_app/core/utils/session_manager.dart';
 import 'package:onepos_admin_app/features/splash/presentation/screens/splash_screen.dart';
+import 'package:onepos_admin_app/features/online_store/presentation/providers/subscription_billing_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -36,11 +37,14 @@ void main() async {
   );
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // initialize the IAP provider so it listens to the purchase stream immediately
+    ref.listen(subscriptionBillingProvider, (_, __) {});
+
     return MaterialApp(
       navigatorKey: SessionManager.navigatorKey,
       title: '01POS',
