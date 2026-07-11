@@ -7,7 +7,7 @@ import '../../features/online_store/presentation/providers/profile_provider.dart
 import '../../shared/widgets/custom_bottom_navigation_bar.dart';
 import '../../core/services/local_notification_service.dart';
 import '../../core/services/background_sync_service.dart';
-import 'dart:developer';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:showcaseview/showcaseview.dart';
@@ -64,9 +64,9 @@ class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
 
       await _scheduleDefaultInsights(localNotificationService);
 
-      log('App services initialized successfully.');
+      debugPrint('App services initialized successfully.');
     } on PlatformException catch (e) {
-      log('Platform error during service initialization: ${e.code}');
+      debugPrint('Platform error during service initialization: ${e.code}');
       if (mounted) {
         final messenger = ScaffoldMessenger.of(context);
         String message = 'Notification setup failed: ${e.message}';
@@ -89,7 +89,7 @@ class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
         );
       }
     } catch (e) {
-      log('General error during service initialization: $e');
+      debugPrint('General error during service initialization: $e');
     }
   }
 
@@ -125,7 +125,7 @@ class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
         minute: 0,
       );
     } catch (e) {
-      log('Failed to schedule insights: $e');
+      debugPrint('Failed to schedule insights: $e');
     }
   }
 

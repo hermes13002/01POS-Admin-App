@@ -4,6 +4,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:onepos_admin_app/core/utils/session_manager.dart';
 import 'package:onepos_admin_app/presentation/widgets/update_dialog.dart';
+import 'package:flutter/foundation.dart';
 
 class UpdateService {
   static final UpdateService _instance = UpdateService._internal();

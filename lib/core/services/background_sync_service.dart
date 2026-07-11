@@ -1,4 +1,4 @@
-import 'dart:developer';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:workmanager/workmanager.dart';
 import 'package:onepos_admin_app/core/network/dio_client.dart';
@@ -18,7 +18,7 @@ void callbackDispatcher() {
       await localAuth.init();
 
       if (task == BackgroundSyncService.checkLowStockTask) {
-        log('Background task triggered: $task');
+        debugPrint('Background task triggered: $task');
 
         final dio = DioClient();
         final remoteDatasource = ProductRemoteDatasource(dioClient: dio);
@@ -48,7 +48,7 @@ void callbackDispatcher() {
       }
       return Future.value(true);
     } catch (err) {
-      log('Background task failed: $err');
+      debugPrint('Background task failed: $err');
       return Future.value(false);
     }
   });

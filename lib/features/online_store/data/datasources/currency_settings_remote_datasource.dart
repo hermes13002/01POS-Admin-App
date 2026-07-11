@@ -35,7 +35,10 @@ class CurrencySettingsRemoteDatasourceImpl
     final response = await _client.get(ApiEndpoints.currencySettingsCurrencies);
     final responseBody = _asMap(response.data);
 
-    log('get_all_currencies response: ${jsonEncode(responseBody)}', name: 'API');
+    log(
+      'get_all_currencies response: ${jsonEncode(responseBody)}',
+      name: 'API',
+    );
 
     if (_isError(responseBody['error'])) {
       throw ServerException(
@@ -64,7 +67,10 @@ class CurrencySettingsRemoteDatasourceImpl
     final response = await _client.get(ApiEndpoints.currencySettings);
     final responseBody = _asMap(response.data);
 
-    log('get_company_currency response: ${jsonEncode(responseBody)}', name: 'API');
+    log(
+      'get_company_currency response: ${jsonEncode(responseBody)}',
+      name: 'API',
+    );
 
     if (_isError(responseBody['error'])) {
       throw ServerException(
@@ -95,8 +101,10 @@ class CurrencySettingsRemoteDatasourceImpl
     final response = await _client.put(endpoint, data: body);
     final responseBody = _asMap(response.data);
 
-    log('update_company_currency response: ${jsonEncode(responseBody)}',
-        name: 'API');
+    log(
+      'update_company_currency response: ${jsonEncode(responseBody)}',
+      name: 'API',
+    );
 
     if (_isError(responseBody['error'])) {
       throw ServerException(

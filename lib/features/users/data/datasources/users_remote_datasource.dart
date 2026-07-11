@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'dart:developer';
+import 'package:flutter/foundation.dart';
 
 import 'package:onepos_admin_app/core/constants/api_endpoints.dart';
 import 'package:onepos_admin_app/core/constants/app_constants.dart';
@@ -43,8 +43,8 @@ class UsersRemoteDatasourceImpl implements UsersRemoteDatasource {
     final url = '${AppConstants.baseUrl}${ApiEndpoints.allUsers}?page=$page';
     final body = {'page': page};
 
-    log('get_users url: $url', name: 'API');
-    log('get_users body: ${jsonEncode(body)}', name: 'API');
+    debugPrint('get_users url: $url');
+    debugPrint('get_users body: ${jsonEncode(body)}');
 
     final response = await _client.post(
       ApiEndpoints.allUsers,
@@ -52,7 +52,7 @@ class UsersRemoteDatasourceImpl implements UsersRemoteDatasource {
     );
     final responseBody = response.data as Map<String, dynamic>;
 
-    log('get_users response: ${jsonEncode(responseBody)}', name: 'API');
+    debugPrint('get_users response: ${jsonEncode(responseBody)}');
 
     if (responseBody['error'] == true) {
       throw ServerException(
@@ -69,13 +69,13 @@ class UsersRemoteDatasourceImpl implements UsersRemoteDatasource {
   Future<UserModel> createUser(Map<String, dynamic> body) async {
     final url = '${AppConstants.baseUrl}${ApiEndpoints.storeUser}';
 
-    log('create_user url: $url', name: 'API');
-    log('create_user body: ${jsonEncode(body)}', name: 'API');
+    debugPrint('create_user url: $url');
+    debugPrint('create_user body: ${jsonEncode(body)}');
 
     final response = await _client.post(ApiEndpoints.storeUser, data: body);
     final responseBody = response.data as Map<String, dynamic>;
 
-    log('create_user response: ${jsonEncode(responseBody)}', name: 'API');
+    debugPrint('create_user response: ${jsonEncode(responseBody)}');
 
     if (responseBody['error'] == true) {
       throw ServerException(
@@ -90,8 +90,8 @@ class UsersRemoteDatasourceImpl implements UsersRemoteDatasource {
   Future<UserModel> updateUser(int userId, Map<String, dynamic> body) async {
     final url = '${AppConstants.baseUrl}${ApiEndpoints.updateUser}/$userId';
 
-    log('update_user url: $url', name: 'API');
-    log('update_user body: ${jsonEncode(body)}', name: 'API');
+    debugPrint('update_user url: $url');
+    debugPrint('update_user body: ${jsonEncode(body)}');
 
     final response = await _client.put(
       '${ApiEndpoints.updateUser}/$userId',
@@ -99,7 +99,7 @@ class UsersRemoteDatasourceImpl implements UsersRemoteDatasource {
     );
     final responseBody = response.data as Map<String, dynamic>;
 
-    log('update_user response: ${jsonEncode(responseBody)}', name: 'API');
+    debugPrint('update_user response: ${jsonEncode(responseBody)}');
 
     if (responseBody['error'] == true) {
       throw ServerException(
@@ -115,13 +115,13 @@ class UsersRemoteDatasourceImpl implements UsersRemoteDatasource {
     final url = '${AppConstants.baseUrl}${ApiEndpoints.activateUser}/$userId';
     final body = <String, dynamic>{};
 
-    log('activate_user url: $url', name: 'API');
-    log('activate_user body: ${jsonEncode(body)}', name: 'API');
+    debugPrint('activate_user url: $url');
+    debugPrint('activate_user body: ${jsonEncode(body)}');
 
     final response = await _client.get('${ApiEndpoints.activateUser}/$userId');
     final responseBody = response.data as Map<String, dynamic>;
 
-    log('activate_user response: ${jsonEncode(responseBody)}', name: 'API');
+    debugPrint('activate_user response: ${jsonEncode(responseBody)}');
 
     if (responseBody['error'] == true) {
       throw ServerException(
@@ -137,15 +137,15 @@ class UsersRemoteDatasourceImpl implements UsersRemoteDatasource {
     final url = '${AppConstants.baseUrl}${ApiEndpoints.deactivateUser}/$userId';
     final body = <String, dynamic>{};
 
-    log('deactivate_user url: $url', name: 'API');
-    log('deactivate_user body: ${jsonEncode(body)}', name: 'API');
+    debugPrint('deactivate_user url: $url');
+    debugPrint('deactivate_user body: ${jsonEncode(body)}');
 
     final response = await _client.get(
       '${ApiEndpoints.deactivateUser}/$userId',
     );
     final responseBody = response.data as Map<String, dynamic>;
 
-    log('deactivate_user response: ${jsonEncode(responseBody)}', name: 'API');
+    debugPrint('deactivate_user response: ${jsonEncode(responseBody)}');
 
     if (responseBody['error'] == true) {
       throw ServerException(
@@ -161,13 +161,13 @@ class UsersRemoteDatasourceImpl implements UsersRemoteDatasource {
     final url = '${AppConstants.baseUrl}${ApiEndpoints.showUser}/$userId';
     final body = <String, dynamic>{};
 
-    log('get_user url: $url', name: 'API');
-    log('get_user body: ${jsonEncode(body)}', name: 'API');
+    debugPrint('get_user url: $url');
+    debugPrint('get_user body: ${jsonEncode(body)}');
 
     final response = await _client.get('${ApiEndpoints.showUser}/$userId');
     final responseBody = response.data as Map<String, dynamic>;
 
-    log('get_user response: ${jsonEncode(responseBody)}', name: 'API');
+    debugPrint('get_user response: ${jsonEncode(responseBody)}');
 
     if (responseBody['error'] == true) {
       throw ServerException(
@@ -183,13 +183,13 @@ class UsersRemoteDatasourceImpl implements UsersRemoteDatasource {
     final url = '${AppConstants.baseUrl}${ApiEndpoints.deleteUser}/$userId';
     final body = <String, dynamic>{};
 
-    log('delete_user url: $url', name: 'API');
-    log('delete_user body: ${jsonEncode(body)}', name: 'API');
+    debugPrint('delete_user url: $url');
+    debugPrint('delete_user body: ${jsonEncode(body)}');
 
     final response = await _client.delete('${ApiEndpoints.deleteUser}/$userId');
     final responseBody = response.data as Map<String, dynamic>;
 
-    log('delete_user response: ${jsonEncode(responseBody)}', name: 'API');
+    debugPrint('delete_user response: ${jsonEncode(responseBody)}');
 
     if (responseBody['error'] == true) {
       throw ServerException(
@@ -202,12 +202,12 @@ class UsersRemoteDatasourceImpl implements UsersRemoteDatasource {
   Future<List<RoleModel>> getRoles() async {
     final url = '${AppConstants.baseUrl}${ApiEndpoints.getRoles}';
 
-    log('get_roles url: $url', name: 'API');
+    debugPrint('get_roles url: $url');
 
     final response = await _client.get(ApiEndpoints.getRoles);
     final responseBody = response.data as Map<String, dynamic>;
 
-    log('get_roles response: ${jsonEncode(responseBody)}', name: 'API');
+    debugPrint('get_roles response: ${jsonEncode(responseBody)}');
 
     if (responseBody['error'] == true) {
       throw ServerException(

@@ -160,7 +160,7 @@ class _ProfileContent extends HookConsumerWidget {
                 // plan row
                 GestureDetector(
                   onTap: () {
-                    // Navigator.pushNamed(context, AppRoutes.subscriptionDetails);
+                    Navigator.pushNamed(context, AppRoutes.subscriptionDetails);
                   },
                   behavior: HitTestBehavior.opaque,
                   child: Row(
@@ -183,12 +183,12 @@ class _ProfileContent extends HookConsumerWidget {
                               color: AppTheme.textPrimary,
                             ),
                           ),
-                          // const SizedBox(width: 4),
-                          // const Icon(
-                          //   Icons.arrow_forward_ios,
-                          //   size: 12,
-                          //   color: AppTheme.textPrimary,
-                          // ),
+                          const SizedBox(width: 4),
+                          const Icon(
+                            Icons.arrow_forward_ios,
+                            size: 12,
+                            color: AppTheme.textPrimary,
+                          ),
                         ],
                       ),
                     ],

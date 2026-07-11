@@ -1,5 +1,5 @@
 import 'dart:io';
-
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
@@ -101,11 +101,14 @@ class AppImagePicker {
                   height: 44,
                   decoration: BoxDecoration(
                     color: AppTheme.grey100,
-                    borderRadius:
-                        BorderRadius.circular(AppTheme.borderRadiusMedium),
+                    borderRadius: BorderRadius.circular(
+                      AppTheme.borderRadiusMedium,
+                    ),
                   ),
-                  child: const Icon(Icons.camera_alt_outlined,
-                      color: AppTheme.textPrimary),
+                  child: const Icon(
+                    Icons.camera_alt_outlined,
+                    color: AppTheme.textPrimary,
+                  ),
                 ),
                 title: Text(
                   'Take a photo',
@@ -114,8 +117,7 @@ class AppImagePicker {
                     fontWeight: FontWeight.w500,
                   ),
                 ),
-                onTap: () =>
-                    Navigator.pop(context, ImagePickSource.camera),
+                onTap: () => Navigator.pop(context, ImagePickSource.camera),
               ),
 
               // gallery option
@@ -125,11 +127,14 @@ class AppImagePicker {
                   height: 44,
                   decoration: BoxDecoration(
                     color: AppTheme.grey100,
-                    borderRadius:
-                        BorderRadius.circular(AppTheme.borderRadiusMedium),
+                    borderRadius: BorderRadius.circular(
+                      AppTheme.borderRadiusMedium,
+                    ),
                   ),
-                  child: const Icon(Icons.photo_library_outlined,
-                      color: AppTheme.textPrimary),
+                  child: const Icon(
+                    Icons.photo_library_outlined,
+                    color: AppTheme.textPrimary,
+                  ),
                 ),
                 title: Text(
                   'Choose from gallery',
@@ -138,8 +143,7 @@ class AppImagePicker {
                     fontWeight: FontWeight.w500,
                   ),
                 ),
-                onTap: () =>
-                    Navigator.pop(context, ImagePickSource.gallery),
+                onTap: () => Navigator.pop(context, ImagePickSource.gallery),
               ),
               const SizedBox(height: AppTheme.spacingSmall),
             ],
@@ -204,11 +208,7 @@ class ImageUploadBox extends StatelessWidget {
 
   Widget _buildPlaceholder() {
     return const Center(
-      child: Icon(
-        Icons.add,
-        size: 28,
-        color: AppTheme.textSecondary,
-      ),
+      child: Icon(Icons.add, size: 28, color: AppTheme.textSecondary),
     );
   }
 }

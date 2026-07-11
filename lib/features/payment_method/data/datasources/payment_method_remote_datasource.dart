@@ -18,7 +18,8 @@ abstract class PaymentMethodRemoteDatasource {
   Future<void> deletePaymentMethod(int methodId);
 }
 
-class PaymentMethodRemoteDatasourceImpl implements PaymentMethodRemoteDatasource {
+class PaymentMethodRemoteDatasourceImpl
+    implements PaymentMethodRemoteDatasource {
   final DioClient _client;
 
   PaymentMethodRemoteDatasourceImpl(this._client);
@@ -31,10 +32,16 @@ class PaymentMethodRemoteDatasourceImpl implements PaymentMethodRemoteDatasource
     log('get_payment_methods url: $url', name: 'API');
     log('get_payment_methods body: ${jsonEncode(body)}', name: 'API');
 
-    final response = await _client.post(ApiEndpoints.allPaymentMethods, data: body);
+    final response = await _client.post(
+      ApiEndpoints.allPaymentMethods,
+      data: body,
+    );
     final responseBody = _asMap(response.data);
 
-    log('get_payment_methods response: ${jsonEncode(responseBody)}', name: 'API');
+    log(
+      'get_payment_methods response: ${jsonEncode(responseBody)}',
+      name: 'API',
+    );
 
     if (_isError(responseBody['error'])) {
       throw ServerException(
@@ -54,16 +61,22 @@ class PaymentMethodRemoteDatasourceImpl implements PaymentMethodRemoteDatasource
 
   @override
   Future<PaymentMethodModel> getPaymentMethod(int methodId) async {
-    final url = '${AppConstants.baseUrl}${ApiEndpoints.showPaymentMethod}/$methodId';
+    final url =
+        '${AppConstants.baseUrl}${ApiEndpoints.showPaymentMethod}/$methodId';
     final body = <String, dynamic>{};
 
     log('show_payment_method url: $url', name: 'API');
     log('show_payment_method body: ${jsonEncode(body)}', name: 'API');
 
-    final response = await _client.get('${ApiEndpoints.showPaymentMethod}/$methodId');
+    final response = await _client.get(
+      '${ApiEndpoints.showPaymentMethod}/$methodId',
+    );
     final responseBody = _asMap(response.data);
 
-    log('show_payment_method response: ${jsonEncode(responseBody)}', name: 'API');
+    log(
+      'show_payment_method response: ${jsonEncode(responseBody)}',
+      name: 'API',
+    );
 
     if (_isError(responseBody['error'])) {
       throw ServerException(
@@ -80,16 +93,24 @@ class PaymentMethodRemoteDatasourceImpl implements PaymentMethodRemoteDatasource
   }
 
   @override
-  Future<PaymentMethodModel> createPaymentMethod(Map<String, dynamic> body) async {
+  Future<PaymentMethodModel> createPaymentMethod(
+    Map<String, dynamic> body,
+  ) async {
     final url = '${AppConstants.baseUrl}${ApiEndpoints.storePaymentMethod}';
 
     log('create_payment_method url: $url', name: 'API');
     log('create_payment_method body: ${jsonEncode(body)}', name: 'API');
 
-    final response = await _client.post(ApiEndpoints.storePaymentMethod, data: body);
+    final response = await _client.post(
+      ApiEndpoints.storePaymentMethod,
+      data: body,
+    );
     final responseBody = _asMap(response.data);
 
-    log('create_payment_method response: ${jsonEncode(responseBody)}', name: 'API');
+    log(
+      'create_payment_method response: ${jsonEncode(responseBody)}',
+      name: 'API',
+    );
 
     if (_isError(responseBody['error'])) {
       throw ServerException(
@@ -110,7 +131,8 @@ class PaymentMethodRemoteDatasourceImpl implements PaymentMethodRemoteDatasource
     int methodId,
     Map<String, dynamic> body,
   ) async {
-    final url = '${AppConstants.baseUrl}${ApiEndpoints.updatePaymentMethod}/$methodId';
+    final url =
+        '${AppConstants.baseUrl}${ApiEndpoints.updatePaymentMethod}/$methodId';
 
     log('update_payment_method url: $url', name: 'API');
     log('update_payment_method body: ${jsonEncode(body)}', name: 'API');
@@ -121,7 +143,10 @@ class PaymentMethodRemoteDatasourceImpl implements PaymentMethodRemoteDatasource
     );
     final responseBody = _asMap(response.data);
 
-    log('update_payment_method response: ${jsonEncode(responseBody)}', name: 'API');
+    log(
+      'update_payment_method response: ${jsonEncode(responseBody)}',
+      name: 'API',
+    );
 
     if (_isError(responseBody['error'])) {
       throw ServerException(
@@ -139,16 +164,22 @@ class PaymentMethodRemoteDatasourceImpl implements PaymentMethodRemoteDatasource
 
   @override
   Future<void> deletePaymentMethod(int methodId) async {
-    final url = '${AppConstants.baseUrl}${ApiEndpoints.deletePaymentMethod}/$methodId';
+    final url =
+        '${AppConstants.baseUrl}${ApiEndpoints.deletePaymentMethod}/$methodId';
     final body = <String, dynamic>{};
 
     log('delete_payment_method url: $url', name: 'API');
     log('delete_payment_method body: ${jsonEncode(body)}', name: 'API');
 
-    final response = await _client.delete('${ApiEndpoints.deletePaymentMethod}/$methodId');
+    final response = await _client.delete(
+      '${ApiEndpoints.deletePaymentMethod}/$methodId',
+    );
     final responseBody = _asMap(response.data);
 
-    log('delete_payment_method response: ${jsonEncode(responseBody)}', name: 'API');
+    log(
+      'delete_payment_method response: ${jsonEncode(responseBody)}',
+      name: 'API',
+    );
 
     if (_isError(responseBody['error'])) {
       throw ServerException(

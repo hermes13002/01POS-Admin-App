@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:developer' as dev;
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -101,7 +102,7 @@ class SplashScreen extends HookConsumerWidget {
           }
         } catch (e) {
           // handle initialization error? maybe show a retry button or just log
-          debugPrint('Initialization error: $e');
+          dev.log('Initialization error: $e');
         }
       }
 

@@ -156,4 +156,7 @@ class ApiEndpoints {
 
   // restock
   static const String restock = '/admin/restock';
+
+  // Billing
+  static const String billingUpgrade = '/admin/billing/upgrade';
 }

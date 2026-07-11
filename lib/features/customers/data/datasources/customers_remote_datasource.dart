@@ -11,7 +11,10 @@ abstract class CustomersRemoteDatasource {
   Future<PaginatedCustomersResponse> getCustomers({int page = 1});
   Future<CustomerModel> getCustomer(int customerId);
   Future<CustomerModel> createCustomer(Map<String, dynamic> body);
-  Future<CustomerModel> updateCustomer(int customerId, Map<String, dynamic> body);
+  Future<CustomerModel> updateCustomer(
+    int customerId,
+    Map<String, dynamic> body,
+  );
   Future<void> deleteCustomer(int customerId);
 }
 
@@ -22,7 +25,8 @@ class CustomersRemoteDatasourceImpl implements CustomersRemoteDatasource {
 
   @override
   Future<PaginatedCustomersResponse> getCustomers({int page = 1}) async {
-    final url = '${AppConstants.baseUrl}${ApiEndpoints.allCustomers}?page=$page';
+    final url =
+        '${AppConstants.baseUrl}${ApiEndpoints.allCustomers}?page=$page';
     final body = <String, dynamic>{};
 
     log('get_customers url: $url', name: 'API');
@@ -71,13 +75,16 @@ class CustomersRemoteDatasourceImpl implements CustomersRemoteDatasource {
 
   @override
   Future<CustomerModel> getCustomer(int customerId) async {
-    final url = '${AppConstants.baseUrl}${ApiEndpoints.showCustomer}/$customerId';
+    final url =
+        '${AppConstants.baseUrl}${ApiEndpoints.showCustomer}/$customerId';
     final body = <String, dynamic>{};
 
     log('show_customer url: $url', name: 'API');
     log('show_customer body: ${jsonEncode(body)}', name: 'API');
 
-    final response = await _client.get('${ApiEndpoints.showCustomer}/$customerId');
+    final response = await _client.get(
+      '${ApiEndpoints.showCustomer}/$customerId',
+    );
     final responseBody = _asMap(response.data);
 
     log('show_customer response: ${jsonEncode(responseBody)}', name: 'API');
@@ -129,7 +136,8 @@ class CustomersRemoteDatasourceImpl implements CustomersRemoteDatasource {
     int customerId,
     Map<String, dynamic> body,
   ) async {
-    final url = '${AppConstants.baseUrl}${ApiEndpoints.updateCustomer}/$customerId';
+    final url =
+        '${AppConstants.baseUrl}${ApiEndpoints.updateCustomer}/$customerId';
 
     log('update_customer url: $url', name: 'API');
     log('update_customer body: ${jsonEncode(body)}', name: 'API');
@@ -158,13 +166,16 @@ class CustomersRemoteDatasourceImpl implements CustomersRemoteDatasource {
 
   @override
   Future<void> deleteCustomer(int customerId) async {
-    final url = '${AppConstants.baseUrl}${ApiEndpoints.deleteCustomer}/$customerId';
+    final url =
+        '${AppConstants.baseUrl}${ApiEndpoints.deleteCustomer}/$customerId';
     final body = <String, dynamic>{};
 
     log('delete_customer url: $url', name: 'API');
     log('delete_customer body: ${jsonEncode(body)}', name: 'API');
 
-    final response = await _client.delete('${ApiEndpoints.deleteCustomer}/$customerId');
+    final response = await _client.delete(
+      '${ApiEndpoints.deleteCustomer}/$customerId',
+    );
     final responseBody = _asMap(response.data);
 
     log('delete_customer response: ${jsonEncode(responseBody)}', name: 'API');

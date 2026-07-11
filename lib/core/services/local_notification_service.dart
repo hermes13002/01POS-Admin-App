@@ -1,7 +1,7 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
-import 'dart:developer';
+import 'package:flutter/foundation.dart';
 import 'package:onepos_admin_app/core/services/firebase_service.dart';
 
 class LocalNotificationService {
@@ -40,7 +40,7 @@ class LocalNotificationService {
     await flutterLocalNotificationsPlugin.initialize(
       settings: initializationSettings,
       onDidReceiveNotificationResponse: (NotificationResponse response) {
-        log('Notification clicked with payload: ${response.payload}');
+        debugPrint('Notification clicked with payload: ${response.payload}');
       },
     );
 
@@ -62,7 +62,7 @@ class LocalNotificationService {
     try {
       await androidImplementation?.requestExactAlarmsPermission();
     } catch (e) {
-      log('Exact alarms permission request failed: $e');
+      debugPrint('Exact alarms permission request failed: $e');
       // this might fail on older versions or if already granted/denied
       // where the method isn't supported, but zonedSchedule will
       // catch it later if it's truly required and missing.

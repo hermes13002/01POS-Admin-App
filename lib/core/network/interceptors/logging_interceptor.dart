@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart';
-import 'dart:developer' as developer;
+import 'package:flutter/foundation.dart';
 
 /// Interceptor for logging HTTP requests and responses
 class LoggingInterceptor extends Interceptor {
@@ -9,16 +9,10 @@ class LoggingInterceptor extends Interceptor {
       return handler.next(options);
     }
 
-    developer.log('┌──────────────', name: 'HTTP REQUEST');
-    developer.log('│ ${options.method} ${options.uri}', name: 'HTTP REQUEST');
-    developer.log('│ Headers:', name: 'HTTP REQUEST');
-    options.headers.forEach((key, value) {
-      developer.log('│   $key: $value', name: 'HTTP REQUEST');
-    });
+    debugPrint('[REQUEST] ${options.method} ${options.uri}');
     if (options.data != null) {
-      developer.log('│ Body: ${options.data}', name: 'HTTP REQUEST');
+      debugPrint('[REQUEST] Body: ${options.data}');
     }
-    developer.log('└──────────────', name: 'HTTP REQUEST');
     handler.next(options);
   }
 
@@ -28,13 +22,10 @@ class LoggingInterceptor extends Interceptor {
       return handler.next(response);
     }
 
-    developer.log('┌──────────────', name: 'HTTP RESPONSE');
-    developer.log(
-      '│ ${response.statusCode} ${response.requestOptions.uri}',
-      name: 'HTTP RESPONSE',
+    debugPrint(
+      '[SUCCESS] ${response.statusCode} ${response.requestOptions.uri}',
     );
-    developer.log('│ Response: ${response.data}', name: 'HTTP RESPONSE');
-    developer.log('└──────────────', name: 'HTTP RESPONSE');
+    debugPrint('[SUCCESS] Response: ${response.data}');
     handler.next(response);
   }
 
@@ -44,20 +35,14 @@ class LoggingInterceptor extends Interceptor {
       return handler.next(err);
     }
 
-    developer.log('┌──────────────', name: 'HTTP ERROR');
-    developer.log(
-      '│ ${err.requestOptions.method} ${err.requestOptions.uri}',
-      name: 'HTTP ERROR',
+    debugPrint(
+      '[FAILURE] ${err.requestOptions.method} ${err.requestOptions.uri}',
     );
-    developer.log('│ Error: ${err.message}', name: 'HTTP ERROR');
+    debugPrint('[FAILURE] Error: ${err.message}');
     if (err.response != null) {
-      developer.log(
-        '│ Status: ${err.response?.statusCode}',
-        name: 'HTTP ERROR',
-      );
-      developer.log('│ Data: ${err.response?.data}', name: 'HTTP ERROR');
+      debugPrint('[FAILURE] Status: ${err.response?.statusCode}');
+      debugPrint('[FAILURE] Data: ${err.response?.data}');
     }
-    developer.log('└──────────────', name: 'HTTP ERROR');
     handler.next(err);
   }
 

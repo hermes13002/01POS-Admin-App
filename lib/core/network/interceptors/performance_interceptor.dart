@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:firebase_performance/firebase_performance.dart';
 import 'package:flutter/foundation.dart';
+import 'dart:developer';
 
 class PerformanceInterceptor extends Interceptor {
   final _metrics = <RequestOptions, HttpMetric>{};
@@ -18,7 +19,7 @@ class PerformanceInterceptor extends Interceptor {
       metric.start();
       _metrics[options] = metric;
     } catch (e) {
-      debugPrint('failed to start performance metric: $e');
+      log('failed to start performance metric: $e');
     }
 
     super.onRequest(options, handler);
@@ -35,7 +36,7 @@ class PerformanceInterceptor extends Interceptor {
         metric.responsePayloadSize = response.data?.toString().length;
         metric.stop();
       } catch (e) {
-        debugPrint('failed to stop performance metric: $e');
+        log('failed to stop performance metric: $e');
       }
     }
 
@@ -52,7 +53,7 @@ class PerformanceInterceptor extends Interceptor {
         metric.httpResponseCode = err.response?.statusCode;
         metric.stop();
       } catch (e) {
-        debugPrint('failed to stop performance metric: $e');
+        log('failed to stop performance metric: $e');
       }
     }
 
