@@ -186,16 +186,13 @@ class SubscriptionDetailsScreen extends ConsumerWidget {
                 ),
 
               // Bottom Section: Plans
-              Wrap(
-                spacing: 12,
-                runSpacing: 20,
-                alignment: WrapAlignment.center,
+              Column(
                 children: [
                   _PlanPill(
                     title: 'STANDARD',
                     price: priceLabel(
                       'net.onepos.app.standard_monthly',
-                      '₦4,900/mo',
+                      '₦6,000/mo',
                     ),
                     bgColor: const Color(0xFFE1EEFE),
                     textColor: const Color(0xFF1B4F93),
@@ -204,6 +201,8 @@ class SubscriptionDetailsScreen extends ConsumerWidget {
                     isPending:
                         billing?.pendingProductId ==
                         'net.onepos.app.standard_monthly',
+                    buttonText: 'Renew',
+                    buttonColor: const Color(0xFF22A353),
                     onTap: () {
                       debugPrint('[SUBSCRIPTION] STANDARD plan tapped');
                       ref
@@ -211,11 +210,12 @@ class SubscriptionDetailsScreen extends ConsumerWidget {
                           .purchasePlan('net.onepos.app.standard_monthly');
                     },
                   ),
+                  const SizedBox(height: 32),
                   _PlanPill(
                     title: 'PRO',
                     price: priceLabel(
-                      'net.onepos.app.pro_monthly',
-                      '₦4,900/mo',
+                      'net.oneposadmin.app.pro_1month',
+                      '₦11,000/mo',
                     ),
                     bgColor: const Color(0xFFE2E4FA),
                     textColor: const Color(0xFF28287F),
@@ -223,14 +223,18 @@ class SubscriptionDetailsScreen extends ConsumerWidget {
                     isCurrentPlan: currentPlanKey == 'pro',
                     isPending:
                         billing?.pendingProductId ==
-                        'net.onepos.app.pro_monthly',
+                        'net.oneposadmin.app.pro_1month',
+                    buttonText: 'Upgrade to Pro',
+                    buttonColor: const Color(0xFF1D4ED8),
                     onTap: () {
                       debugPrint('[SUBSCRIPTION] PRO plan tapped');
                       ref
                           .read(subscriptionBillingProvider.notifier)
-                          .purchasePlan('net.onepos.app.pro_monthly');
+                          .purchasePlan('net.oneposadmin.app.pro_1month');
                     },
                   ),
+                  const SizedBox(height: 32),
+                  /*
                   _PlanPill(
                     title: 'AI',
                     price: priceLabel('net.onepos.app.ai_monthly', '₦5,900/mo'),
@@ -241,6 +245,8 @@ class SubscriptionDetailsScreen extends ConsumerWidget {
                     isPending:
                         billing?.pendingProductId ==
                         'net.onepos.app.ai_monthly',
+                    buttonText: 'Activate AI',
+                    buttonColor: const Color(0xFF1D4ED8),
                     onTap: () {
                       debugPrint('[SUBSCRIPTION] AI plan tapped');
                       ref
@@ -248,6 +254,7 @@ class SubscriptionDetailsScreen extends ConsumerWidget {
                           .purchasePlan('net.onepos.app.ai_monthly');
                     },
                   ),
+                  */
                 ],
               ),
 
@@ -305,6 +312,8 @@ class _PlanPill extends StatelessWidget {
   final Color borderColor;
   final bool isCurrentPlan;
   final bool isPending;
+  final String buttonText;
+  final Color buttonColor;
   final VoidCallback onTap;
 
   const _PlanPill({
@@ -315,6 +324,8 @@ class _PlanPill extends StatelessWidget {
     required this.borderColor,
     required this.isCurrentPlan,
     required this.isPending,
+    required this.buttonText,
+    required this.buttonColor,
     required this.onTap,
   });
 
@@ -329,68 +340,62 @@ class _PlanPill extends StatelessWidget {
         Text(
           title,
           style: GoogleFonts.poppins(
-            fontSize: 11,
-            fontWeight: FontWeight.w600,
+            fontSize: 13,
+            fontWeight: FontWeight.w700,
             color: AppTheme.textSecondary,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 10),
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
           decoration: BoxDecoration(
             color: bgColor,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: borderColor),
+            borderRadius: BorderRadius.circular(30),
+            border: Border.all(color: borderColor, width: 1.5),
           ),
           child: Text(
             price,
             style: GoogleFonts.plusJakartaSans(
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
+              fontSize: 22,
+              fontWeight: FontWeight.w700,
               color: textColor,
             ),
           ),
         ),
-        const SizedBox(height: 8),
-        SizedBox(
-          width: 120,
-          child: ElevatedButton(
-            onPressed: (isCurrentPlan || isPending)
-                ? null
-                : () {
-                    debugPrint('[PLAN_PILL] Button pressed for: $title');
-                    onTap();
-                  },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: isCurrentPlan
-                  ? AppTheme.textSecondary.withValues(alpha: 0.25)
-                  : Colors.black,
-              foregroundColor: Colors.white,
-              disabledBackgroundColor: isCurrentPlan
-                  ? AppTheme.textSecondary.withValues(alpha: 0.25)
-                  : Colors.black.withValues(alpha: 0.55),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              padding: const EdgeInsets.symmetric(vertical: 8),
+        const SizedBox(height: 16),
+        ElevatedButton(
+          onPressed: isPending
+              ? null
+              : () {
+                  debugPrint('[PLAN_PILL] Button pressed for: $title');
+                  onTap();
+                },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: buttonColor,
+            foregroundColor: Colors.white,
+            disabledBackgroundColor: buttonColor.withValues(alpha: 0.55),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
             ),
-            child: isPending
-                ? const SizedBox(
-                    width: 14,
-                    height: 14,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Colors.white,
-                    ),
-                  )
-                : Text(
-                    isCurrentPlan ? 'Current' : 'Purchase',
-                    style: GoogleFonts.poppins(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+            elevation: 0,
           ),
+          child: isPending
+              ? const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.5,
+                    color: Colors.white,
+                  ),
+                )
+              : Text(
+                  buttonText,
+                  style: GoogleFonts.poppins(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
         ),
       ],
     );

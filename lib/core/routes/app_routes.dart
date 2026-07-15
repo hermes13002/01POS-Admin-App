@@ -49,6 +49,7 @@ import 'package:onepos_admin_app/features/online_store/presentation/screens/subs
 import 'package:onepos_admin_app/features/invoices/presentation/screens/invoices_screen.dart';
 import 'package:onepos_admin_app/features/invoices/presentation/screens/create_invoice_screen.dart';
 import 'package:onepos_admin_app/features/ai_insights/presentation/screens/ai_insights_history_screen.dart';
+import 'package:onepos_admin_app/features/dashboard/presentation/screens/guided_tutorials_screen.dart';
 
 /// centralized route configuration
 class AppRoutes {
@@ -102,6 +103,7 @@ class AppRoutes {
   static const String invoices = '/invoices';
   static const String createInvoice = '/create-invoice';
   static const String aiInsights = '/ai-insights';
+  static const String guidedTutorials = '/guided-tutorials';
 
   // route map
   static Map<String, WidgetBuilder> get routes => {
@@ -170,5 +172,6 @@ class AppRoutes {
     invoices: (context) => const InvoicesScreen(),
     createInvoice: (context) => const CreateInvoiceScreen(),
     aiInsights: (context) => const AiInsightsHistoryScreen(),
+    guidedTutorials: (context) => const GuidedTutorialsScreen(),
   };
 }

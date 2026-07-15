@@ -293,16 +293,31 @@ class SignupScreen extends HookConsumerWidget {
                             hint: 'Loading industries...',
                             items: [],
                           ),
-                          error: (err, stack) => AppDropdown<int>(
-                            hint: 'Failed to load industries',
-                            items: [
-                              DropdownMenuItem(
-                                value: -1,
-                                enabled: false,
-                                child: Text(
-                                  'Error: ${err.toString()}',
-                                  style: const TextStyle(color: Colors.red),
+                          error: (err, stack) => Row(
+                            children: [
+                              Expanded(
+                                child: AppDropdown<int>(
+                                  hint: 'Failed to load industries',
+                                  items: [
+                                    DropdownMenuItem(
+                                      value: -1,
+                                      enabled: false,
+                                      child: Text(
+                                        'Error: ${err.toString()}',
+                                        style: const TextStyle(color: Colors.red),
+                                      ),
+                                    ),
+                                  ],
                                 ),
+                              ),
+                              const SizedBox(width: 8),
+                              IconButton(
+                                onPressed: () {
+                                  ref.invalidate(industriesProvider);
+                                },
+                                icon: const Icon(Icons.refresh),
+                                tooltip: 'Retry loading industries',
+                                color: AppTheme.primaryColor,
                               ),
                             ],
                           ),

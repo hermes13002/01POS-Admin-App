@@ -55,7 +55,67 @@ class LoginScreen extends HookConsumerWidget {
 
       if (!context.mounted) return;
       if (error != null) {
-        AppSnackbar.showError(context, error);
+        if (error.toLowerCase().contains('expired')) {
+          showDialog(
+            context: context,
+            builder: (dialogContext) => AlertDialog(
+              backgroundColor: AppTheme.backgroundColor,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
+              ),
+              title: Text(
+                'Plan Expired',
+                style: GoogleFonts.poppins(
+                  fontWeight: FontWeight.w600,
+                  color: AppTheme.textPrimary,
+                ),
+              ),
+              content: Text(
+                'Your subscription plan has expired. Please renew your subscription to continue using the app.',
+                style: GoogleFonts.poppins(
+                  fontSize: 14,
+                  color: AppTheme.textSecondary,
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(dialogContext),
+                  child: Text(
+                    'Cancel',
+                    style: GoogleFonts.poppins(
+                      color: AppTheme.textSecondary,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(dialogContext);
+                    Navigator.pushNamed(
+                      context,
+                      AppRoutes.subscriptionDetails,
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.primaryColor,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: Text(
+                    'Subscribe',
+                    style: GoogleFonts.poppins(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        } else {
+          AppSnackbar.showError(context, error);
+        }
       } else {
         /*
         // persist or clear credentials based on checkbox
@@ -393,7 +453,7 @@ class _LoginButton extends StatelessWidget {
               : Text(
                   'Login',
                   style: GoogleFonts.poppins(
-                    fontSize: 15,
+                    fontSize: 13.5,
                     fontWeight: FontWeight.w600,
                   ),
                 ),

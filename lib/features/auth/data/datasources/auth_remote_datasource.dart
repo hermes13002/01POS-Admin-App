@@ -40,12 +40,18 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
 
     log('login_email response: ${jsonEncode(responseBody)}', name: 'API');
 
+    if (responseBody['data'] != null) {
+      try {
+        final loginResponse = LoginResponseModel.fromJson(responseBody['data']);
+        await _persistToken(loginResponse);
+      } catch (_) {}
+    }
+
     if (responseBody['error'] == true) {
       throw ServerException(message: responseBody['message'] ?? 'Login failed');
     }
 
     final loginResponse = LoginResponseModel.fromJson(responseBody['data']);
-    await _persistToken(loginResponse);
     return loginResponse;
   }
 
@@ -62,12 +68,18 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
 
     log('login_pin response: ${jsonEncode(responseBody)}', name: 'API');
 
+    if (responseBody['data'] != null) {
+      try {
+        final loginResponse = LoginResponseModel.fromJson(responseBody['data']);
+        await _persistToken(loginResponse);
+      } catch (_) {}
+    }
+
     if (responseBody['error'] == true) {
       throw ServerException(message: responseBody['message'] ?? 'Login failed');
     }
 
     final loginResponse = LoginResponseModel.fromJson(responseBody['data']);
-    await _persistToken(loginResponse);
     return loginResponse;
   }
 

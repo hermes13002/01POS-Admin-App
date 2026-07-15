@@ -159,13 +159,13 @@ class AppTools {
       icon: Icons.add_box_outlined,
       route: '/add-product',
     ),
-    // ToolModel(
-    //   id: 'tutorial',
-    //   name: 'Tutorial',
-    //   iconPath: 'assets/icons/tutorial.png',
-    //   icon: Icons.help_outline_rounded,
-    //   route: '/tutorial',
-    // ),
+    ToolModel(
+      id: 'guided_tutorials',
+      name: 'Guided Tutorials',
+      iconPath: 'assets/icons/tutorial.png',
+      icon: Icons.help_outline_rounded,
+      route: AppRoutes.guidedTutorials,
+    ),
     ToolModel(
       id: 'ai_insights',
       name: 'AI Insights',

@@ -5,6 +5,9 @@ import 'package:onepos_admin_app/core/storage/shared_prefs_service.dart';
 import 'package:onepos_admin_app/features/online_store/presentation/providers/profile_provider.dart';
 import 'package:onepos_admin_app/features/chats/presentation/providers/chat_provider.dart';
 import 'package:onepos_admin_app/features/users/presentation/providers/users_provider.dart';
+import 'package:onepos_admin_app/features/ai_insights/presentation/providers/ai_insights_provider.dart';
+import 'package:onepos_admin_app/features/reports/presentation/providers/reports_provider.dart';
+import 'package:onepos_admin_app/features/restock_pro/presentation/providers/restock_provider.dart';
 import '../../data/datasources/auth_remote_datasource.dart';
 import '../../data/models/login_response_model.dart';
 import '../../data/repositories/auth_repository_impl.dart';
@@ -79,6 +82,9 @@ class Auth extends _$Auth {
     // invalidate all keepAlive data providers so stale data is cleared
     ref.invalidate(allUsersProvider);
     ref.invalidate(userProfileProvider);
+    ref.invalidate(historicalInsightsProvider);
+    ref.invalidate(reportsProvider);
+    ref.invalidate(restockSuggestionsProvider);
 
     state = const AsyncData(null);
   }

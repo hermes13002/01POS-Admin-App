@@ -27,23 +27,16 @@ const List<SubscriptionPlanConfig> kSubscriptionPlans = [
   SubscriptionPlanConfig(
     key: 'standard',
     productId: 'net.onepos.app.standard_monthly',
-    amount: 4900,
+    amount: 6000,
     months: 1,
     displayName: 'Standard',
   ),
   SubscriptionPlanConfig(
     key: 'pro',
-    productId: 'net.onepos.app.pro_monthly',
-    amount: 4900,
+    productId: 'net.oneposadmin.app.pro_1month',
+    amount: 11000,
     months: 1,
     displayName: 'Pro',
-  ),
-  SubscriptionPlanConfig(
-    key: 'ai',
-    productId: 'net.onepos.app.ai_monthly',
-    amount: 5900,
-    months: 1,
-    displayName: 'AI',
   ),
 ];
 
@@ -408,13 +401,13 @@ class SubscriptionBillingNotifier
         ),
       );
       return true;
-    } catch (_) {
+    } catch (e) {
       _setState(
         _currentState.copyWith(
           clearPendingProductId: true,
           isRestoring: false,
           errorMessage:
-              'Payment succeeded, but plan sync failed. Please tap Restore Purchases.',
+              'Sync failed: $e. Please tap Restore Purchases.',
           clearSuccess: true,
         ),
       );

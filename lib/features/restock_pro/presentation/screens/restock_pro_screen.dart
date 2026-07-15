@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -44,22 +45,26 @@ class RestockProScreen extends HookConsumerWidget {
     final profileAsync = ref.watch(userProfileProvider);
     final hasShownDialog = useState(false);
 
+    final plan = profileAsync.valueOrNull?.plan?.toLowerCase() ?? 'standard';
+    final hasAccess = profileAsync.isLoading || plan == 'pro' || plan == 'ai';
+
     useEffect(() {
       final profile = profileAsync.valueOrNull;
       if (profile != null && !hasShownDialog.value) {
-        final plan = profile.plan?.toLowerCase() ?? 'standard';
-        if (plan != 'pro' && plan != 'ai') {
+        if (!hasAccess) {
           hasShownDialog.value = true;
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (!context.mounted) return;
             showDialog(
               context: context,
               barrierDismissible: false,
-              builder: (context) => AlertDialog(
-                backgroundColor: AppTheme.backgroundColor,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
+              builder: (context) => PopScope(
+                canPop: false,
+                child: AlertDialog(
+                  backgroundColor: AppTheme.backgroundColor,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                 title: Text(
                   'Upgrade Required',
                   style: GoogleFonts.poppins(
@@ -91,9 +96,7 @@ class RestockProScreen extends HookConsumerWidget {
                   ElevatedButton(
                     onPressed: () {
                       Navigator.of(context).pop(); // dismiss dialog
-                      Navigator.of(
-                        context,
-                      ).pushNamed(AppRoutes.subscriptionDetails);
+                      Navigator.of(context).pushReplacementNamed(AppRoutes.subscriptionDetails);
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.black,
@@ -108,6 +111,7 @@ class RestockProScreen extends HookConsumerWidget {
                     ),
                   ),
                 ],
+                ),
               ),
             );
           });
@@ -116,13 +120,7 @@ class RestockProScreen extends HookConsumerWidget {
       return null;
     }, [profileAsync.value, hasShownDialog.value]);
 
-    return Scaffold(
-      backgroundColor: AppTheme.backgroundColor,
-      appBar: CustomAppBar2(
-        title: 'Restock Pro',
-        backgroundColor: AppTheme.backgroundColor,
-      ),
-      body: Column(
+    Widget bodyContent = Column(
         children: [
           // search bar
           CustomSearchBar(
@@ -272,7 +270,22 @@ class RestockProScreen extends HookConsumerWidget {
             ),
           ),
         ],
+      );
+
+    if (!hasAccess) {
+      bodyContent = ImageFiltered(
+        imageFilter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+        child: IgnorePointer(child: bodyContent),
+      );
+    }
+
+    return Scaffold(
+      backgroundColor: AppTheme.backgroundColor,
+      appBar: CustomAppBar2(
+        title: 'Restock Pro',
+        backgroundColor: AppTheme.backgroundColor,
       ),
+      body: bodyContent,
     );
   }
 }
