@@ -1,5 +1,6 @@
 import 'dart:developer';
 import 'dart:convert';
+import 'package:flutter/widgets.dart';
 import 'package:onepos_admin_app/core/constants/api_endpoints.dart';
 import 'package:onepos_admin_app/core/constants/app_constants.dart';
 import 'package:onepos_admin_app/core/errors/exceptions.dart';
@@ -43,6 +44,7 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
     if (responseBody['data'] != null) {
       try {
         final loginResponse = LoginResponseModel.fromJson(responseBody['data']);
+        debugPrint('Extracted Token: ${loginResponse.accessToken}');
         await _persistToken(loginResponse);
       } catch (_) {}
     }
@@ -71,6 +73,7 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
     if (responseBody['data'] != null) {
       try {
         final loginResponse = LoginResponseModel.fromJson(responseBody['data']);
+        log('Extracted Token: ${loginResponse.accessToken}', name: 'API_TOKEN');
         await _persistToken(loginResponse);
       } catch (_) {}
     }

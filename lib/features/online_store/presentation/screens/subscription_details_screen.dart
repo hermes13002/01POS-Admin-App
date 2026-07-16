@@ -30,6 +30,11 @@ class SubscriptionDetailsScreen extends ConsumerWidget {
         if (curr.successMessage != null &&
             curr.successMessage != prev?.successMessage) {
           AppSnackbar.showSuccess(context, curr.successMessage!);
+          Future.delayed(const Duration(seconds: 2), () {
+            if (context.mounted) {
+              Navigator.pop(context);
+            }
+          });
         }
       },
     );
@@ -59,6 +64,10 @@ class SubscriptionDetailsScreen extends ConsumerWidget {
           ];
           expiryLabel =
               '${months[parsed.month - 1]} ${parsed.day}, ${parsed.year}';
+              
+          if (parsed.isBefore(DateTime.now())) {
+            currentPlan = 'Expired';
+          }
         } catch (_) {
           expiryLabel = company.licenseDuration;
         }
@@ -81,6 +90,9 @@ class SubscriptionDetailsScreen extends ConsumerWidget {
     } else {
       currentPlanKey = 'standard';
     }
+
+    final standardButtonText = currentPlanKey == 'pro' ? 'Purchase Standard' : 'Renew Standard';
+    final proButtonText = currentPlanKey == 'pro' ? 'Renew Pro' : 'Upgrade to Pro';
 
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
@@ -121,16 +133,30 @@ class SubscriptionDetailsScreen extends ConsumerWidget {
                           vertical: 8,
                         ),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFCBE2FD),
+                          color: currentPlanKey == 'pro'
+                              ? const Color(0xFFE2E4FA)
+                              : currentPlanKey == 'expired'
+                                  ? const Color(0xFFFFEBEE)
+                                  : const Color(0xFFE1EEFE),
                           borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: const Color(0xFFAECFFB)),
+                          border: Border.all(
+                            color: currentPlanKey == 'pro'
+                                ? const Color(0xFFC7CDFA)
+                                : currentPlanKey == 'expired'
+                                    ? const Color(0xFFFFCDD2)
+                                    : const Color(0xFFC5DFFE),
+                          ),
                         ),
                         child: Text(
                           currentPlan,
                           style: GoogleFonts.poppins(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w500,
-                            color: const Color(0xFF1B4F93),
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: currentPlanKey == 'pro'
+                                ? const Color(0xFF28287F)
+                                : currentPlanKey == 'expired'
+                                    ? const Color(0xFFD32F2F)
+                                    : const Color(0xFF1B4F93),
                           ),
                         ),
                       ),
@@ -192,7 +218,7 @@ class SubscriptionDetailsScreen extends ConsumerWidget {
                     title: 'STANDARD',
                     price: priceLabel(
                       'net.onepos.app.standard_monthly',
-                      '₦6,000/mo',
+                      '₦5,000/mo',
                     ),
                     bgColor: const Color(0xFFE1EEFE),
                     textColor: const Color(0xFF1B4F93),
@@ -201,7 +227,7 @@ class SubscriptionDetailsScreen extends ConsumerWidget {
                     isPending:
                         billing?.pendingProductId ==
                         'net.onepos.app.standard_monthly',
-                    buttonText: 'Renew',
+                    buttonText: standardButtonText,
                     buttonColor: const Color(0xFF22A353),
                     onTap: () {
                       debugPrint('[SUBSCRIPTION] STANDARD plan tapped');
@@ -215,7 +241,7 @@ class SubscriptionDetailsScreen extends ConsumerWidget {
                     title: 'PRO',
                     price: priceLabel(
                       'net.oneposadmin.app.pro_1month',
-                      '₦11,000/mo',
+                      '₦10,000/mo',
                     ),
                     bgColor: const Color(0xFFE2E4FA),
                     textColor: const Color(0xFF28287F),
@@ -224,7 +250,7 @@ class SubscriptionDetailsScreen extends ConsumerWidget {
                     isPending:
                         billing?.pendingProductId ==
                         'net.oneposadmin.app.pro_1month',
-                    buttonText: 'Upgrade to Pro',
+                    buttonText: proButtonText,
                     buttonColor: const Color(0xFF1D4ED8),
                     onTap: () {
                       debugPrint('[SUBSCRIPTION] PRO plan tapped');
@@ -261,40 +287,60 @@ class SubscriptionDetailsScreen extends ConsumerWidget {
               const SizedBox(height: 28),
 
               if (billing != null)
-                SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton(
-                    onPressed: billing.isRestoring
-                        ? null
-                        : () {
-                            debugPrint(
-                              '[SUBSCRIPTION] Restore Purchases tapped',
-                            );
-                            ref
-                                .read(subscriptionBillingProvider.notifier)
-                                .restorePurchases();
-                          },
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      side: BorderSide(
-                        color: AppTheme.textSecondary.withValues(alpha: 0.45),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: billing.isRestoring
+                            ? null
+                            : () {
+                                debugPrint(
+                                  '[SUBSCRIPTION] Restore Purchases tapped',
+                                );
+                                ref
+                                    .read(subscriptionBillingProvider.notifier)
+                                    .restorePurchases();
+                              },
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          side: BorderSide(
+                            color:
+                                AppTheme.textSecondary.withValues(alpha: 0.45),
+                          ),
+                        ),
+                        child: billing.isRestoring
+                            ? const SizedBox(
+                                width: 18,
+                                height: 18,
+                                child:
+                                    CircularProgressIndicator(strokeWidth: 2.2),
+                              )
+                            : Text(
+                                'Restore Purchases',
+                                style: GoogleFonts.poppins(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w500,
+                                  color: AppTheme.textPrimary,
+                                ),
+                              ),
                       ),
                     ),
-                    child: billing.isRestoring
-                        ? const SizedBox(
-                            width: 18,
-                            height: 18,
-                            child: CircularProgressIndicator(strokeWidth: 2.2),
-                          )
-                        : Text(
-                            'Restore Purchases',
-                            style: GoogleFonts.poppins(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w500,
-                              color: AppTheme.textPrimary,
-                            ),
-                          ),
-                  ),
+                    const SizedBox(width: 16),
+                    Tooltip(
+                      message:
+                          'Tap this if you changed devices, reinstalled the app, or if a payment was successful but your plan did not update.',
+                      triggerMode: TooltipTriggerMode.tap,
+                      margin: const EdgeInsets.symmetric(horizontal: 20),
+                      padding: const EdgeInsets.all(12),
+                      showDuration: const Duration(seconds: 4),
+                      child: Icon(
+                        Icons.info_outline,
+                        size: 24,
+                        color: AppTheme.textSecondary,
+                      ),
+                    ),
+                  ],
                 ),
             ],
           ),

@@ -1,10 +1,11 @@
 import 'dart:convert';
-import 'dart:developer';
 
+import 'package:flutter/widgets.dart';
 import 'package:onepos_admin_app/core/constants/api_endpoints.dart';
 import 'package:onepos_admin_app/core/constants/app_constants.dart';
 import 'package:onepos_admin_app/core/errors/exceptions.dart';
 import 'package:onepos_admin_app/core/network/dio_client.dart';
+import 'package:onepos_admin_app/core/storage/secure_storage_service.dart';
 
 abstract class BillingRemoteDatasource {
   Future<void> upgradePlan({
@@ -15,6 +16,7 @@ abstract class BillingRemoteDatasource {
     String? productId,
     String? transactionId,
     String? purchaseId,
+    String? receiptId,
   });
 }
 
@@ -32,6 +34,7 @@ class BillingRemoteDatasourceImpl implements BillingRemoteDatasource {
     String? productId,
     String? transactionId,
     String? purchaseId,
+    String? receiptId,
   }) async {
     final endpoint = ApiEndpoints.billingUpgrade;
     final url = '${AppConstants.baseUrl}$endpoint';
@@ -43,15 +46,19 @@ class BillingRemoteDatasourceImpl implements BillingRemoteDatasource {
       if (productId != null) 'product_id': productId,
       if (transactionId != null) 'transaction_id': transactionId,
       if (purchaseId != null) 'purchase_id': purchaseId,
+      if (receiptId != null) 'receipt_id': receiptId,
     };
 
-    log('billing_upgrade url: $url', name: 'API');
-    log('billing_upgrade body: ${jsonEncode(body)}', name: 'API');
+    debugPrint('billing_upgrade url: $url');
+    debugPrint('billing_upgrade body: ${jsonEncode(body)}');
+
+    final token = await SecureStorageService().read(AppConstants.keyAccessToken);
+    debugPrint('access token: $token');
 
     final response = await _client.post(endpoint, data: body);
     final responseBody = _asMap(response.data);
 
-    log('billing_upgrade response: ${jsonEncode(responseBody)}', name: 'API');
+    debugPrint('billing_upgrade response: ${jsonEncode(responseBody)}');
 
     if (_isError(responseBody['error'])) {
       throw ServerException(

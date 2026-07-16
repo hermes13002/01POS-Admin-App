@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:onepos_admin_app/core/network/dio_client.dart';
@@ -27,14 +28,14 @@ const List<SubscriptionPlanConfig> kSubscriptionPlans = [
   SubscriptionPlanConfig(
     key: 'standard',
     productId: 'net.onepos.app.standard_monthly',
-    amount: 6000,
+    amount: 5000,
     months: 1,
     displayName: 'Standard',
   ),
   SubscriptionPlanConfig(
     key: 'pro',
     productId: 'net.oneposadmin.app.pro_1month',
-    amount: 11000,
+    amount: 10000,
     months: 1,
     displayName: 'Pro',
   ),
@@ -101,6 +102,7 @@ class SubscriptionBillingNotifier
   final InAppPurchase _iap = InAppPurchase.instance;
   StreamSubscription<List<PurchaseDetails>>? _purchaseSubscription;
   final Set<String> _processedPurchaseIds = <String>{};
+  bool _hasReceivedRestoreEvent = false;
 
   BillingRemoteDatasource get _billingDatasource =>
       BillingRemoteDatasourceImpl(DioClient());
@@ -228,8 +230,20 @@ class SubscriptionBillingNotifier
     );
 
     try {
+      _hasReceivedRestoreEvent = false;
       await _iap.restorePurchases();
-      _setState(_currentState.copyWith(isRestoring: false));
+      debugPrint('restore purchase completed, awaiting stream updates');
+      
+      // wait briefly to allow the stream to process any emitted events
+      await Future.delayed(const Duration(milliseconds: 2000));
+      if (!_hasReceivedRestoreEvent && _currentState.isRestoring) {
+        debugPrint('No restore events received after timeout. Stopping loader.');
+        _setState(_currentState.copyWith(
+          isRestoring: false,
+          errorMessage: 'No previous purchases found to restore.',
+          clearSuccess: true,
+        ));
+      }
     } catch (_) {
       _setState(
         _currentState.copyWith(
@@ -300,7 +314,13 @@ class SubscriptionBillingNotifier
           );
           break;
         case PurchaseStatus.purchased:
+          final success = await _handleCompletedPurchase(purchase);
+          if (success) {
+            shouldComplete = true;
+          }
+          break;
         case PurchaseStatus.restored:
+          _hasReceivedRestoreEvent = true;
           final success = await _handleCompletedPurchase(purchase);
           if (success) {
             shouldComplete = true;
@@ -336,13 +356,17 @@ class SubscriptionBillingNotifier
         try {
           await _iap.completePurchase(purchase);
         } catch (_) {
-          // Ignore complete purchase errors
+          
         }
       }
     }
   }
 
   Future<bool> _handleCompletedPurchase(PurchaseDetails purchase) async {
+    debugPrint('handling completed purchase');
+    debugPrint('Product ID: ${purchase.productID}');
+    debugPrint('Status: ${purchase.status}');
+    
     final purchaseId = purchase.purchaseID;
     if (purchaseId != null && _processedPurchaseIds.contains(purchaseId)) {
       _setState(
@@ -379,8 +403,9 @@ class SubscriptionBillingNotifier
         plan: plan.key,
         status: 'success',
         productId: purchase.productID,
-        transactionId: purchase.verificationData.serverVerificationData,
+        transactionId: purchase.purchaseID,
         purchaseId: purchase.purchaseID,
+        receiptId: purchase.verificationData.serverVerificationData,
       );
 
       if (purchaseId != null) {
@@ -401,13 +426,13 @@ class SubscriptionBillingNotifier
         ),
       );
       return true;
-    } catch (e) {
+    } catch (_) {
       _setState(
         _currentState.copyWith(
           clearPendingProductId: true,
           isRestoring: false,
           errorMessage:
-              'Sync failed: $e. Please tap Restore Purchases.',
+              'Payment succeeded, but plan sync failed. Please tap Restore Purchases.',
           clearSuccess: true,
         ),
       );
