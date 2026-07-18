@@ -61,7 +61,9 @@ class LoginScreen extends HookConsumerWidget {
             builder: (dialogContext) => AlertDialog(
               backgroundColor: AppTheme.backgroundColor,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
+                borderRadius: BorderRadius.circular(
+                  AppTheme.borderRadiusMedium,
+                ),
               ),
               title: Text(
                 'Plan Expired',
@@ -91,10 +93,7 @@ class LoginScreen extends HookConsumerWidget {
                 ElevatedButton(
                   onPressed: () {
                     Navigator.pop(dialogContext);
-                    Navigator.pushNamed(
-                      context,
-                      AppRoutes.subscriptionDetails,
-                    );
+                    Navigator.pushNamed(context, AppRoutes.subscriptionDetails);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppTheme.primaryColor,

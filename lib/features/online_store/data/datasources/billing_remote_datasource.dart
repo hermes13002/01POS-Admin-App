@@ -55,15 +55,23 @@ class BillingRemoteDatasourceImpl implements BillingRemoteDatasource {
     final token = await SecureStorageService().read(AppConstants.keyAccessToken);
     debugPrint('access token: $token');
 
-    final response = await _client.post(endpoint, data: body);
-    final responseBody = _asMap(response.data);
+    try {
+      final response = await _client.post(endpoint, data: body);
+      final responseBody = _asMap(response.data);
 
-    debugPrint('billing_upgrade response: ${jsonEncode(responseBody)}');
+      debugPrint('billing_upgrade response: ${jsonEncode(responseBody)}');
 
-    if (_isError(responseBody['error'])) {
-      throw ServerException(
-        message: responseBody['message'] ?? 'failed to upgrade billing plan',
-      );
+      if (_isError(responseBody['error'])) {
+        throw ServerException(
+          message: responseBody['message'] ?? 'failed to upgrade billing plan',
+        );
+      }
+    } on ServerException catch (e) {
+      if (e.message.toLowerCase().contains('already been processed')) {
+        debugPrint('Transaction already processed - treating as success.');
+        return;
+      }
+      rethrow;
     }
   }
 

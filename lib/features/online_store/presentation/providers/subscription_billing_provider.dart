@@ -25,6 +25,23 @@ class SubscriptionPlanConfig {
 }
 
 const List<SubscriptionPlanConfig> kSubscriptionPlans = [
+  // new Non-Renewing Subscriptions
+  SubscriptionPlanConfig(
+    key: 'standard',
+    productId: 'com.01posadmin.standard_monthly',
+    amount: 5000,
+    months: 1,
+    displayName: 'Standard',
+  ),
+  SubscriptionPlanConfig(
+    key: 'pro',
+    productId: 'com.01posadmin.pro_monthly',
+    amount: 10000,
+    months: 1,
+    displayName: 'Pro',
+  ),
+
+  // legacy Auto-Renewing Subscriptions which is needed to process pending/restored transactions
   SubscriptionPlanConfig(
     key: 'standard',
     productId: 'net.onepos.app.standard_monthly',

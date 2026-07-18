@@ -217,7 +217,7 @@ class SubscriptionDetailsScreen extends ConsumerWidget {
                   _PlanPill(
                     title: 'STANDARD',
                     price: priceLabel(
-                      'net.onepos.app.standard_monthly',
+                      'com.01posadmin.standard_monthly',
                       '₦5,000/mo',
                     ),
                     bgColor: const Color(0xFFE1EEFE),
@@ -226,21 +226,21 @@ class SubscriptionDetailsScreen extends ConsumerWidget {
                     isCurrentPlan: currentPlanKey == 'standard',
                     isPending:
                         billing?.pendingProductId ==
-                        'net.onepos.app.standard_monthly',
+                        'com.01posadmin.standard_monthly',
                     buttonText: standardButtonText,
                     buttonColor: const Color(0xFF22A353),
                     onTap: () {
                       debugPrint('[SUBSCRIPTION] STANDARD plan tapped');
                       ref
                           .read(subscriptionBillingProvider.notifier)
-                          .purchasePlan('net.onepos.app.standard_monthly');
+                          .purchasePlan('com.01posadmin.standard_monthly');
                     },
                   ),
                   const SizedBox(height: 32),
                   _PlanPill(
                     title: 'PRO',
                     price: priceLabel(
-                      'net.oneposadmin.app.pro_1month',
+                      'com.01posadmin.pro_monthly',
                       '₦10,000/mo',
                     ),
                     bgColor: const Color(0xFFE2E4FA),
@@ -249,14 +249,14 @@ class SubscriptionDetailsScreen extends ConsumerWidget {
                     isCurrentPlan: currentPlanKey == 'pro',
                     isPending:
                         billing?.pendingProductId ==
-                        'net.oneposadmin.app.pro_1month',
+                        'com.01posadmin.pro_monthly',
                     buttonText: proButtonText,
                     buttonColor: const Color(0xFF1D4ED8),
                     onTap: () {
                       debugPrint('[SUBSCRIPTION] PRO plan tapped');
                       ref
                           .read(subscriptionBillingProvider.notifier)
-                          .purchasePlan('net.oneposadmin.app.pro_1month');
+                          .purchasePlan('com.01posadmin.pro_monthly');
                     },
                   ),
                   const SizedBox(height: 32),
