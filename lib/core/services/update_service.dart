@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:onepos_admin_app/core/utils/session_manager.dart';
 import 'package:onepos_admin_app/presentation/widgets/update_dialog.dart';
 import 'package:flutter/foundation.dart';
+import 'dart:io' show Platform;
 
 class UpdateService {
   static final UpdateService _instance = UpdateService._internal();
@@ -22,10 +23,14 @@ class UpdateService {
     );
 
     await _remoteConfig.setDefaults({
-      'min_required_version': '1.0.0',
-      'latest_version': '1.0.0',
+      'min_required_version_android': '1.0.0',
+      'latest_version_android': '1.0.0',
+      'min_required_version_ios': '1.0.0',
+      'latest_version_ios': '1.0.0',
       'store_url':
-          'https://play.google.com/store/apps/details?id=com.onepos.admin',
+          'https://play.google.com/store/apps/details?id=com.onepos.admin', // Android store url
+      'ios_store_url':
+          'https://apps.apple.com/app/id6784260341', // iOS store url
     });
   }
 
@@ -37,11 +42,17 @@ class UpdateService {
       final currentVersion = packageInfo.version;
       final currentBuild = packageInfo.buildNumber;
 
+      final isIOS = !kIsWeb && Platform.isIOS;
       final minRequiredVersion = _remoteConfig.getString(
-        'min_required_version',
+        isIOS ? 'min_required_version_ios' : 'min_required_version_android',
       );
-      final latestVersion = _remoteConfig.getString('latest_version');
-      final storeUrl = _remoteConfig.getString('store_url');
+      final latestVersion = _remoteConfig.getString(
+        isIOS ? 'latest_version_ios' : 'latest_version_android',
+      );
+      
+      final storeUrl = isIOS
+          ? _remoteConfig.getString('ios_store_url')
+          : _remoteConfig.getString('store_url');
 
       if (_isVersionOlder(currentVersion, currentBuild, minRequiredVersion)) {
         _showUpdateDialog(isMandatory: true, storeUrl: storeUrl);

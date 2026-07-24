@@ -29,6 +29,7 @@ import 'package:onepos_admin_app/features/payment_method/presentation/screens/pa
 import 'package:onepos_admin_app/features/payment_method/presentation/screens/add_payment_method_screen.dart';
 import 'package:onepos_admin_app/features/payment_method/presentation/screens/connect_bank_account_screen.dart';
 import 'package:onepos_admin_app/features/online_store/presentation/screens/store_profile_screen.dart';
+import 'package:onepos_admin_app/features/online_store/presentation/screens/profile_details_screen.dart';
 import 'package:onepos_admin_app/features/online_store/presentation/screens/edit_profile_screen.dart';
 import 'package:onepos_admin_app/features/online_store/presentation/screens/edit_store_name_screen.dart';
 import 'package:onepos_admin_app/features/online_store/presentation/screens/edit_email_address_screen.dart';
@@ -96,6 +97,7 @@ class AppRoutes {
   static const String notificationSettings = '/notification-settings';
   static const String subCategories = '/sub-categories';
   static const String salesSettings = '/sales-settings';
+  static const String profileDetails = '/profile-details';
   static const String editProfile = '/edit-profile';
   static const String chats = '/chats';
   static const String individualChat = '/individual-chat';
@@ -158,6 +160,7 @@ class AppRoutes {
     notificationSettings: (context) => const NotificationSettingsScreen(),
     subCategories: (context) => const SubCategoriesScreen(),
     salesSettings: (context) => const SalesSettingsScreen(),
+    profileDetails: (context) => const ProfileDetailsScreen(),
     editProfile: (context) => const EditProfileScreen(),
     notificationDetail: (context) {
       final args = ModalRoute.of(context)!.settings.arguments as int;

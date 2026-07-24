@@ -98,14 +98,14 @@ class HomeScreen extends HookConsumerWidget {
                     children: [
                       Expanded(
                         child: _MarqueeGreeting(
-                          text: profileAsync.when(
-                            data: (p) => 'Welcome, ${p.firstname}',
+                          greeting: profileAsync.when(
+                            data: (_) => 'Welcome, ',
                             loading: () => 'Welcome...',
                             error: (_, __) => 'Welcome',
                           ),
+                          name: profileAsync.valueOrNull?.firstname,
                           style: GoogleFonts.poppins(
                             fontSize: greetingFontSize,
-                            fontWeight: FontWeight.w700,
                             color: Colors.black,
                           ),
                         ),
@@ -1055,10 +1055,15 @@ void _showReplaceDialog(
 }
 
 class _MarqueeGreeting extends HookWidget {
-  final String text;
+  final String greeting;
+  final String? name;
   final TextStyle style;
 
-  const _MarqueeGreeting({required this.text, required this.style});
+  const _MarqueeGreeting({
+    required this.greeting,
+    this.name,
+    required this.style,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -1109,13 +1114,26 @@ class _MarqueeGreeting extends HookWidget {
       });
 
       return () => disposed = true;
-    }, [text]);
+    }, [greeting, name]);
 
     return SingleChildScrollView(
       controller: scrollController,
       scrollDirection: Axis.horizontal,
       physics: const NeverScrollableScrollPhysics(),
-      child: Text(text, style: style, maxLines: 1),
+      child: Text.rich(
+        TextSpan(
+          text: greeting,
+          style: style.copyWith(fontWeight: FontWeight.w400),
+          children: [
+            if (name != null)
+              TextSpan(
+                text: name,
+                style: style.copyWith(fontWeight: FontWeight.w700),
+              ),
+          ],
+        ),
+        maxLines: 1,
+      ),
     );
   }
 }

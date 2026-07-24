@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import 'package:onepos_admin_app/core/routes/app_routes.dart';
@@ -11,7 +11,6 @@ import 'package:onepos_admin_app/features/products/presentation/providers/produc
 import 'package:onepos_admin_app/shared/widgets/app_snackbar.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_text_field.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_app_bar.dart';
-import 'package:onepos_admin_app/shared/widgets/custom_button.dart';
 import 'package:onepos_admin_app/shared/widgets/custom_button_with_icon.dart';
 import 'package:onepos_admin_app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:onepos_admin_app/shared/widgets/loading_widget.dart';
@@ -113,50 +112,82 @@ class _ProfileContent extends HookConsumerWidget {
             ),
             child: Column(
               children: [
-                // avatar with edit badge
-                Stack(
-                  alignment: Alignment.bottomRight,
-                  children: [
-                    CircleAvatar(
-                      radius: 40,
-                      backgroundColor: const Color(0xFF4A4A4A),
-                      child: Text(
-                        (company?.companyName ?? profile.firstname).isNotEmpty
-                            ? (company?.companyName ?? profile.firstname)[0]
-                                  .toUpperCase()
-                            : 'S',
-                        style: GoogleFonts.poppins(
-                          fontSize: 28,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
+                GestureDetector(
+                  onTap: () => Navigator.pushNamed(context, AppRoutes.profileDetails),
+                  behavior: HitTestBehavior.opaque,
+                  child: Row(
+                    children: [
+                      // avatar with edit badge
+                      Stack(
+                        alignment: Alignment.bottomRight,
+                        children: [
+                          CircleAvatar(
+                            radius: 35,
+                            backgroundColor: const Color(0xFF4A4A4A),
+                            child: Text(
+                              (company?.companyName ?? profile.firstname).isNotEmpty
+                                  ? (company?.companyName ?? profile.firstname)[0]
+                                        .toUpperCase()
+                                  : '',
+                              style: GoogleFonts.poppins(
+                                fontSize: 24,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                          // Container(
+                          //   padding: const EdgeInsets.all(4),
+                          //   decoration: const BoxDecoration(
+                          //     color: Color(0xFF4A90E2),
+                          //     shape: BoxShape.circle,
+                          //   ),
+                          //   child: const Icon(
+                          //     Icons.edit_outlined,
+                          //     size: 14,
+                          //     color: Colors.white,
+                          //   ),
+                          // ),
+                        ],
+                      ),
+                      const SizedBox(width: 16),
+                      // Text
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              company?.companyName ?? profile.firstname,
+                              style: GoogleFonts.poppins(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: AppTheme.textPrimary,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'View store details and\nmanage your information',
+                              style: GoogleFonts.poppins(
+                                fontSize: 12,
+                                color: AppTheme.textSecondary,
+                                height: 1.4,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.all(4),
-                      decoration: const BoxDecoration(
-                        color: Color(0xFF4A90E2),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.edit_outlined,
+                      const Icon(
+                        Icons.arrow_forward_ios,
                         size: 16,
-                        color: Colors.white,
+                        color: AppTheme.textPrimary,
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  company?.companyName ?? profile.firstname,
-                  style: GoogleFonts.poppins(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: AppTheme.textPrimary,
+                    ],
                   ),
                 ),
-                const SizedBox(height: 24),
-
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 20),
+                  child: Divider(height: 1),
+                ),
                 // plan row
                 GestureDetector(
                   onTap: () {
@@ -164,56 +195,77 @@ class _ProfileContent extends HookConsumerWidget {
                   },
                   behavior: HitTestBehavior.opaque,
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.deepPurple.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Icon(
+                          Icons.workspace_premium,
+                          color: Colors.deepPurple,
+                          size: 20,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
                       Text(
-                        'Your current plan',
+                        'Current Plan',
                         style: GoogleFonts.poppins(
-                          fontSize: 12,
+                          fontSize: 14,
                           color: AppTheme.textSecondary,
                         ),
                       ),
-                      Row(
-                        children: [
-                          Text(
-                            profile.plan ?? 'Standard',
-                            style: GoogleFonts.poppins(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w500,
-                              color: AppTheme.textPrimary,
-                            ),
-                          ),
-                          const SizedBox(width: 4),
-                          const Icon(
-                            Icons.arrow_forward_ios,
-                            size: 12,
-                            color: AppTheme.textPrimary,
-                          ),
-                        ],
+                      const Spacer(),
+                      Text(
+                        (profile.plan != null && profile.plan!.isNotEmpty)
+                            ? '${profile.plan![0].toUpperCase()}${profile.plan!.substring(1).toLowerCase()}'
+                            : 'Standard',
+                        style: GoogleFonts.poppins(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: AppTheme.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      const Icon(
+                        Icons.arrow_forward_ios,
+                        size: 14,
+                        color: AppTheme.textPrimary,
                       ),
                     ],
                   ),
                 ),
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 12),
-                  child: Divider(height: 1),
-                ),
-
+                const SizedBox(height: 16),
                 // expiry row
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.blue.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(
+                        Icons.calendar_today_outlined,
+                        color: Colors.blue,
+                        size: 20,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
                     Text(
-                      'Expiry date',
+                      'Expiry Date',
                       style: GoogleFonts.poppins(
-                        fontSize: 12,
+                        fontSize: 14,
                         color: AppTheme.textSecondary,
                       ),
                     ),
+                    const Spacer(),
                     Text(
                       expiryLabel,
                       style: GoogleFonts.poppins(
-                        fontSize: 13,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
                         color: AppTheme.textPrimary,
                       ),
                     ),
@@ -262,19 +314,27 @@ class _ProfileContent extends HookConsumerWidget {
           ),
           const SizedBox(height: AppTheme.spacingMedium),
           */
+
+
           _ProfileListItem(
             title: 'Login Settings',
+            icon: Icons.lock_outline,
+            iconColor: Colors.blue,
             onTap: () => Navigator.pushNamed(context, AppRoutes.loginSettings),
           ),
           const SizedBox(height: AppTheme.spacingMedium),
           _ProfileListItem(
             title: 'Currency Settings',
+            icon: Icons.monetization_on_outlined,
+            iconColor: Colors.green,
             onTap: () =>
                 Navigator.pushNamed(context, AppRoutes.currencySettings),
           ),
           const SizedBox(height: AppTheme.spacingMedium),
           _ProfileListItem(
             title: 'Receipt Template Settings',
+            icon: Icons.receipt_long_outlined,
+            iconColor: Colors.purple,
             onTap: () =>
                 Navigator.pushNamed(context, AppRoutes.receiptTemplateSettings),
           ),
@@ -282,6 +342,8 @@ class _ProfileContent extends HookConsumerWidget {
           _ProfileListItem(
             title: 'Low Stock Limit Settings',
             value: company?.lowStockLimit,
+            icon: Icons.view_in_ar_outlined,
+            iconColor: Colors.orange,
             onTap: () async {
               final controller = TextEditingController(
                 text: company?.lowStockLimit ?? '0',
@@ -349,49 +411,19 @@ class _ProfileContent extends HookConsumerWidget {
           const SizedBox(height: AppTheme.spacingMedium),
           _ProfileListItem(
             title: 'Notification Settings',
+            icon: Icons.notifications_none_outlined,
+            iconColor: Colors.amber,
             onTap: () =>
                 Navigator.pushNamed(context, AppRoutes.notificationSettings),
           ),
           const SizedBox(height: AppTheme.spacingMedium),
           _ProfileListItem(
             title: 'Sales Download Settings',
+            icon: Icons.cloud_download_outlined,
+            iconColor: Colors.blue,
             onTap: () => Navigator.pushNamed(context, AppRoutes.salesSettings),
           ),
 
-          const SizedBox(height: AppTheme.spacingMedium),
-
-          CustomButton(
-            text: 'Edit Profile',
-            onPressed: () =>
-                Navigator.pushNamed(context, AppRoutes.editProfile),
-            icon: Icons.edit_note_rounded,
-          ),
-
-          const SizedBox(height: AppTheme.spacingLarge),
-
-          Divider(height: 1),
-          const SizedBox(height: AppTheme.spacingLarge),
-
-          // profile details section
-          Text(
-            'Profile Details',
-            style: GoogleFonts.poppins(
-              fontSize: 17,
-              fontWeight: FontWeight.w600,
-              color: AppTheme.textPrimary,
-            ),
-          ),
-          const SizedBox(height: AppTheme.spacingMedium),
-          _ProfileDetailField(label: 'First Name', value: profile.firstname),
-          const SizedBox(height: AppTheme.spacingSmall),
-          _ProfileDetailField(label: 'Last Name', value: profile.lastname),
-          const SizedBox(height: AppTheme.spacingSmall),
-          _ProfileDetailField(label: 'Email', value: profile.email),
-          const SizedBox(height: AppTheme.spacingSmall),
-          _ProfileDetailField(label: 'Phone Number', value: profile.phoneno),
-          const SizedBox(height: AppTheme.spacingSmall),
-          _ProfileDetailField(label: 'Address', value: profile.address ?? '—'),
-          const SizedBox(height: AppTheme.spacingLarge),
           const SizedBox(height: AppTheme.spacingLarge),
           CustomButtonWithIcon(
             text: 'Logout',
@@ -539,8 +571,16 @@ class _ProfileListItem extends StatelessWidget {
   final String title;
   final String? value;
   final VoidCallback? onTap;
+  final IconData? icon;
+  final Color? iconColor;
 
-  const _ProfileListItem({required this.title, this.value, this.onTap});
+  const _ProfileListItem({
+    required this.title,
+    this.value,
+    this.onTap,
+    this.icon,
+    this.iconColor,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -559,11 +599,15 @@ class _ProfileListItem extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
+            if (icon != null) ...[
+              Icon(icon, size: 22, color: iconColor),
+              const SizedBox(width: 16),
+            ],
             Expanded(
               child: Text(
                 title,
                 style: GoogleFonts.poppins(
-                  fontSize: 13,
+                  fontSize: 14,
                   color: AppTheme.textSecondary,
                 ),
               ),
@@ -602,42 +646,4 @@ class _ProfileListItem extends StatelessWidget {
   }
 }
 
-/// read-only labelled field for profile details section
-class _ProfileDetailField extends StatelessWidget {
-  final String label;
-  final String value;
 
-  const _ProfileDetailField({required this.label, required this.value});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: GoogleFonts.poppins(
-            fontSize: 12,
-            color: AppTheme.textSecondary,
-          ),
-        ),
-        const SizedBox(height: 6),
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(AppTheme.borderRadiusMedium),
-          ),
-          child: Text(
-            value,
-            style: GoogleFonts.poppins(
-              fontSize: 14,
-              color: AppTheme.textPrimary,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
